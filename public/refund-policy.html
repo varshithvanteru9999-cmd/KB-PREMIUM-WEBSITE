@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Refund & Cancellation Policy | KB Beauty Salons & Tattoos</title>
+  <meta name="description" content="KB Beauty Salons & Tattoos refund and cancellation policy. Understand our fair policies on appointment cancellations, advance payment refunds, and FAQs.">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/js/main.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .legal-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 120px 2rem 5rem;
+    }
+    .legal-hero {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+    .legal-hero .eyebrow {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #b89030;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .legal-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 40%, #d4af37 60%, #bf953f 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .legal-hero .updated { color: #7a6030; font-size: 0.85rem; }
+    .legal-hero .updated strong { color: #c8a050; }
+    .shimmer-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #7a5c10, #d4af37, #fcf6ba, #d4af37, #7a5c10, transparent);
+      margin: 2rem auto;
+      max-width: 400px;
+    }
+    .toc-card {
+      background: rgba(22,16,3,0.82);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 1rem;
+      padding: 1.8rem 2rem;
+      margin-bottom: 3rem;
+    }
+    .toc-card h3 {
+      font-family: 'Playfair Display', serif;
+      color: #f5e6b8;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .toc-list {
+      list-style: none;
+      padding: 0; margin: 0;
+      columns: 2;
+      column-gap: 2rem;
+    }
+    .toc-list li { margin-bottom: 0.45rem; }
+    .toc-list a {
+      color: #c8a050;
+      text-decoration: none;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+    .toc-list a::before {
+      content: '';
+      display: inline-block;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: #d4af37;
+      flex-shrink: 0;
+    }
+    .toc-list a:hover { color: #f5e6b8; }
+    .legal-section {
+      margin-bottom: 2.8rem;
+      scroll-margin-top: 90px;
+    }
+    .legal-section h2 {
+      font-family: 'Playfair Display', serif;
+      color: #f5e6b8;
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid rgba(212,175,55,0.15);
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .legal-section h2 .sec-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: #d4af37;
+      color: #0d0800;
+      font-size: 0.75rem;
+      font-weight: 900;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 2px rgba(212,175,55,0.3);
+    }
+    .legal-section p, .legal-section li {
+      color: #c8a050;
+      font-size: 0.95rem;
+      line-height: 1.85;
+    }
+    .legal-section ul, .legal-section ol { padding-left: 1.5rem; margin: 0.8rem 0; }
+    .legal-section li { margin-bottom: 0.4rem; }
+    .legal-section strong { color: #e8d5a0; }
+    .legal-section a { color: #d4af37; text-decoration: none; transition: color 0.2s; }
+    .legal-section a:hover { color: #fcf6ba; }
+    .info-box {
+      background: rgba(212,175,55,0.06);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-left: 3px solid #d4af37;
+      border-radius: 0.5rem;
+      padding: 1.1rem 1.4rem;
+      margin: 1.2rem 0;
+    }
+    .info-box p { margin: 0; }
+    .warn-box {
+      background: rgba(224,112,96,0.07);
+      border: 1px solid rgba(224,112,96,0.25);
+      border-left: 3px solid #e07060;
+      border-radius: 0.5rem;
+      padding: 1.1rem 1.4rem;
+      margin: 1.2rem 0;
+    }
+    .warn-box p { margin: 0; color: #e8c0b0 !important; }
+    /* Refund table */
+    .refund-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.2rem 0;
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+    .refund-table th {
+      background: rgba(212,175,55,0.12);
+      color: #f5e6b8;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 12px 16px;
+      text-align: left;
+    }
+    .refund-table td {
+      padding: 12px 16px;
+      color: #c8a050;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(212,175,55,0.1);
+    }
+    .refund-table tr:last-child td { border-bottom: none; }
+    .refund-table tr:nth-child(odd) td { background: rgba(22,16,3,0.5); }
+    .refund-table tr:nth-child(even) td { background: rgba(22,16,3,0.25); }
+    .badge-green { color: #6fcf8a; font-weight: 700; }
+    .badge-yellow { color: #d4af37; font-weight: 700; }
+    .badge-red { color: #e07060; font-weight: 700; }
+    /* FAQ Section */
+    .faq-section {
+      margin-top: 4rem;
+      scroll-margin-top: 90px;
+    }
+    .faq-section-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .faq-section-header .eyebrow {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #b89030;
+      margin-bottom: 0.8rem;
+      display: block;
+    }
+    .faq-section-header h2 {
+      font-family: 'Playfair Display', serif;
+      color: #f5e6b8;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      font-weight: 600;
+      margin-bottom: 0.7rem;
+    }
+    .faq-section-header p { color: #c8a050; font-size: 0.95rem; }
+    .faq-grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+    .faq-item {
+      background: rgba(22,16,3,0.7);
+      border: 1px solid rgba(212,175,55,0.15);
+      border-radius: 0.85rem;
+      overflow: hidden;
+      transition: border-color 0.25s;
+    }
+    .faq-item.open { border-color: rgba(212,175,55,0.35); }
+    .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      cursor: pointer;
+      text-align: left;
+    }
+    .faq-question span {
+      color: #e8d5a0;
+      font-size: 0.97rem;
+      font-weight: 600;
+      font-family: 'Outfit', sans-serif;
+      line-height: 1.4;
+    }
+    .faq-chevron {
+      color: #d4af37;
+      font-size: 1rem;
+      flex-shrink: 0;
+      transition: transform 0.3s cubic-bezier(0.23,1,0.32,1);
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s cubic-bezier(0.23,1,0.32,1);
+    }
+    .faq-answer-inner {
+      padding: 0 1.5rem 1.3rem;
+      color: #c8a050;
+      font-size: 0.92rem;
+      line-height: 1.85;
+    }
+    .faq-answer-inner a { color: #d4af37; text-decoration: none; }
+    .faq-answer-inner a:hover { color: #fcf6ba; }
+    .faq-answer-inner strong { color: #e8d5a0; }
+    .contact-block {
+      background: rgba(22,16,3,0.82);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 1rem;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 3.5rem;
+    }
+    .contact-block h3 { font-family: 'Playfair Display', serif; color: #f5e6b8; font-size: 1.3rem; margin-bottom: 0.8rem; }
+    .contact-block p { color: #c8a050; font-size: 0.9rem; margin-bottom: 1.4rem; }
+    .contact-links { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .contact-links a {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0.7rem 1.5rem;
+      border: 1px solid rgba(212,175,55,0.35);
+      border-radius: 8px;
+      color: #d4af37;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .contact-links a:hover { background: rgba(212,175,55,0.1); border-color: #d4af37; color: #fcf6ba; }
+    @media (max-width: 600px) {
+      .toc-list { columns: 1; }
+      .legal-wrap { padding: 100px 1.2rem 4rem; }
+      .refund-table th, .refund-table td { padding: 10px 12px; font-size: 0.82rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="gradient-bg"></div>
+  <div class="gradient-bg-mid"></div>
+
+  <header id="main-header" class="scrolled">
+    <a href="/"><img src="/images/kb logo.png" alt="KB Beauty Logo" class="logo-img"></a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/privacy-policy.html">Privacy Policy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="#faq">FAQ</a>
+      <a href="/login.html" class="btn-login">Customer Login</a>
+    </nav>
+  </header>
+
+  <div class="legal-wrap">
+    <div class="legal-hero">
+      <span class="eyebrow">Legal</span>
+      <h1>Refund &amp; Cancellation Policy</h1>
+      <p class="updated">Last updated: <strong>31 March 2026</strong></p>
+      <div class="shimmer-line"></div>
+      <p style="color:#c8a050;font-size:0.95rem;max-width:580px;margin:0 auto;line-height:1.8;">
+        We understand that plans change. Our policy is designed to be fair to both you and our team — who reserve time specifically for your appointment.
+      </p>
+    </div>
+
+    <div class="toc-card">
+      <h3>Contents</h3>
+      <ul class="toc-list">
+        <li><a href="#r1">Cancellation Policy</a></li>
+        <li><a href="#r2">Rescheduling</a></li>
+        <li><a href="#r3">Refund Eligibility</a></li>
+        <li><a href="#r4">Refund Timeline</a></li>
+        <li><a href="#r5">Non-Refundable Situations</a></li>
+        <li><a href="#r6">Salon-Initiated Changes</a></li>
+        <li><a href="#r7">How to Cancel or Request Refund</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </div>
+
+    <div class="legal-section" id="r1">
+      <h2><span class="sec-num">1</span> Cancellation Policy</h2>
+      <p>We request adequate notice if you need to cancel, so we can offer your slot to another guest.</p>
+
+      <table class="refund-table">
+        <thead>
+          <tr>
+            <th>Notice Given</th>
+            <th>Cancellation Fee</th>
+            <th>Advance Refund</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>48+ hours before appointment</strong></td>
+            <td><span class="badge-green">None</span></td>
+            <td><span class="badge-green">100% refund</span></td>
+          </tr>
+          <tr>
+            <td><strong>24–48 hours before appointment</strong></td>
+            <td>25% of advance</td>
+            <td><span class="badge-yellow">75% refund</span></td>
+          </tr>
+          <tr>
+            <td><strong>Less than 24 hours before appointment</strong></td>
+            <td>50% of advance</td>
+            <td><span class="badge-yellow">50% refund</span></td>
+          </tr>
+          <tr>
+            <td><strong>Same-day cancellation / No-show</strong></td>
+            <td>Full advance forfeited</td>
+            <td><span class="badge-red">No refund</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="info-box">
+        <p><i class="bi bi-info-circle" style="color:#d4af37;margin-right:6px;"></i> Cancellations must be communicated via <strong>phone or WhatsApp</strong> to <a href="tel:+919640401112">+91 96404 01112</a>. Online cancellations through the dashboard will also be honoured.</p>
+      </div>
+    </div>
+
+    <div class="legal-section" id="r2">
+      <h2><span class="sec-num">2</span> Rescheduling</h2>
+      <p>We're happy to reschedule your appointment subject to availability:</p>
+      <ul>
+        <li>Rescheduling is allowed <strong>up to 2 times per booking</strong> without any charge, provided it is done at least <strong>24 hours before</strong> the original appointment time</li>
+        <li>Rescheduling within 24 hours is treated as a late cancellation and may attract charges as per the table above</li>
+        <li>Your advance payment will be carried forward to the new appointment date</li>
+        <li>To reschedule, contact us via <a href="https://wa.me/919640401112" target="_blank" rel="noopener">WhatsApp</a> or call <a href="tel:+919640401112">+91 96404 01112</a></li>
+      </ul>
+    </div>
+
+    <div class="legal-section" id="r3">
+      <h2><span class="sec-num">3</span> Refund Eligibility</h2>
+      <p>Refunds are applicable only for <strong>advance payments</strong> made online through our payment gateway. The following conditions apply:</p>
+      <ul>
+        <li>The cancellation request must be submitted within the eligible notice period (see table above)</li>
+        <li>Refunds are processed only to the <strong>original payment method</strong> (same bank account / UPI / card used for payment)</li>
+        <li>Cash payments collected in-salon are not eligible for online refunds — any adjustment will be made at your next visit</li>
+        <li>Partial services rendered at the salon are not eligible for refund</li>
+        <li>If a service caused dissatisfaction due to a genuine quality concern, please contact us within <strong>48 hours</strong> of the appointment for a resolution</li>
+      </ul>
+    </div>
+
+    <div class="legal-section" id="r4">
+      <h2><span class="sec-num">4</span> Refund Timeline</h2>
+      <p>Once a refund is approved and initiated by us:</p>
+      <ul>
+        <li><strong>UPI &amp; Net Banking:</strong> 2–5 business days</li>
+        <li><strong>Credit / Debit Card:</strong> 5–7 business days</li>
+        <li><strong>Wallets (PayU):</strong> 2–3 business days</li>
+      </ul>
+      <p>Processing times depend on your bank and payment provider. We will send you a confirmation message once the refund has been initiated from our end. If you do not receive your refund within the stated period, please contact us with your <strong>booking reference number</strong> and <strong>transaction ID</strong>.</p>
+      <div class="info-box">
+        <p><i class="bi bi-clock" style="color:#d4af37;margin-right:6px;"></i> We aim to initiate all approved refunds within <strong>2 business days</strong> of the cancellation confirmation.</p>
+      </div>
+    </div>
+
+    <div class="legal-section" id="r5">
+      <h2><span class="sec-num">5</span> Non-Refundable Situations</h2>
+      <p>The following are <strong>not eligible</strong> for a refund under any circumstances:</p>
+      <ul>
+        <li><strong>Tattoo deposits</strong> — the design consultation fee and booking deposit for tattoo services are non-refundable as they cover the artist's design time and slot reservation</li>
+        <li><strong>Completed services</strong> — once a service has been fully rendered, no refund will be issued regardless of the reason</li>
+        <li><strong>No-shows</strong> — failure to arrive for a confirmed appointment without prior notice</li>
+        <li><strong>Promotional / discounted bookings</strong> — services booked under special promotional pricing</li>
+        <li><strong>Package deals</strong> — partially used packages or combo deals are not refundable for the unused portions</li>
+        <li><strong>Gift vouchers</strong> — once redeemed, gift vouchers cannot be returned or refunded</li>
+      </ul>
+      <div class="warn-box">
+        <p><i class="bi bi-exclamation-triangle-fill" style="color:#e07060;margin-right:6px;"></i> Refunds will not be processed for dissatisfaction due to subjective preferences (e.g., "I don't like the colour") — we encourage all customers to discuss desired outcomes in detail with our stylist before the service begins.</p>
+      </div>
+    </div>
+
+    <div class="legal-section" id="r6">
+      <h2><span class="sec-num">6</span> Salon-Initiated Changes</h2>
+      <p>In rare circumstances, we may need to cancel or reschedule your appointment due to:</p>
+      <ul>
+        <li>Staff illness or emergency</li>
+        <li>Public holidays or unforeseen salon closure</li>
+        <li>Circumstances beyond our reasonable control</li>
+      </ul>
+      <p>In such cases, we will notify you as soon as possible and offer either:</p>
+      <ul>
+        <li>A <strong>full refund</strong> of any advance payment, or</li>
+        <li>A <strong>free rescheduled appointment</strong> at your preferred date and time</li>
+      </ul>
+      <p>We sincerely apologise for any inconvenience caused in such situations.</p>
+    </div>
+
+    <div class="legal-section" id="r7">
+      <h2><span class="sec-num">7</span> How to Cancel or Request a Refund</h2>
+      <ol>
+        <li>Contact us via <strong>WhatsApp at <a href="https://wa.me/919640401112" target="_blank" rel="noopener">+91 96404 01112</a></strong> or call us directly</li>
+        <li>Provide your <strong>full name</strong>, <strong>booking reference number</strong> (e.g., Booking #21), and <strong>appointment date</strong></li>
+        <li>State whether you wish to cancel or reschedule</li>
+        <li>We will confirm the cancellation and the applicable refund amount within <strong>1 business day</strong></li>
+        <li>The refund will be initiated within <strong>2 business days</strong> of confirmation</li>
+      </ol>
+      <p>You may also cancel via the <a href="/dashboard.html">Customer Dashboard</a> — the system will automatically calculate your refund eligibility based on the notice period.</p>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         FAQ SECTION — SEO Rich Content
+         ══════════════════════════════════════ -->
+    <div class="faq-section" id="faq">
+      <div class="faq-section-header">
+        <span class="eyebrow">Frequently Asked Questions</span>
+        <h2>Got Questions? We Have Answers.</h2>
+        <p>Everything you need to know about appointments, payments, and policies at KB Beauty.</p>
+      </div>
+
+      <div class="faq-grid">
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>How do I book an appointment at KB Beauty Salons?</span>
+            <i class="bi bi-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              You can book an appointment in two ways:<br><br>
+              <strong>Online:</strong> Browse <a href="/#services">Services</a> on our website, select your preferred category (e.g., Hair, Skin, Tattoos), add services to your cart, and proceed to checkout. Your account is automatically created after your first booking — no separate registration needed.<br><br>
+              <strong>Walk-in / Phone:</strong> You're also welcome to visit us directly at our salon in Ongole or call us at <a href="tel:+919640401112">+91 96404 01112</a> to book over the phone. Our team will schedule your appointment and confirm the slot for you.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>How do I log in to the customer portal?</span>
+            <i class="bi bi-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Use your <strong>registered email address</strong> as your username and your <strong>10-digit mobile number</strong> as your password. Your account is automatically created when you place your first booking. Visit the <a href="/login.html">Customer Login</a> page to sign in.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>Can I book multiple services in one appointment?</span>
+            <i class="bi bi-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Yes! You can add multiple services to your cart before checking out. All selected services will be scheduled for the same appointment date and time. Our team will sequence the services efficiently during your visit.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>What payment methods do you accept?</span>
+            <i class="bi bi-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              We accept <strong>Cash, UPI, Credit/Debit Cards</strong>, and online payments through our PayU payment gateway. For advance bookings, payment is processed securely through PayU. At the salon, you can pay the remaining balance in any form you prefer.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>Will I receive an invoice for my appointment?</span>
+            <i class="bi bi-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Yes. After every payment — whether online or collected at the salon — you will receive an automated email with a <strong>detailed invoice as a PDF attachment</strong>. You can also download invoices anytime from your <a href="/dashboard.html">Customer Dashboard</a>.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>Can I use a promo code at the time of booking?</span>
+            <i class="bi bi-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Yes! Enter your promo code at the checkout step before confirming your booking. Valid promo codes are applied instantly and the discount will be reflected in your total and invoice. Each promo code has its own validity and usage limits.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>What happens if I need to cancel my appointment?</span>
+            <i class="bi bi-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Please contact us via <a href="https://wa.me/919640401112" target="_blank" rel="noopener">WhatsApp</a> or call <a href="tel:+919640401112">+91 96404 01112</a> as early as possible. Cancellations made <strong>48+ hours in advance</strong> receive a full refund of the advance. See the full cancellation table in <a href="#r1">Section 1</a> above.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>How long does a refund take to process?</span>
+            <i class="bi bi-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Once we initiate the refund (within 2 business days of your cancellation confirmation), it typically takes <strong>2–7 business days</strong> to reflect in your account depending on your bank and payment method. We will notify you once the refund is processed.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>Are tattoo deposits refundable?</span>
+            <i class="bi bi-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              <strong>Tattoo booking deposits are non-refundable.</strong> This is because our artist invests significant time in design consultation and concept creation specifically for you. However, if you reschedule at least 48 hours in advance, your deposit will be carried forward to the new appointment date.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>What if I'm not happy with the service?</span>
+            <i class="bi bi-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Your satisfaction is our top priority. If you have a genuine concern about the quality of a service, please contact us <strong>within 48 hours</strong> of your appointment via WhatsApp or phone. We will do our best to make it right — either with a complimentary touch-up or a suitable resolution. We appreciate your feedback as it helps us improve.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>Is there a minimum age requirement for services?</span>
+            <i class="bi bi-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              For tattoo services, customers must be <strong>18 years of age or older</strong>, and valid government-issued ID will be required. For beauty and salon services, minors (under 18) are welcome when accompanied by a parent or guardian.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>Where is KB Beauty Salons & Tattoos located?</span>
+            <i class="bi bi-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              We are located at <strong>3rd Floor, VKB Residency, Kurnool Rd, near Bus Stand, Vantavari Colony, Ongole, Andhra Pradesh 523001</strong>. For directions, use the "View on Map" link in the footer below, or <a href="https://wa.me/919640401112" target="_blank" rel="noopener">WhatsApp us</a> and we'll send you the exact location pin.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>How do I contact KB Beauty for support?</span>
+            <i class="bi bi-chevron-down faq-chevron"></i>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              The fastest way is via <a href="https://wa.me/919640401112" target="_blank" rel="noopener">WhatsApp at +91 96404 01112</a>. You can also call us directly at <a href="tel:+919640401112">+91 96404 01112</a>. We are available during salon hours (Tuesday–Sunday, 10 AM – 8 PM).
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- END FAQ -->
+
+    <div class="contact-block">
+      <h3>Still Have Questions?</h3>
+      <p>Our team is always happy to help. Reach out and we'll respond promptly.</p>
+      <div class="contact-links">
+        <a href="tel:+919640401112"><i class="bi bi-telephone-fill"></i> Call Us</a>
+        <a href="https://wa.me/919640401112" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+        <a href="/privacy-policy.html"><i class="bi bi-shield-check"></i> Privacy Policy</a>
+        <a href="/terms.html"><i class="bi bi-file-text"></i> Terms &amp; Conditions</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <img src="/images/kb logo.png" alt="KB Beauty Logo" class="footer-logo">
+        <p class="footer-proprietor">Proprietor: <strong id="footer-proprietor-name">SHAIK SHAHID</strong></p>
+        <a id="footer-phone-link" href="tel:+919640401112" class="footer-phone">
+            <i class="bi bi-telephone-fill"></i> <span id="footer-phone-text">+91 96404 01112</span>
+        </a>
+        <a id="footer-whatsapp-link" href="https://wa.me/919640401112" class="footer-whatsapp-btn" target="_blank" rel="noopener noreferrer">
+            <i class="bi bi-whatsapp"></i> Chat on WhatsApp
+        </a>
+      </div>
+      <div class="footer-location">
+        <h4>Location</h4>
+        <p>3RD FLOOR, VKB RESIDENCY,<br>Kurnool Rd, near bus stand,<br>Vantavari colony, Ongole,<br>Andhra Pradesh 523001.</p>
+        <a href="#" class="footer-map-btn" id="footer-map-btn" target="_blank" rel="noopener noreferrer" style="display:none;"><i class="bi bi-geo-alt-fill"></i> VIEW ON MAP</a>
+      </div>
+      <div class="footer-social">
+        <h4>Follow Us</h4>
+        <div class="footer-social-icons" id="footer-social-icons"></div>
+        <div style="margin-top:1.5rem;">
+          <h4 style="font-size:0.9rem;letter-spacing:1.5px;color:#9a7840;text-transform:uppercase;font-family:'Outfit',sans-serif;margin-bottom:0.7rem;">Legal</h4>
+          <div style="display:flex;flex-direction:column;gap:0.4rem;">
+            <a href="/privacy-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Privacy Policy</a>
+            <a href="/terms.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Terms &amp; Conditions</a>
+            <a href="/refund-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Refund &amp; Cancellation</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>Designed &amp; Built By: <strong>VARUN VANTERU</strong></p>
+      <div class="footer-bottom-contact">
+        <a href="tel:+918125179109"><i class="bi bi-telephone-fill"></i> +91 8125179109</a>
+        <a href="https://wa.me/918125179109" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+      </div>
+    </div>
+  </footer>
+  <script src="/js/cart.js"></script>
+  <script>
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const answer = item.querySelector('.faq-answer');
+    const isOpen = item.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.faq-item.open').forEach(el => {
+      el.classList.remove('open');
+      el.querySelector('.faq-answer').style.maxHeight = '0';
+    });
+    if (!isOpen) {
+      item.classList.add('open');
+      answer.style.maxHeight = answer.scrollHeight + 'px';
+    }
+  }
+  (function() {
+    fetch('/api/settings').then(r => r.json()).then(data => {
+      const c = document.getElementById('footer-social-icons');
+      if (c) {
+        [
+          { key: 'social_instagram', icon: 'bi-instagram', label: 'Instagram' },
+          { key: 'social_facebook',  icon: 'bi-facebook',  label: 'Facebook'  },
+          { key: 'social_youtube',   icon: 'bi-youtube',   label: 'YouTube'   },
+          { key: 'social_twitter',   icon: 'bi-twitter-x', label: 'Twitter/X' },
+          { key: 'social_whatsapp',  icon: 'bi-whatsapp',  label: 'WhatsApp'  },
+          { key: 'social_tiktok',    icon: 'bi-tiktok',    label: 'TikTok'    },
+        ].forEach(({ key, icon, label }) => {
+          const url = data[key];
+          if (url && url.trim()) {
+            const a = document.createElement('a');
+            a.href = url.trim(); a.target = '_blank'; a.rel = 'noopener noreferrer';
+            a.className = 'footer-social-link'; a.setAttribute('aria-label', label);
+            a.innerHTML = `<i class="bi ${icon}"></i>`;
+            c.appendChild(a);
+          }
+        });
+      }
+      const mapBtn = document.getElementById('footer-map-btn');
+      if (mapBtn && data.maps_url && data.maps_url.trim()) {
+        mapBtn.href = data.maps_url.trim();
+        mapBtn.style.display = 'inline-flex';
+      }
+    }).catch(() => {});
+    const hdr = document.getElementById('main-header');
+    if (hdr) window.addEventListener('scroll', () => hdr.classList.toggle('scrolled', window.scrollY > 30), { passive: true });
+    // Open FAQ from hash
+    if (location.hash === '#faq') {
+      setTimeout(() => {
+        document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    }
+  })();
+  </script>
+</body>
+</html>

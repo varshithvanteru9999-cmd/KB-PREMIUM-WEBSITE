@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(PGPASSWORD=Varun1234 psql -U postgres -h localhost -d kbbeauty -c \"SELECT customer_id, name, mobile_number, email FROM customers ORDER BY customer_id;\")",
+      "Bash(PGPASSWORD=Varun1234 psql -U postgres -h localhost -d kbbeauty -c \"SELECT appointment_id, customer_id, appointment_date, status FROM appointments WHERE customer_id IN \\(1, 5\\) ORDER BY customer_id, appointment_id;\")",
+      "Bash(PGPASSWORD=Varun1234 psql -U postgres -h localhost -d kbbeauty -c \":*)",
+      "Read(//Users/venuvallepu/Documents/ANIQ\\\\ PROJECT\\\\ WEBSITE/**)",
+      "Read(//Users/venuvallepu/Documents/**)"
+    ]
+  }
+}

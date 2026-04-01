@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment | KB Beauty Salons & Tattoos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .booking-central {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 1.5rem 3rem;
+        }
+        .booking-card {
+            width: 100%;
+            max-width: 520px;
+            transition: max-width 0.3s ease;
+            background: rgba(22, 16, 3, 0.93);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(212, 175, 55, 0.28);
+            border-radius: 1.5rem;
+            padding: 2rem 2.2rem 2.2rem;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(252,246,186,0.07);
+        }
+
+        /* ── Step indicator ── */
+        .step-track {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.6rem;
+            gap: 0;
+        }
+        .step-node {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            border: 2px solid rgba(212,175,55,0.25);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 800; color: #6a5030;
+            transition: all 0.35s;
+            flex-shrink: 0;
+        }
+        .step-node.active {
+            border-color: #d4af37;
+            background: rgba(212,175,55,0.12);
+            color: #fcf6ba;
+            box-shadow: 0 0 0 4px rgba(212,175,55,0.1);
+        }
+        .step-node.done {
+            background: linear-gradient(135deg,#bf953f,#d4af37);
+            border-color: #d4af37;
+            color: #1a1000;
+        }
+        .step-node.done::after { content: '✓'; font-size: 0.75rem; }
+        .step-node.done span { display: none; }
+        .step-rail {
+            flex: 1; height: 2px; max-width: 48px;
+            background: rgba(212,175,55,0.12);
+            transition: background 0.35s;
+            margin: 0 4px;
+        }
+        .step-rail.done { background: rgba(212,175,55,0.5); }
+        .step-label-row {
+            display: flex;
+            justify-content: space-between;
+            margin: -0.9rem 0 1.2rem;
+            padding: 0 2px;
+        }
+        .step-label {
+            font-size: 0.62rem;
+            color: #6a5030;
+            text-align: center;
+            flex: 1;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.3s;
+        }
+        .step-label.active { color: #d4af37; }
+        .step-label.done   { color: #bf953f; }
+
+        /* ── Service box ── */
+        .service-box {
+            padding: 0.9rem 1.1rem;
+            background: rgba(13,10,2,0.6);
+            border-radius: 0.9rem;
+            border: 1px solid rgba(212,175,55,0.18);
+            margin-bottom: 1.4rem;
+        }
+        .service-tag { color: #d4af37; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; margin-bottom: 3px; }
+        .service-name { font-family: 'Playfair Display', serif; font-size: 1.2rem; background: linear-gradient(135deg,#bf953f 0%,#fcf6ba 40%,#d4af37 70%,#bf953f 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .service-meta { display: flex; align-items: center; gap: 1rem; margin-top: 3px; }
+        .service-price { color: #fcf6ba; font-weight: 900; font-size: 1.05rem; }
+        .service-dur   { color: #9a7840; font-size: 0.76rem; font-weight: 700; }
+
+        /* ── Step panels ── */
+        .step-panel { display: none; animation: stepIn 0.25s ease; }
+        .step-panel.active { display: block; }
+        @keyframes stepIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+        /* ── Shared input styles ── */
+        .booking-fields { display: flex; flex-direction: column; gap: 0.7rem; }
+        .input-luxury { margin-top: 0 !important; padding: 0.8rem 1rem !important; font-size: 0.9rem !important; }
+
+        /* ── Back link ── */
+        .btn-back {
+            background: none; border: none; color: #7a5c30; font-size: 0.78rem;
+            cursor: pointer; padding: 0; display: inline-flex; align-items: center;
+            gap: 4px; margin-bottom: 1rem; font-family: inherit; transition: color 0.2s;
+        }
+        .btn-back:hover { color: #d4af37; }
+
+        /* ── Step headings ── */
+        .step-heading { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #fcf6ba; margin-bottom: 0.3rem; }
+        .step-sub { font-size: 0.8rem; color: #9a7840; margin-bottom: 1.1rem; line-height: 1.5; }
+
+        /* ── Welcome back banner ── */
+        .welcome-banner {
+            display: flex; align-items: center; gap: 0.9rem;
+            background: rgba(111,207,138,0.07);
+            border: 1px solid rgba(111,207,138,0.22);
+            border-radius: 0.9rem;
+            padding: 0.9rem 1rem;
+            margin-bottom: 1.1rem;
+        }
+        .welcome-icon { font-size: 1.6rem; color: #6fcf8a; flex-shrink: 0; }
+        .welcome-name { color: #fcf6ba; font-weight: 700; font-size: 0.95rem; }
+        .welcome-sub  { color: #7a9870; font-size: 0.76rem; margin-top: 2px; }
+
+        /* ── Info chip (logged-in) ── */
+        .auth-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(212,175,55,0.08);
+            border: 1px solid rgba(212,175,55,0.22);
+            border-radius: 2rem; padding: 0.35rem 0.85rem;
+            font-size: 0.78rem; color: #d4af37; margin-bottom: 1.2rem;
+        }
+
+        /* ── OTP boxes ── */
+        .otp-row {
+            display: flex; gap: 0.45rem; justify-content: center;
+            margin: 0.8rem 0 1rem;
+        }
+        .otp-box {
+            width: 42px; height: 50px;
+            background: rgba(13,10,2,0.85);
+            border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 0.65rem; color: #fcf6ba;
+            font-size: 1.4rem; font-weight: 800; text-align: center;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: monospace;
+        }
+        .otp-box:focus { border-color: rgba(212,175,55,0.65); box-shadow: 0 0 0 3px rgba(212,175,55,0.1); }
+        .otp-hint { text-align: center; color: #9a7840; font-size: 0.78rem; margin-bottom: 0.5rem; }
+        .resend-btn {
+            background: none; border: none; color: #7a5c30; font-size: 0.76rem;
+            cursor: pointer; font-family: inherit; padding: 0; transition: color 0.2s;
+        }
+        .resend-btn:hover { color: #d4af37; }
+        .resend-btn:disabled { color: #4a3820; cursor: not-allowed; }
+
+        /* ── Time picker ── */
+        .time-select-wrap { position: relative; display: none; }
+        .time-trigger {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; background: rgba(13,10,2,0.85);
+            border: 1px solid rgba(212,175,55,0.25); border-radius: 0.65rem;
+            padding: 0.8rem 1rem; color: #9a7840; font-family: inherit;
+            font-size: 0.9rem; cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s; user-select: none;
+        }
+        .time-trigger.has-value { color: #e8d5a0; }
+        .time-trigger:hover, .time-trigger.open { border-color: rgba(212,175,55,0.55); box-shadow: 0 0 0 3px rgba(212,175,55,0.08); }
+        .time-trigger i { color: #d4af37; font-size: 0.95rem; }
+        .time-dropdown {
+            position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+            background: #1a1400; border: 1px solid rgba(212,175,55,0.35);
+            border-radius: 1rem; box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+            max-height: 220px; overflow-y: auto; z-index: 9999;
+            display: none; padding: 0.4rem 0;
+        }
+        .time-dropdown.open { display: block; }
+        .time-dropdown::-webkit-scrollbar { width: 4px; }
+        .time-dropdown::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 2px; }
+        .time-option {
+            padding: 0.55rem 1.1rem; color: #c8a050; font-size: 0.88rem;
+            font-family: inherit; cursor: pointer; transition: background 0.15s;
+            border-radius: 0.4rem; margin: 0 0.3rem;
+        }
+        .time-option:hover { background: rgba(212,175,55,0.12); color: #fcf6ba; }
+        .time-option.selected { background: linear-gradient(135deg,#bf953f,#d4af37,#fcf6ba,#d4af37); color: #1a1000; font-weight: 800; }
+
+        /* ── Flatpickr theme ── */
+        .fp-wrap { position: relative; }
+        .fp-wrap .fp-icon { position: absolute; right: 0.9rem; top: 50%; transform: translateY(-50%); color: #d4af37; pointer-events: none; font-size: 0.95rem; }
+        .fp-wrap input { padding-right: 2.4rem !important; cursor: pointer; }
+        .flatpickr-calendar { background: #1a1400 !important; border: 1px solid rgba(212,175,55,0.35) !important; border-radius: 1rem !important; box-shadow: 0 20px 60px rgba(0,0,0,0.7) !important; font-family: 'Outfit', sans-serif !important; color: #e8d5a0 !important; z-index: 999999 !important; }
+        .flatpickr-calendar.arrowTop::before,.flatpickr-calendar.arrowTop::after { border-bottom-color: rgba(212,175,55,0.4) !important; }
+        .flatpickr-months { background: rgba(22,16,3,0.95) !important; border-radius: 1rem 1rem 0 0 !important; padding: 0.4rem 0 !important; border-bottom: 1px solid rgba(212,175,55,0.18) !important; }
+        .flatpickr-month,.flatpickr-current-month { color: #e8d5a0 !important; fill: #e8d5a0 !important; font-weight:700 !important; }
+        .flatpickr-current-month select,.flatpickr-current-month input.cur-year { color: #e8d5a0 !important; background: transparent !important; font-weight:700 !important; }
+        .flatpickr-prev-month svg,.flatpickr-next-month svg { fill: #d4af37 !important; }
+        .flatpickr-weekdays { background: rgba(212,175,55,0.06) !important; }
+        span.flatpickr-weekday { color: #9a7840 !important; font-size: 0.72rem !important; font-weight:800 !important; letter-spacing:1.5px !important; }
+        .flatpickr-day { color: #c8a050 !important; border-radius: 0.5rem !important; font-size:0.88rem !important; }
+        .flatpickr-day:hover { background: rgba(212,175,55,0.15) !important; border-color: rgba(212,175,55,0.4) !important; color: #fcf6ba !important; }
+        .flatpickr-day.selected,.flatpickr-day.selected:hover { background: linear-gradient(135deg,#bf953f,#d4af37,#fcf6ba,#d4af37) !important; border-color: transparent !important; color: #1a1000 !important; font-weight:800 !important; }
+        .flatpickr-day.today { border-color: rgba(212,175,55,0.6) !important; color: #fcf6ba !important; font-weight:700 !important; }
+        .flatpickr-day.flatpickr-disabled,.flatpickr-day.prevMonthDay,.flatpickr-day.nextMonthDay { color: rgba(140,100,50,0.25) !important; }
+
+        /* ── Booking summary ── */
+        .booking-summary {
+            background: rgba(13,10,2,0.5);
+            border: 1px solid rgba(212,175,55,0.14);
+            border-radius: 0.9rem;
+            padding: 0.9rem 1.1rem;
+            margin-bottom: 1.1rem;
+        }
+        .sum-row { display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; font-size: 0.87rem; }
+        .sum-row + .sum-row { border-top: 1px solid rgba(212,175,55,0.07); }
+        .sum-label { color: #9a7840; }
+        .sum-value { color: #e8d5a0; font-weight: 700; }
+        .sum-value.gold { color: #fcf6ba; }
+        .sum-advance { margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px dashed rgba(212,175,55,0.2); font-size: 0.78rem; color: #bf953f; line-height: 1.5; }
+
+        /* ── Main CTA ── */
+        .btn-book {
+            width: 100%; margin-top: 0.9rem;
+            padding: 1.05rem !important; font-size: 0.95rem !important;
+        }
+
+        /* ── Advance note ── */
+        .advance-note { color: #7a5c30; font-size: 0.76rem; margin-top: 0.6rem; line-height: 1.5; display: flex; gap: 5px; }
+
+        /* ── Login nudge ── */
+        .login-nudge { text-align: center; margin-top: 1rem; font-size: 0.78rem; color: #6a5030; }
+        .login-nudge a { color: #9a7840; text-decoration: none; }
+        .login-nudge a:hover { color: #d4af37; }
+
+        /* ── SweetAlert2 dark gold override ── */
+        .swal2-popup { background: rgba(22,16,3,0.98) !important; border: 1px solid rgba(212,175,55,0.25) !important; border-radius: 1rem !important; font-family: 'Outfit', sans-serif !important; color: #e8d5a0 !important; }
+        .swal2-title { color: #fcf6ba !important; font-family: 'Playfair Display', serif !important; }
+        .swal2-html-container { color: #c8a050 !important; }
+        .swal2-confirm { background: linear-gradient(135deg,#2a1f00,#7a5c10,#bf953f,#fcf6ba,#d4af37,#b38728) !important; color: #1a1000 !important; font-weight: 800 !important; border-radius: 8px !important; }
+        .swal2-cancel { background: transparent !important; border: 1px solid rgba(212,175,55,0.3) !important; color: #9a7840 !important; border-radius: 8px !important; }
+        .swal2-deny { background: transparent !important; border: 1px solid rgba(212,175,55,0.2) !important; color: #7a5c30 !important; border-radius: 8px !important; }
+        .swal2-icon.swal2-success { border-color: rgba(111,207,138,0.4) !important; color: #6fcf8a !important; }
+        .swal2-icon.swal2-success .swal2-success-ring { border-color: rgba(111,207,138,0.25) !important; }
+        .swal2-icon.swal2-success [class^=swal2-success-line] { background-color: #6fcf8a !important; }
+        .swal2-icon.swal2-warning { border-color: rgba(212,175,55,0.4) !important; color: #d4af37 !important; }
+        .swal2-icon.swal2-error { border-color: rgba(224,112,96,0.4) !important; color: #e07060 !important; }
+
+        /* ── Credentials display box ── */
+        .cred-box {
+            background: rgba(212,175,55,0.06); border: 1px solid rgba(212,175,55,0.22);
+            border-radius: 0.8rem; padding: 1rem 1.2rem; margin: 0.8rem 0 0; text-align: left;
+        }
+        .cred-row { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0; font-size: 0.85rem; }
+        .cred-row + .cred-row { border-top: 1px solid rgba(212,175,55,0.08); }
+        .cred-key { color: #9a7840; }
+        .cred-val { color: #fcf6ba; font-weight: 700; font-family: monospace; letter-spacing: 0.5px; }
+
+        /* ── Service picker ── */
+        .booking-card.wide { max-width: 680px; }
+        .svc-picker-heading { font-family:'Playfair Display',serif; font-size:1.3rem; color:#fcf6ba; margin-bottom:0.3rem; }
+        .svc-picker-sub { font-size:0.8rem; color:#9a7840; margin-bottom:1.1rem; }
+
+        .cat-tabs {
+            display: flex; gap: 0.45rem; flex-wrap: wrap; margin-bottom: 1.1rem;
+        }
+        .cat-tab {
+            padding: 0.35rem 0.9rem; border-radius: 2rem; font-size: 0.75rem;
+            font-weight: 700; cursor: pointer; border: 1px solid rgba(212,175,55,0.22);
+            background: transparent; color: #9a7840; font-family: inherit;
+            transition: all 0.2s; white-space: nowrap;
+        }
+        .cat-tab:hover { border-color: rgba(212,175,55,0.5); color: #d4af37; }
+        .cat-tab.active {
+            background: linear-gradient(135deg,#2a1f00,#7a5c10,#d4af37);
+            border-color: transparent; color: #1a1000; font-weight: 800;
+        }
+
+        .svc-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 0.65rem; max-height: 380px; overflow-y: auto;
+            padding-right: 2px;
+        }
+        .svc-grid::-webkit-scrollbar { width: 3px; }
+        .svc-grid::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.25); border-radius: 2px; }
+
+        .svc-card {
+            background: rgba(13,10,2,0.6);
+            border: 1px solid rgba(212,175,55,0.16);
+            border-radius: 0.9rem; padding: 0.85rem 0.9rem;
+            cursor: pointer; transition: border-color 0.2s, background 0.2s, transform 0.15s;
+            display: flex; flex-direction: column; gap: 0.3rem;
+        }
+        .svc-card:hover {
+            border-color: rgba(212,175,55,0.45);
+            background: rgba(212,175,55,0.06);
+            transform: translateY(-1px);
+        }
+        .svc-card-name {
+            font-size: 0.88rem; font-weight: 700; color: #e8d5a0; line-height: 1.3;
+        }
+        .svc-card-price {
+            font-size: 1rem; font-weight: 900; color: #fcf6ba;
+        }
+        .svc-card-dur {
+            font-size: 0.7rem; color: #7a5c30; display: flex; align-items: center; gap: 3px;
+        }
+        .svc-card-cat {
+            font-size: 0.62rem; color: #6a5030; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 2px;
+        }
+        .svc-empty { color: #6a5030; font-size: 0.85rem; text-align: center; padding: 2rem 0; grid-column: span 2; }
+
+        @media (max-width: 540px) { .svc-grid { grid-template-columns: 1fr; } }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin-icon { display: inline-block; animation: spin 0.8s linear infinite; }
+        /* ── Promo Code ── */
+        .promo-wrap {
+            margin: 1rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            padding: 0.8rem 1rem;
+            background: rgba(212,175,55,0.04);
+            border: 1px dashed rgba(212,175,55,0.2);
+            border-radius: 0.9rem;
+        }
+        .promo-input-row {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .promo-input {
+            flex: 1;
+            background: rgba(13,10,2,0.6);
+            border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 0.5rem;
+            padding: 0.6rem 0.8rem;
+            color: #fcf6ba;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .promo-input:focus { border-color: rgba(212,175,55,0.6); }
+        .btn-apply-promo {
+            background: rgba(212,175,55,0.1);
+            border: 1px solid rgba(212,175,55,0.4);
+            color: #d4af37;
+            padding: 0 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-apply-promo:hover:not(:disabled) { background: rgba(212,175,55,0.2); color: #fcf6ba; }
+        .btn-apply-promo:disabled { opacity: 0.5; cursor: not-allowed; }
+        .promo-msg { font-size: 0.72rem; margin-top: 2px; }
+        .promo-msg.success { color: #6fcf8a; }
+        .promo-msg.error { color: #e07060; }
+        .discount-row { color: #6fcf8a !important; font-weight: 800; }
+    </style>
+</head>
+<body class="reveal active">
+    <div class="gradient-bg"></div>
+    <div class="gradient-bg-mid"></div>
+    <header id="main-header" class="scrolled">
+        <a href="/"><img src="/images/kb logo.png" alt="KB Beauty Logo" class="logo-img"></a>
+        <nav>
+            <a href="/dashboard.html" id="nav-dashboard" style="display:none;">My Dashboard</a>
+            <a href="/login.html" class="btn-login" id="nav-login">Login</a>
+        </nav>
+    </header>
+
+    <div class="booking-central">
+        <div class="booking-card">
+
+            <!-- Step indicator -->
+            <div class="step-track" id="step-track">
+                <div class="step-node active" id="sn1"><span>1</span></div>
+                <div class="step-rail" id="sr12"></div>
+                <div class="step-node" id="sn2"><span>2</span></div>
+                <div class="step-rail" id="sr23"></div>
+                <div class="step-node" id="sn3"><span>3</span></div>
+            </div>
+            <div class="step-label-row">
+                <span class="step-label active" id="sl1">You</span>
+                <span class="step-label" id="sl2">Schedule</span>
+                <span class="step-label" id="sl3">Confirm</span>
+            </div>
+
+            <!-- Service / Cart summary box -->
+            <div id="service-box-wrap">
+                <div class="service-box" id="service-box-inner">
+                    <div class="service-tag" id="service-box-tag">Selected Service</div>
+                    <div class="service-name" id="service-name"></div>
+                    <div id="cart-items-summary"></div>
+                    <div class="service-meta">
+                        <span class="service-price" id="service-price"></span>
+                        <span class="service-dur" id="service-dur" style="display:none;"><i class="bi bi-clock" style="color:#d4af37;margin-right:3px;"></i><span id="service-dur-val"></span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══════════ STEP 0 — Service picker (shown when no service pre-selected) ══════════ -->
+            <div class="step-panel" id="panel-service">
+                <div class="svc-picker-heading">Choose a Service</div>
+                <div class="svc-picker-sub">Select the service you'd like to book.</div>
+                <div class="cat-tabs" id="cat-tabs"></div>
+                <div class="svc-grid" id="svc-grid">
+                    <div class="svc-empty"><i class="bi bi-arrow-clockwise spin-icon"></i> Loading services…</div>
+                </div>
+            </div>
+
+            <!-- ══════════ STEP 1 — Mobile ══════════ -->
+            <div class="step-panel active" id="panel-mobile">
+                <div class="step-heading">What's your mobile number?</div>
+                <div class="step-sub">We'll use this to find or create your account.</div>
+                <div class="booking-fields">
+                    <input type="tel" id="cust-mobile" placeholder="10-digit Mobile Number" class="input-luxury" maxlength="15"
+                           onkeydown="if(event.key==='Enter') checkMobile()">
+                </div>
+                <button class="btn-premium btn-book" onclick="checkMobile()" id="btn-check-mobile">
+                    Continue &nbsp;<i class="bi bi-arrow-right"></i>
+                </button>
+                <div class="login-nudge">
+                    Already have an account? <a href="/login.html">Login here</a>
+                </div>
+            </div>
+
+            <!-- ══════════ STEP 2a — Existing customer ══════════ -->
+            <div class="step-panel" id="panel-existing">
+                <button class="btn-back" onclick="goToStep('mobile')"><i class="bi bi-arrow-left"></i> Change number</button>
+                <div class="welcome-banner">
+                    <i class="bi bi-person-check-fill welcome-icon"></i>
+                    <div>
+                        <div class="welcome-name" id="wb-name">Welcome back!</div>
+                        <div class="welcome-sub">Your details are on file. Ready to book?</div>
+                    </div>
+                </div>
+                <div class="booking-fields">
+                    <input type="text" id="existing-name" class="input-luxury" placeholder="Full Name" readonly
+                           style="opacity:0.75;cursor:default;">
+                    <input type="email" id="existing-email" class="input-luxury" placeholder="Email (on file)">
+                </div>
+                <button class="btn-premium btn-book" onclick="goToSchedule()">
+                    Pick Date &amp; Time &nbsp;<i class="bi bi-calendar3"></i>
+                </button>
+                <div class="login-nudge">
+                    <a href="/login.html"><i class="bi bi-box-arrow-in-right"></i> Login to access full dashboard</a>
+                </div>
+            </div>
+
+            <!-- ══════════ STEP 2b — New customer ══════════ -->
+            <div class="step-panel" id="panel-new">
+                <button class="btn-back" onclick="goToStep('mobile')"><i class="bi bi-arrow-left"></i> Change number</button>
+
+                <!-- Sub-step: details form -->
+                <div id="new-details-section">
+                    <div class="step-heading">Let's set up your account</div>
+                    <div class="step-sub">Enter your details — we'll create your account automatically.</div>
+                    <div class="booking-fields">
+                        <input type="text" id="cust-name" placeholder="Full Name" class="input-luxury">
+                        <input type="email" id="cust-email" placeholder="Email Address" class="input-luxury">
+                    </div>
+                    <button class="btn-premium btn-book" onclick="sendOTP()" id="btn-send-otp">
+                        Send OTP to Email &nbsp;<i class="bi bi-envelope-fill"></i>
+                    </button>
+                </div>
+
+                <!-- Sub-step: OTP verification -->
+                <div id="new-otp-section" style="display:none;">
+                    <div class="step-heading">Verify your email</div>
+                    <p class="otp-hint" id="otp-hint-msg"></p>
+                    <div class="otp-row" id="otp-row">
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
+                        <input class="otp-box" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
+                    </div>
+                    <button class="btn-premium btn-book" onclick="verifyOTP()" id="btn-verify-otp">
+                        Verify OTP &nbsp;<i class="bi bi-shield-check"></i>
+                    </button>
+                    <p style="text-align:center;margin-top:0.7rem;">
+                        <button class="resend-btn" id="resend-btn" onclick="resendOTP()">
+                            <i class="bi bi-arrow-clockwise"></i> Didn't receive? Resend OTP
+                        </button>
+                    </p>
+                </div>
+            </div>
+
+            <!-- ══════════ STEP 3 — Schedule (logged-in users start here) ══════════ -->
+            <div class="step-panel" id="panel-schedule">
+                <div id="loggedin-chip" class="auth-chip" style="display:none;">
+                    <i class="bi bi-person-circle"></i>
+                    <span id="loggedin-chip-name"></span>
+                </div>
+                <button class="btn-back" id="schedule-back-btn" onclick="scheduleBack()"><i class="bi bi-arrow-left"></i> Back</button>
+                <div class="step-heading">Choose Date &amp; Time</div>
+                <div class="step-sub">Pick when you'd like to visit us.</div>
+                <div class="booking-fields">
+                    <div class="fp-wrap">
+                        <input type="text" id="appt-date" placeholder="Select Date" class="input-luxury" readonly>
+                        <i class="bi bi-calendar3 fp-icon"></i>
+                    </div>
+                    <div class="time-select-wrap" id="time-picker-wrap">
+                        <div class="time-trigger" id="time-trigger" onclick="toggleTimeDropdown()">
+                            <span id="time-trigger-label">Select Time</span>
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <div class="time-dropdown" id="time-dropdown"></div>
+                    </div>
+                    <input type="hidden" id="appt-time">
+                </div>
+                <button class="btn-premium btn-book" onclick="goToConfirm()" id="btn-to-confirm">
+                    Review Booking &nbsp;<i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- ══════════ STEP 4 — Confirm ══════════ -->
+            <div class="step-panel" id="panel-confirm">
+                <button class="btn-back" onclick="goToStep('schedule')"><i class="bi bi-arrow-left"></i> Change time</button>
+                <div class="step-heading">Confirm Your Booking</div>
+                <div class="booking-summary" id="booking-summary"></div>
+                
+                <div class="promo-wrap">
+                    <label style="font-size:0.7rem; color:#9a7840; text-transform:uppercase; letter-spacing:1px; font-weight:700;">Promo Code</label>
+                    <div class="promo-input-row">
+                        <input type="text" id="promo-code-input" class="promo-input" placeholder="Enter code">
+                        <button class="btn-apply-promo" id="btn-apply-promo" onclick="applyPromoCode()">Apply</button>
+                    </div>
+                    <div id="promo-msg" class="promo-msg"></div>
+                </div>
+
+                <div class="advance-note" id="advance-note"><i class="bi bi-info-circle" style="margin-top:1px;flex-shrink:0;"></i><span></span></div>
+                <button class="btn-premium btn-book" onclick="processBooking()" id="btn-confirm-book">
+                    BOOK APPOINTMENT
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    /* ══════════════════════════════════════════════════════════════
+       STATE
+    ══════════════════════════════════════════════════════════════ */
+    const S = {
+        mobile:       '',
+        name:         '',
+        email:        '',
+        isExisting:   false,
+        isLoggedIn:   false,
+        verified:     false,   // OTP verified for new users
+        date:         '',
+        time:         '',
+        currentStep:  'mobile',
+        promoCode:    '',
+        discountAmt:  0
+    };
+
+    // URL params — mutable so service picker can set them
+    const urlP        = new URLSearchParams(location.search);
+    let serviceId     = urlP.get('serviceId')  || '';
+    let serviceName   = urlP.get('name')       || '';
+    let servicePrice  = urlP.get('price')      || '0';
+
+    // Cart helpers (inline, no dependency on cart.js for this page)
+    function _getCart()  { return JSON.parse(localStorage.getItem('kb_cart') || '[]'); }
+    function _cartTotal(cart) { return cart.reduce((s,i) => s + i.price * i.qty, 0); }
+    function _cartCount(cart) { return cart.reduce((s,i) => s + i.qty, 0); }
+
+    // Settings
+    let settings = { advance_type:'fixed', advance_value:1, working_days:[0,1,2,3,4,5,6], working_start:'09:00', working_end:'21:00', slot_duration:30 };
+
+    function calcAdvance(price) {
+        if (settings.advance_type === 'percent') return Math.ceil(price * settings.advance_value / 100);
+        return parseFloat(settings.advance_value) || 0;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       INIT
+    ══════════════════════════════════════════════════════════════ */
+    (async () => {
+        // Load settings
+        try { const r = await fetch('/api/settings'); settings = await r.json(); } catch(_) {}
+
+        // Check login
+        const token = localStorage.getItem('salonToken');
+        const user  = JSON.parse(localStorage.getItem('salonUser') || 'null');
+        if (token && user) {
+            S.isLoggedIn = true;
+            S.name   = user.name   || '';
+            S.email  = user.email  || '';
+            S.mobile = user.mobile || '';
+            S.isExisting = true;
+            S.verified   = true;
+            document.getElementById('nav-dashboard').style.display = '';
+            document.getElementById('nav-login').style.display = 'none';
+
+            // If mobile/email missing (old session), fetch from profile API
+            if (!S.mobile || !S.email) {
+                try {
+                    const pr = await fetch('/api/customer/me', { headers: { 'Authorization': 'Bearer ' + token } });
+                    if (pr.ok) {
+                        const pd = await pr.json();
+                        S.mobile = S.mobile || pd.mobile_number || '';
+                        S.email  = S.email  || pd.email || '';
+                        S.name   = S.name   || pd.name  || '';
+                        // Update stored user so future loads don't re-fetch
+                        const updated = { ...user, mobile: S.mobile, email: S.email, name: S.name };
+                        localStorage.setItem('salonUser', JSON.stringify(updated));
+                    }
+                } catch(_) {}
+            }
+        }
+
+        const _cart    = _getCart();
+        const _hasCart = _cart.length > 0;
+
+        if (!serviceId && !_hasCart) {
+            // Nothing to book
+            if (S.isLoggedIn) {
+                location.replace('/#services');
+                return;
+            }
+            // Guest: show inline service picker
+            document.getElementById('step-track').style.display = 'none';
+            document.querySelector('.step-label-row').style.display = 'none';
+            document.getElementById('service-box-wrap').style.display = 'none';
+            document.querySelector('.booking-card').classList.add('wide');
+            showStep('service');
+            loadServicePicker();
+        } else {
+            if (_hasCart) {
+                // Cart booking — show cart summary
+                renderCartSummaryBox(_cart);
+            } else {
+                // Single-service booking — render service box
+                renderServiceBox(serviceId, serviceName, servicePrice);
+            }
+            if (S.isLoggedIn) {
+                showStep('schedule');
+                document.getElementById('loggedin-chip-name').textContent = 'Booking as ' + (S.name || 'you');
+                document.getElementById('loggedin-chip').style.display = 'inline-flex';
+                document.getElementById('schedule-back-btn').style.display = 'none';
+            } else {
+                const saved = localStorage.getItem('kbGuestMobile');
+                if (saved) document.getElementById('cust-mobile').value = saved;
+            }
+        }
+
+        initDatePicker();
+    })();
+
+    /* ── Render service box (single service from URL) ── */
+    async function renderServiceBox(id, name, price) {
+        document.getElementById('service-box-tag').textContent = 'Selected Service';
+        document.getElementById('service-name').textContent    = name  || 'Service';
+        document.getElementById('service-price').textContent   = price ? '₹' + parseFloat(price).toLocaleString('en-IN') : '';
+        if (id) {
+            try {
+                const svcs = await (await fetch('/api/services?lang=en')).json();
+                const svc  = svcs.find(s => String(s.service_id) === String(id));
+                if (svc?.duration_minutes) {
+                    document.getElementById('service-dur-val').textContent = svc.duration_minutes + ' min';
+                    document.getElementById('service-dur').style.display = 'inline-flex';
+                }
+            } catch(_) {}
+        }
+    }
+
+    /* ── Render cart summary box (multi-service) ── */
+    function renderCartSummaryBox(cart) {
+        const total = _cartTotal(cart);
+        const count = _cartCount(cart);
+        document.getElementById('service-box-tag').textContent  = `Your Cart (${count} item${count > 1 ? 's' : ''})`;
+        document.getElementById('service-name').textContent     = '';
+        document.getElementById('service-price').textContent    = '₹' + total.toLocaleString('en-IN') + ' total';
+        const summary = document.getElementById('cart-items-summary');
+        if (summary) {
+            summary.innerHTML = cart.map(item =>
+                `<div style="display:flex;justify-content:space-between;font-size:0.82rem;color:#c8a050;padding:2px 0;">
+                    <span>${item.name}${item.qty > 1 ? ' ×' + item.qty : ''}</span>
+                    <span style="color:#fcf6ba;font-weight:700;">₹${(item.price * item.qty).toLocaleString('en-IN')}</span>
+                </div>`
+            ).join('');
+        }
+    }
+
+    /* ── Service picker logic ── */
+    let _allServices = [], _activeCategory = 'all';
+
+    async function loadServicePicker() {
+        try {
+            const [catsRes, svcsRes] = await Promise.all([
+                fetch('/api/categories'),
+                fetch('/api/services?lang=en')
+            ]);
+            const cats = await catsRes.json();
+            _allServices = (await svcsRes.json()).filter(s => s.is_enabled);
+
+            // Render category tabs
+            const tabsEl = document.getElementById('cat-tabs');
+            tabsEl.innerHTML = `<button class="cat-tab active" onclick="filterCat('all',this)">All</button>` +
+                cats.map(c => `<button class="cat-tab" onclick="filterCat(${c.category_id},this)">${c.name}</button>`).join('');
+
+            renderServiceCards('all');
+        } catch(e) {
+            document.getElementById('svc-grid').innerHTML = '<div class="svc-empty">Could not load services. Please try again.</div>';
+        }
+    }
+
+    function filterCat(catId, btn) {
+        _activeCategory = catId;
+        document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        renderServiceCards(catId);
+    }
+
+    function renderServiceCards(catId) {
+        const grid = document.getElementById('svc-grid');
+        const filtered = catId === 'all'
+            ? _allServices
+            : _allServices.filter(s => String(s.category_id) === String(catId));
+
+        if (!filtered.length) {
+            grid.innerHTML = '<div class="svc-empty">No services available in this category.</div>';
+            return;
+        }
+        grid.innerHTML = filtered.map(s => `
+            <div class="svc-card" onclick="pickService(${s.service_id},'${(s.name||'').replace(/'/g,"\\'")}',${s.price||0},${s.duration_minutes||0},${s.category_id})">
+                <div class="svc-card-cat">${s.category_name || ''}</div>
+                <div class="svc-card-name">${s.name}</div>
+                <div class="svc-card-price">₹${parseFloat(s.price||0).toLocaleString('en-IN')}</div>
+                ${s.duration_minutes ? `<div class="svc-card-dur"><i class="bi bi-clock"></i>${s.duration_minutes} min</div>` : ''}
+            </div>`).join('');
+    }
+
+    function pickService(id, name, price, duration, catId) {
+        // Set state
+        serviceId    = String(id);
+        serviceName  = name;
+        servicePrice = String(price);
+
+        // Show service box
+        const wrap = document.getElementById('service-box-wrap');
+        wrap.style.display = '';
+        document.getElementById('service-name').textContent  = name;
+        document.getElementById('service-price').textContent = '₹' + parseFloat(price).toLocaleString('en-IN');
+        if (duration) {
+            document.getElementById('service-dur-val').textContent = duration + ' min';
+            document.getElementById('service-dur').style.display = 'inline-flex';
+        }
+
+        // Shrink card, show step indicator
+        document.querySelector('.booking-card').classList.remove('wide');
+        document.getElementById('step-track').style.display = '';
+        document.querySelector('.step-label-row').style.display = '';
+
+        // Go to right first step
+        if (S.isLoggedIn) {
+            document.getElementById('loggedin-chip-name').textContent = 'Booking as ' + (S.name || 'you');
+            document.getElementById('loggedin-chip').style.display = 'inline-flex';
+            document.getElementById('schedule-back-btn').onclick = () => goBackToServicePicker();
+            document.getElementById('schedule-back-btn').style.display = '';
+            showStep('schedule');
+        } else {
+            const saved = localStorage.getItem('kbGuestMobile');
+            if (saved) document.getElementById('cust-mobile').value = saved;
+            showStep('mobile');
+        }
+    }
+
+    function goBackToServicePicker() {
+        document.querySelector('.booking-card').classList.add('wide');
+        document.getElementById('step-track').style.display = 'none';
+        document.querySelector('.step-label-row').style.display = 'none';
+        document.getElementById('service-box-wrap').style.display = 'none';
+        showStep('service');
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       STEP NAVIGATION
+    ══════════════════════════════════════════════════════════════ */
+    const STEP_PANELS = {
+        service:  'panel-service',
+        mobile:   'panel-mobile',
+        existing: 'panel-existing',
+        new:      'panel-new',
+        schedule: 'panel-schedule',
+        confirm:  'panel-confirm'
+    };
+    const STEP_DOT_MAP = {
+        service:  0, mobile: 1, existing: 1, new: 1, schedule: 2, confirm: 3
+    };
+
+    function showStep(step) {
+        S.currentStep = step;
+        // Hide all panels
+        Object.values(STEP_PANELS).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.classList.remove('active'); }
+        });
+        // Show target
+        const target = STEP_PANELS[step] || ('panel-' + step);
+        document.getElementById(target)?.classList.add('active');
+        updateStepDots(STEP_DOT_MAP[step] || 1);
+    }
+
+    function updateStepDots(activeNum) {
+        [1,2,3].forEach(n => {
+            const node  = document.getElementById('sn' + n);
+            const label = document.getElementById('sl' + n);
+            node.className  = 'step-node' + (n < activeNum ? ' done' : n === activeNum ? ' active' : '');
+            label.className = 'step-label' + (n < activeNum ? ' done' : n === activeNum ? ' active' : '');
+        });
+        [['sr12',1],['sr23',2]].forEach(([id,n]) => {
+            document.getElementById(id).className = 'step-rail' + (activeNum > n ? ' done' : '');
+        });
+    }
+
+    function goToStep(step) { showStep(step); }
+    function scheduleBack() {
+        // If we came from service picker (no URL params), go back there
+        if (!urlP.get('serviceId') && S.isLoggedIn) { goBackToServicePicker(); return; }
+        showStep(S.isExisting ? 'existing' : 'new');
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       STEP 1 — MOBILE CHECK
+    ══════════════════════════════════════════════════════════════ */
+    async function checkMobile() {
+        const raw = document.getElementById('cust-mobile').value.trim();
+        if (!raw || raw.replace(/\D/g,'').length < 10) {
+            kbAlert('warning', 'Enter a valid 10-digit mobile number.'); return;
+        }
+        S.mobile = raw;
+        const btn = document.getElementById('btn-check-mobile');
+        btn.innerHTML = '<i class="bi bi-arrow-clockwise spin-icon"></i> Checking…';
+        btn.disabled = true;
+        try {
+            const r = await fetch('/api/customers/check-mobile?mobile=' + encodeURIComponent(raw));
+            const d = await r.json();
+            if (d.exists) {
+                S.isExisting = true;
+                S.name       = d.name || '';
+                S.email      = '';  // don't expose full email, let them update
+                S.verified   = true;
+                document.getElementById('wb-name').textContent = 'Welcome back, ' + S.name + '!';
+                document.getElementById('existing-name').value  = S.name;
+                document.getElementById('existing-email').placeholder = d.email_masked
+                    ? 'Email on file: ' + d.email_masked
+                    : 'Add your email (optional)';
+                showStep('existing');
+            } else {
+                S.isExisting = false;
+                S.verified   = false;
+                showStep('new');
+            }
+            localStorage.setItem('kbGuestMobile', raw);
+        } catch(e) {
+            kbAlert('error', 'Network error. Please try again.');
+        } finally {
+            btn.innerHTML = 'Continue <i class="bi bi-arrow-right"></i>';
+            btn.disabled  = false;
+        }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       STEP 2a — EXISTING: go to schedule
+    ══════════════════════════════════════════════════════════════ */
+    function goToSchedule() {
+        const nameEl  = document.getElementById('existing-name');
+        const emailEl = document.getElementById('existing-email');
+        S.name  = nameEl.value.trim()  || S.name;
+        S.email = emailEl.value.trim() || '';
+        showStep('schedule');
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       STEP 2b — NEW: send OTP
+    ══════════════════════════════════════════════════════════════ */
+    async function sendOTP() {
+        const name  = document.getElementById('cust-name').value.trim();
+        const email = document.getElementById('cust-email').value.trim();
+        if (!name)  { kbAlert('warning', 'Please enter your full name.'); return; }
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            kbAlert('warning', 'Please enter a valid email address.'); return;
+        }
+        S.name  = name;
+        S.email = email;
+        const btn = document.getElementById('btn-send-otp');
+        btn.innerHTML = '<i class="bi bi-arrow-clockwise spin-icon"></i> Sending…';
+        btn.disabled  = true;
+        try {
+            const r = await fetch('/api/auth/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mobile: S.mobile, email, name })
+            });
+            const d = await r.json();
+            if (!d.success) { kbAlert('error', d.error || 'Failed to send OTP.'); return; }
+            // Show OTP section
+            document.getElementById('new-details-section').style.display = 'none';
+            document.getElementById('new-otp-section').style.display = 'block';
+            const masked = email.replace(/^(.{2})(.*)(@.+)$/, (_, a, b, c) => a + '***' + c);
+            document.getElementById('otp-hint-msg').textContent = 'Enter the 6-digit OTP sent to ' + masked;
+            setupOtpBoxes();
+            startResendTimer();
+        } catch(e) {
+            kbAlert('error', 'Network error. Please try again.');
+        } finally {
+            btn.innerHTML = 'Send OTP to Email <i class="bi bi-envelope-fill"></i>';
+            btn.disabled  = false;
+        }
+    }
+
+    async function resendOTP() {
+        const btn = document.getElementById('resend-btn');
+        btn.disabled = true;
+        document.getElementById('new-details-section').style.display = 'block';
+        document.getElementById('new-otp-section').style.display = 'none';
+        document.getElementById('cust-name').value  = S.name;
+        document.getElementById('cust-email').value = S.email;
+    }
+
+    function startResendTimer() {
+        const btn = document.getElementById('resend-btn');
+        btn.disabled = true;
+        let sec = 30;
+        btn.textContent = 'Resend in ' + sec + 's';
+        const t = setInterval(() => {
+            sec--;
+            if (sec <= 0) {
+                clearInterval(t);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Didn\'t receive? Resend OTP';
+            } else {
+                btn.textContent = 'Resend in ' + sec + 's';
+            }
+        }, 1000);
+    }
+
+    // OTP box navigation
+    function setupOtpBoxes() {
+        const boxes = document.querySelectorAll('.otp-box');
+        boxes.forEach((box, i) => {
+            box.value = '';
+            box.addEventListener('input', e => {
+                const v = e.target.value.replace(/\D/g, '');
+                e.target.value = v.slice(-1);
+                if (v && i < boxes.length - 1) boxes[i+1].focus();
+            });
+            box.addEventListener('keydown', e => {
+                if (e.key === 'Backspace' && !box.value && i > 0) boxes[i-1].focus();
+                if (e.key === 'Enter') verifyOTP();
+            });
+            box.addEventListener('paste', e => {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'');
+                [...paste.slice(0,6)].forEach((ch, j) => { if (boxes[j]) boxes[j].value = ch; });
+                boxes[Math.min(paste.length, 5)].focus();
+            });
+        });
+        boxes[0]?.focus();
+    }
+
+    async function verifyOTP() {
+        const boxes = document.querySelectorAll('.otp-box');
+        const otp   = [...boxes].map(b => b.value).join('');
+        if (otp.length < 6) { kbAlert('warning', 'Enter the complete 6-digit OTP.'); return; }
+        const btn = document.getElementById('btn-verify-otp');
+        btn.innerHTML = '<i class="bi bi-arrow-clockwise spin-icon"></i> Verifying…';
+        btn.disabled  = true;
+        try {
+            const r = await fetch('/api/auth/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mobile: S.mobile, email: S.email, otp })
+            });
+            const d = await r.json();
+            if (!d.valid) {
+                const msg = d.reason === 'expired' ? 'OTP has expired. Please request a new one.' : 'Incorrect OTP. Please try again.';
+                kbAlert('error', msg);
+                boxes.forEach(b => { b.value = ''; b.style.borderColor = 'rgba(224,112,96,0.6)'; });
+                boxes[0].focus();
+                return;
+            }
+            S.verified = true;
+            showStep('schedule');
+        } catch(e) {
+            kbAlert('error', 'Network error. Please try again.');
+        } finally {
+            btn.innerHTML = 'Verify OTP <i class="bi bi-shield-check"></i>';
+            btn.disabled  = false;
+        }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       STEP 3 — SCHEDULE
+    ══════════════════════════════════════════════════════════════ */
+    function initDatePicker() {
+        const offDays = [0,1,2,3,4,5,6].filter(d => !settings.working_days.includes(d));
+        flatpickr('#appt-date', {
+            minDate: 'today', dateFormat: 'Y-m-d', disableMobile: true,
+            locale: { firstDayOfWeek: 1 },
+            disable: [date => offDays.includes(date.getDay())],
+            onChange: (_, ds) => loadTimeSlots(ds)
+        });
+    }
+
+    async function loadTimeSlots(dateStr) {
+        S.date = dateStr;
+        S.time = '';
+        document.getElementById('appt-time').value = '';
+        const wrap = document.getElementById('time-picker-wrap');
+        const trigger = document.getElementById('time-trigger');
+        const label   = document.getElementById('time-trigger-label');
+        const dropdown= document.getElementById('time-dropdown');
+        label.textContent = 'Loading times…';
+        trigger.classList.remove('has-value','open');
+        dropdown.classList.remove('open');
+        dropdown.innerHTML = '';
+        wrap.style.display = 'block';
+        try {
+            const url = serviceId ? `/api/availability?date=${dateStr}&service_id=${serviceId}` : `/api/availability?date=${dateStr}`;
+            const d   = await (await fetch(url)).json();
+            const slots = d.slots || [];
+            if (!slots.length) { label.textContent = 'No times available for this date'; return; }
+            label.textContent = 'Select Time';
+            dropdown.innerHTML = slots.map(s =>
+                `<div class="time-option" data-value="${s}" onclick="pickTime('${s}',this)">${fmtTime(s)}</div>`
+            ).join('');
+        } catch(_) { label.textContent = 'Could not load times'; }
+    }
+
+    function toggleTimeDropdown() {
+        const trigger  = document.getElementById('time-trigger');
+        const dropdown = document.getElementById('time-dropdown');
+        if (!dropdown.children.length) return;
+        const open = dropdown.classList.contains('open');
+        dropdown.classList.toggle('open', !open);
+        trigger.classList.toggle('open', !open);
+    }
+
+    function pickTime(value, el) {
+        S.time = value;
+        document.getElementById('appt-time').value = value;
+        const trigger  = document.getElementById('time-trigger');
+        const label    = document.getElementById('time-trigger-label');
+        const dropdown = document.getElementById('time-dropdown');
+        label.textContent = fmtTime(value);
+        trigger.classList.add('has-value');
+        trigger.classList.remove('open');
+        dropdown.classList.remove('open');
+        dropdown.querySelectorAll('.time-option').forEach(o => o.classList.toggle('selected', o.dataset.value === value));
+    }
+
+    document.addEventListener('click', e => {
+        const wrap = document.getElementById('time-picker-wrap');
+        if (wrap && !wrap.contains(e.target)) {
+            document.getElementById('time-dropdown')?.classList.remove('open');
+            document.getElementById('time-trigger')?.classList.remove('open');
+        }
+    });
+
+    function goToConfirm() {
+        S.date = document.getElementById('appt-date').value;
+        S.time = document.getElementById('appt-time').value;
+        if (!S.date) { kbAlert('warning', 'Please select a date.'); return; }
+        if (!S.time) { kbAlert('warning', 'Please select a time slot.'); return; }
+
+        // Reset promo for fresh step
+        S.promoCode   = '';
+        S.discountAmt = 0;
+        const msg = document.getElementById('promo-msg');
+        if (msg) msg.innerText = '';
+        const pin = document.getElementById('promo-code-input');
+        if (pin) pin.value = '';
+
+        renderBookingSummary();
+        showStep('confirm');
+    }
+
+    async function applyPromoCode() {
+        const input = document.getElementById('promo-code-input');
+        const code  = input.value.trim();
+        const btn   = document.getElementById('btn-apply-promo');
+        const msg   = document.getElementById('promo-msg');
+
+        if (!code) return;
+
+        btn.disabled = true;
+        btn.innerText = '...';
+        msg.innerText = '';
+
+        try {
+            const cart = _getCart();
+            const baseTotal = cart.length > 0 ? _cartTotal(cart) : parseFloat(servicePrice);
+
+            const r = await fetch('/api/promo-codes/validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code, order_amount: baseTotal })
+            });
+            const data = await r.json();
+
+            if (data.valid) {
+                S.promoCode   = data.code;
+                S.discountAmt = data.discount_amount;
+                msg.className = 'promo-msg success';
+                msg.innerText = `Success! ₹${data.discount_amount} off applied.`;
+                renderBookingSummary();
+            } else {
+                S.promoCode   = '';
+                S.discountAmt = 0;
+                msg.className = 'promo-msg error';
+                msg.innerText = data.error || 'Invalid promo code.';
+                renderBookingSummary();
+            }
+        } catch(e) {
+            kbAlert('error', 'Failed to validate promo code.');
+        } finally {
+            btn.disabled = false;
+            btn.innerText = 'Apply';
+        }
+    }
+
+    function renderBookingSummary() {
+        const container = document.getElementById('booking-summary');
+        const cart = _getCart();
+        const hasCart = cart.length > 0;
+        const baseTotal = hasCart ? _cartTotal(cart) : parseFloat(servicePrice);
+        const finalTotal = Math.max(0, baseTotal - (S.discountAmt || 0));
+        const advance = calcAdvance(finalTotal);
+
+        let html = `
+            <div class="sum-row"><span class="sum-label"><i class="bi bi-person" style="margin-right:5px;color:#d4af37;"></i>Name</span><span class="sum-value">${S.name}</span></div>
+            <div class="sum-row"><span class="sum-label"><i class="bi bi-telephone" style="margin-right:5px;color:#d4af37;"></i>Mobile</span><span class="sum-value">${S.mobile}</span></div>
+            <div class="sum-row"><span class="sum-label"><i class="bi bi-calendar3" style="margin-right:5px;color:#d4af37;"></i>Date</span><span class="sum-value">${fmtDate(S.date)}</span></div>
+            <div class="sum-row"><span class="sum-label"><i class="bi bi-clock" style="margin-right:5px;color:#d4af37;"></i>Time</span><span class="sum-value">${fmtTime(S.time)}</span></div>
+            <div style="margin: 0.8rem 0; border-top: 1px dashed rgba(212,175,55,0.15);"></div>
+        `;
+
+        if (hasCart) {
+            cart.forEach(item => {
+                html += `
+                    <div class="sum-row">
+                        <span class="sum-label"><i class="bi bi-scissors" style="margin-right:5px;color:#d4af37;"></i>${item.name}${item.qty > 1 ? ' <span style="color:#9a7840;">×' + item.qty + '</span>' : ''}</span>
+                        <span class="sum-value gold">₹${(item.price * item.qty).toLocaleString('en-IN')}</span>
+                    </div>`;
+            });
+        } else {
+            html += `
+                <div class="sum-row">
+                    <span class="sum-label"><i class="bi bi-scissors" style="margin-right:5px;color:#d4af37;"></i>${serviceName}</span>
+                    <span class="sum-value gold">₹${parseFloat(servicePrice).toLocaleString('en-IN')}</span>
+                </div>`;
+        }
+
+        if (S.discountAmt > 0) {
+            html += `
+                <div class="sum-row" style="margin-top:0.4rem; padding-top:0.4rem; border-top: 1px solid rgba(212,175,55,0.08);">
+                    <span class="sum-label">Subtotal</span>
+                    <span class="sum-value">₹${baseTotal.toLocaleString('en-IN')}</span>
+                </div>
+                <div class="sum-row discount-row">
+                    <span class="sum-label" style="color:#6fcf8a"><i class="bi bi-tags" style="margin-right:5px;"></i>Discount (${S.promoCode})</span>
+                    <span class="sum-value">-₹${S.discountAmt.toLocaleString('en-IN')}</span>
+                </div>
+            `;
+        }
+
+        html += `
+            <div class="sum-row" style="margin-top:0.5rem; padding-top:0.5rem; border-top: 1px solid rgba(212,175,55,0.2);">
+                <span class="sum-label" style="font-weight:800;color:#fcf6ba;font-size:1rem;">Total Cost</span>
+                <span class="sum-value gold" style="font-size:1.25rem;">₹${finalTotal.toLocaleString('en-IN')}</span>
+            </div>
+        `;
+
+        container.innerHTML = html;
+
+        // Advance note
+        const note = document.getElementById('advance-note');
+        if (settings.advance_value > 0) {
+            note.style.display = 'flex';
+            const noteText = settings.advance_type === 'percent'
+                ? `An advance of ${settings.advance_value}% (₹${advance}) is required to confirm your slot.`
+                : `An advance of ₹${advance} is required to confirm your slot. Pay after admin approves.`;
+            note.querySelector('span').innerText = noteText;
+        } else {
+            note.style.display = 'none';
+        }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       STEP 4 — BOOK
+    ══════════════════════════════════════════════════════════════ */
+    async function processBooking() {
+        if (!S.name || !S.mobile) { kbAlert('error', 'Missing customer details.'); return; }
+        if (!S.date || !S.time)   { kbAlert('error', 'Missing date or time.'); return; }
+
+        const btn = document.getElementById('btn-confirm-book');
+        btn.innerHTML = '<i class="bi bi-arrow-clockwise spin-icon"></i> SECURING YOUR SLOT…';
+        btn.disabled  = true;
+
+        try {
+            const token = localStorage.getItem('salonToken');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = 'Bearer ' + token;
+
+            // Build services array from cart or single-service URL param
+            const cart    = _getCart();
+            const useCart = cart.length > 0;
+            const services = useCart
+                ? cart.map(i => ({ service_id: i.id, quantity: i.qty }))
+                : [{ service_id: parseInt(serviceId), quantity: 1 }];
+            const totalCost = useCart ? _cartTotal(cart) : (parseFloat(servicePrice) || 0);
+
+            const res  = await fetch('/api/bookings', {
+                method: 'POST', headers,
+                body: JSON.stringify({
+                    customerInfo: { name: S.name, email: S.email, mobile_number: S.mobile },
+                    appointmentDate: S.date,
+                    appointmentTime: S.time,
+                    services,
+                    totalCost,
+                    promoCode: S.promoCode
+                })
+            });
+            const data = await res.json();
+
+            if (!data.success) {
+                if (data.error === 'slot_taken' || data.error === 'slot_full') {
+                    Swal.fire({ icon:'warning', title:'Slot Unavailable', text:'This slot just got taken. Please pick another time.' });
+                    showStep('schedule');
+                    loadTimeSlots(S.date);
+                } else {
+                    kbAlert('error', data.message || 'Booking failed. Please try again.');
+                }
+                return;
+            }
+
+            // Clear cart on successful booking
+            localStorage.removeItem('kb_cart');
+
+            // Success
+            if (S.isLoggedIn) {
+                // Already logged in → straight to dashboard
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Appointment Booked!',
+                    html: `<span style="color:#9a7840;font-size:0.9rem;">Your appointment request has been submitted.<br>We'll confirm your slot shortly — check your dashboard.</span>`,
+                    confirmButtonText: 'View Dashboard'
+                });
+                location.href = '/dashboard.html';
+            } else if (S.isExisting) {
+                // Existing customer, not logged in
+                const r = await Swal.fire({
+                    icon: 'success',
+                    title: 'Booking Added!',
+                    html: `<span style="color:#9a7840;font-size:0.9rem;">Your appointment has been submitted.<br><br>
+                           <strong style="color:#d4af37;">Login to track and manage all your bookings</strong><br>
+                           in your personal dashboard.</span>`,
+                    confirmButtonText: 'Login Now',
+                    showDenyButton: true,
+                    denyButtonText: 'View My Booking',
+                    allowOutsideClick: false
+                });
+                location.href = r.isConfirmed ? '/login.html' : '/my-booking.html';
+            } else {
+                // New customer — show credentials
+                const r = await Swal.fire({
+                    icon: 'success',
+                    title: 'Booking Received!',
+                    html: `
+                        <span style="color:#9a7840;font-size:0.88rem;">Your appointment request is submitted. We'll confirm shortly.<br><br>
+                        <strong style="color:#d4af37;">Your account has been created:</strong></span>
+                        <div class="cred-box">
+                            <div class="cred-row"><span class="cred-key">Username</span><span class="cred-val">${S.mobile}</span></div>
+                            <div class="cred-row"><span class="cred-key">Password</span><span class="cred-val">${S.mobile}</span></div>
+                        </div>
+                        <p style="color:#6a5030;font-size:0.72rem;margin-top:0.6rem;">Save these credentials. Your password is your mobile number.</p>
+                    `,
+                    confirmButtonText: 'Login to Dashboard',
+                    showDenyButton: true,
+                    denyButtonText: 'View My Booking',
+                    allowOutsideClick: false
+                });
+                location.href = r.isConfirmed ? '/login.html' : '/my-booking.html';
+            }
+        } catch(e) {
+            kbAlert('error', 'Network error. Please check your connection.');
+        } finally {
+            btn.innerHTML = 'BOOK APPOINTMENT';
+            btn.disabled  = false;
+        }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       HELPERS
+    ══════════════════════════════════════════════════════════════ */
+    function fmtTime(hhmm) {
+        const [h, m] = (hhmm || '').split(':').map(Number);
+        return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;
+    }
+    function fmtDate(d) {
+        if (!d) return '';
+        const [y, mo, day] = d.split('-');
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return `${parseInt(day)} ${months[parseInt(mo)-1]} ${y}`;
+    }
+    function kbAlert(icon, msg) {
+        Swal.fire({ icon, toast: true, position: 'top-end', showConfirmButton: false, timer: 3500, timerProgressBar: true, title: msg, customClass:{popup:'swal2-popup'} });
+    }
+    </script>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+        <div class="footer-main">
+            <div class="footer-brand">
+                <img src="/images/kb logo.png" alt="KB Beauty Logo" class="footer-logo">
+                <p class="footer-proprietor">Proprietor: <strong id="footer-proprietor-name">SHAIK SHAHID</strong></p>
+                <a id="footer-phone-link" href="tel:+919640401112" class="footer-phone">
+                    <i class="bi bi-telephone-fill"></i> <span id="footer-phone-text">+91 96404 01112</span>
+                </a>
+                <a id="footer-whatsapp-link" href="https://wa.me/919640401112" class="footer-whatsapp-btn" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-whatsapp"></i> Chat on WhatsApp
+                </a>
+            </div>
+            <div class="footer-location">
+                <h4>Location</h4>
+                <p>3RD FLOOR, VKB RESIDENCY,<br>Kurnool Rd, near bus stand,<br>Vantavari colony, Ongole,<br>Andhra Pradesh 523001.</p>
+                <a href="#" class="footer-map-btn" id="footer-map-btn" target="_blank" rel="noopener noreferrer" style="display:none;">
+                    <i class="bi bi-geo-alt-fill"></i> VIEW ON MAP
+                </a>
+            </div>
+            <div class="footer-social">
+                <h4>Follow Us</h4>
+                <div class="footer-social-icons" id="footer-social-icons"></div>
+                <div style="margin-top:1.5rem;">
+                  <h4 style="font-size:0.9rem;letter-spacing:1.5px;color:#9a7840;text-transform:uppercase;font-family:'Outfit',sans-serif;margin-bottom:0.7rem;">Legal</h4>
+                  <div style="display:flex;flex-direction:column;gap:0.4rem;">
+                    <a href="/privacy-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Privacy Policy</a>
+                    <a href="/terms.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Terms &amp; Conditions</a>
+                    <a href="/refund-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Refund &amp; Cancellation</a>
+                  </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Designed &amp; Built By: <strong>VARUN VANTERU</strong></p>
+            <div class="footer-bottom-contact">
+                <a href="tel:+918125179109"><i class="bi bi-telephone-fill"></i> +91 8125179109</a>
+                <a href="https://wa.me/918125179109" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

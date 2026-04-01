@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Failed | KB Beauty</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .result-central {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+        }
+        .result-card {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(20, 14, 32, 0.88);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(192, 80, 58, 0.35);
+            border-radius: 1.5rem;
+            padding: 2.5rem 2.2rem;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,120,80,0.04);
+        }
+        .fail-icon {
+            font-size: 3.5rem;
+            color: #c0503a;
+            filter: drop-shadow(0 0 16px rgba(192,80,58,0.4));
+            margin-bottom: 1rem;
+        }
+        .result-card h1 {
+            font-family: 'Playfair Display', serif;
+            color: #e07060;
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+        }
+        .result-card p {
+            color: #9a7840;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+        .btn-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+        .btn-retry {
+            flex: 1;
+            min-width: 140px;
+            padding: 0.9rem 1.5rem;
+            text-align: center;
+        }
+        .btn-home {
+            flex: 1;
+            min-width: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.9rem 1.5rem;
+            background: transparent;
+            border: 1px solid rgba(212,175,55,0.35);
+            border-radius: 0.75rem;
+            color: #9a7840;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+        .btn-home:hover { color: #d4af37; border-color: rgba(212,175,55,0.6); }
+    </style>
+</head>
+<body class="reveal active">
+    <div class="gradient-bg"></div>
+    <div class="gradient-bg-mid"></div>
+
+    <div class="result-central">
+        <div class="result-card">
+            <div class="fail-icon"><i class="bi bi-x-circle-fill"></i></div>
+            <h1>Payment Failed</h1>
+            <p>We couldn't process your payment. Your booking has been saved — you can retry the payment or contact us directly.</p>
+
+            <div class="btn-actions">
+                <a href="javascript:history.back()" class="btn-premium btn-retry">Try Again</a>
+                <a href="/" class="btn-home">Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+        <div class="footer-main">
+            <div class="footer-brand">
+                <img src="/images/kb logo.png" alt="KB Beauty Logo" class="footer-logo">
+                <p class="footer-proprietor">Proprietor: <strong id="footer-proprietor-name">SHAIK SHAHID</strong></p>
+                <a id="footer-phone-link" href="tel:+919640401112" class="footer-phone">
+                    <i class="bi bi-telephone-fill"></i> <span id="footer-phone-text">+91 96404 01112</span>
+                </a>
+                <a id="footer-whatsapp-link" href="https://wa.me/919640401112" class="footer-whatsapp-btn" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-whatsapp"></i> Chat on WhatsApp
+                </a>
+            </div>
+            <div class="footer-location">
+                <h4>Location</h4>
+                <p>3RD FLOOR, VKB RESIDENCY,<br>Kurnool Rd, near bus stand,<br>Vantavari colony, Ongole,<br>Andhra Pradesh 523001.</p>
+                <a href="#" class="footer-map-btn" id="footer-map-btn" target="_blank" rel="noopener noreferrer" style="display:none;">
+                    <i class="bi bi-geo-alt-fill"></i> VIEW ON MAP
+                </a>
+            </div>
+            <div class="footer-social">
+                <h4>Follow Us</h4>
+                <div class="footer-social-icons" id="footer-social-icons"></div>
+                <div style="margin-top:1.5rem;">
+                  <h4 style="font-size:0.9rem;letter-spacing:1.5px;color:#9a7840;text-transform:uppercase;font-family:'Outfit',sans-serif;margin-bottom:0.7rem;">Legal</h4>
+                  <div style="display:flex;flex-direction:column;gap:0.4rem;">
+                    <a href="/privacy-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Privacy Policy</a>
+                    <a href="/terms.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Terms &amp; Conditions</a>
+                    <a href="/refund-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Refund &amp; Cancellation</a>
+                  </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Designed &amp; Built By: <strong>VARUN VANTERU</strong></p>
+            <div class="footer-bottom-contact">
+                <a href="tel:+918125179109"><i class="bi bi-telephone-fill"></i> +91 8125179109</a>
+                <a href="https://wa.me/918125179109" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+    (function() {
+        fetch('/api/settings').then(r => r.json()).then(data => {
+            const c = document.getElementById('footer-social-icons');
+            if (c) {
+                [
+                    { key: 'social_instagram', icon: 'bi-instagram', label: 'Instagram' },
+                    { key: 'social_facebook',  icon: 'bi-facebook',  label: 'Facebook'  },
+                    { key: 'social_youtube',   icon: 'bi-youtube',   label: 'YouTube'   },
+                    { key: 'social_twitter',   icon: 'bi-twitter-x', label: 'Twitter/X' },
+                    { key: 'social_whatsapp',  icon: 'bi-whatsapp',  label: 'WhatsApp'  },
+                    { key: 'social_tiktok',    icon: 'bi-tiktok',    label: 'TikTok'    },
+                ].forEach(({ key, icon, label }) => {
+                    const url = data[key];
+                    if (url && url.trim()) {
+                        const a = document.createElement('a');
+                        a.href = url.trim(); a.target = '_blank'; a.rel = 'noopener noreferrer';
+                        a.className = 'footer-social-link'; a.setAttribute('aria-label', label);
+                        a.innerHTML = `<i class="bi ${icon}"></i>`;
+                        c.appendChild(a);
+                    }
+                });
+            }
+            const mapBtn = document.getElementById('footer-map-btn');
+            if (mapBtn && data.maps_url && data.maps_url.trim()) {
+                mapBtn.href = data.maps_url.trim();
+                mapBtn.style.display = 'inline-flex';
+            }
+        }).catch(() => {});
+    })();
+    </script>
+</body>
+</html>

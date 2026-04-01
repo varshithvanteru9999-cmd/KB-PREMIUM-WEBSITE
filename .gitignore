@@ -1,0 +1,30 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Temporary Files
+tmp/
+*.log
+*.tmp
+
+# VS Code
+.vscode/
+
+# Project Specific
+uploads/
+*.pdf
+# (Keep images if they are part of the UI, but usually uploads are ignored)

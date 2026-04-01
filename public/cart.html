@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cart | KB Beauty Salons & Tattoos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .cart-page {
+            min-height: 100vh;
+            padding: 120px 1.5rem 5rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* ── Page header ── */
+        .cart-page-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+        .cart-back-btn {
+            background: rgba(212,175,55,0.08);
+            border: 1px solid rgba(212,175,55,0.22);
+            color: #d4af37;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s, border-color 0.2s;
+            flex-shrink: 0;
+            text-decoration: none;
+        }
+        .cart-back-btn:hover { background: rgba(212,175,55,0.18); border-color: rgba(212,175,55,0.45); }
+        .cart-page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 35%, #d4af37 55%, #fbf5b7 75%, #bf953f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .cart-item-badge {
+            font-size: 0.72rem;
+            color: #9a7840;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-top: 0.2rem;
+        }
+
+        /* ── Empty state ── */
+        .cart-empty {
+            text-align: center;
+            padding: 5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        .cart-empty-icon {
+            font-size: 4rem;
+            color: rgba(212,175,55,0.15);
+        }
+        .cart-empty h3 {
+            font-family: 'Playfair Display', serif;
+            color: #9a7840;
+            font-size: 1.4rem;
+        }
+        .cart-empty p { color: #c8a060; font-size: 0.9rem; }
+        .cart-empty-cta {
+            margin-top: 0.5rem;
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 0.9rem 2rem;
+            background: var(--gold-gradient);
+            color: #1a1000; font-weight: 800;
+            font-size: 0.82rem; letter-spacing: 1.5px;
+            text-transform: uppercase; text-decoration: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(212,175,55,0.28);
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .cart-empty-cta:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* ── Cart items card ── */
+        .cart-card {
+            background: rgba(22, 16, 3, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(180,130,40,0.22);
+            border-radius: 1.4rem;
+            overflow: hidden;
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+        .cart-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent 0%, #7a5c10 20%, #d4af37 50%, #7a5c10 80%, transparent 100%);
+        }
+
+        /* ── Cart item row ── */
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid rgba(212,175,55,0.07);
+            transition: background 0.2s;
+        }
+        .cart-item:last-child { border-bottom: none; }
+        .cart-item:hover { background: rgba(212,175,55,0.03); }
+
+        .cart-item-info { flex: 1; min-width: 0; }
+        .cart-item-name {
+            font-weight: 700;
+            color: #e8d5a0;
+            font-size: 0.97rem;
+            margin-bottom: 0.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .cart-item-unit { color: #7a5c30; font-size: 0.78rem; }
+
+        /* ── Qty stepper ── */
+        .cart-item-stepper {
+            display: flex;
+            align-items: center;
+            border: 1.5px solid rgba(212,175,55,0.3);
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .cart-step-btn {
+            width: 36px; height: 36px;
+            background: rgba(212,175,55,0.06);
+            border: none; color: #d4af37;
+            font-size: 1.1rem; font-weight: 700;
+            cursor: pointer;
+            transition: background 0.18s;
+            display: flex; align-items: center; justify-content: center;
+            font-family: inherit;
+        }
+        .cart-step-btn:hover { background: rgba(212,175,55,0.2); }
+        .cart-step-qty {
+            min-width: 38px; text-align: center;
+            color: #fcf6ba; font-weight: 900; font-size: 1rem;
+            border-left: 1px solid rgba(212,175,55,0.2);
+            border-right: 1px solid rgba(212,175,55,0.2);
+            padding: 0 4px; line-height: 36px;
+        }
+
+        .cart-item-subtotal {
+            color: #fcf6ba;
+            font-weight: 900;
+            font-size: 1rem;
+            min-width: 72px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .cart-remove-btn {
+            background: rgba(220,60,60,0.1);
+            border: 1px solid rgba(220,80,60,0.3);
+            color: #e07060; font-size: 1rem;
+            cursor: pointer; padding: 6px 9px;
+            border-radius: 8px; flex-shrink: 0;
+            transition: color 0.2s, background 0.2s, border-color 0.2s;
+            display: flex; align-items: center;
+        }
+        .cart-remove-btn:hover { color: #ff6b6b; background: rgba(220,60,60,0.22); border-color: rgba(220,80,60,0.6); }
+
+        /* ── Summary card ── */
+        .cart-summary-card {
+            background: rgba(22, 16, 3, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(180,130,40,0.22);
+            border-radius: 1.4rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        .cart-summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent 0%, #7a5c10 20%, #d4af37 50%, #7a5c10 80%, transparent 100%);
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.45rem 0;
+            font-size: 0.9rem;
+        }
+        .summary-row + .summary-row { border-top: 1px solid rgba(212,175,55,0.06); }
+        .summary-label { color: #9a7840; }
+        .summary-value { color: #e8d5a0; font-weight: 700; }
+        .summary-total {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.9rem 0 0;
+            margin-top: 0.5rem;
+            border-top: 1px dashed rgba(212,175,55,0.25);
+            font-size: 1.05rem;
+        }
+        .summary-total-label { color: #d4af37; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; font-size: 0.85rem; }
+        .summary-total-val   { color: #fcf6ba; font-weight: 900; font-size: 1.4rem; }
+
+        .advance-info {
+            display: flex; align-items: flex-start; gap: 8px;
+            background: rgba(212,175,55,0.06);
+            border: 1px solid rgba(212,175,55,0.15);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #9a7840;
+            line-height: 1.55;
+        }
+        .advance-info i { color: #d4af37; flex-shrink: 0; margin-top: 2px; }
+
+        /* ── CTA ── */
+        .cart-cta-btn {
+            width: 100%;
+            padding: 1.1rem !important;
+            font-size: 0.95rem !important;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+        .cart-continue-btn {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            width: 100%; padding: 0.85rem;
+            background: none;
+            border: 1px solid rgba(212,175,55,0.22);
+            border-radius: 10px;
+            color: #9a7840; font-size: 0.82rem;
+            font-weight: 700; letter-spacing: 1px;
+            text-transform: uppercase; text-decoration: none;
+            margin-top: 0.6rem;
+            transition: border-color 0.2s, color 0.2s, background 0.2s;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .cart-continue-btn:hover { border-color: rgba(212,175,55,0.5); color: #d4af37; background: rgba(212,175,55,0.04); }
+
+        @media (max-width: 480px) {
+            .cart-page { padding-top: 100px; }
+            .cart-item { padding: 1rem; gap: 0.7rem; }
+            .cart-item-name { font-size: 0.88rem; }
+        }
+    </style>
+</head>
+<body class="reveal active">
+    <div class="gradient-bg"></div>
+    <div class="gradient-bg-mid"></div>
+
+    <header id="main-header" class="scrolled">
+        <a href="/"><img src="/images/kb logo.png" alt="KB Beauty Logo" class="logo-img"></a>
+        <nav>
+            <a href="/#services">Services</a>
+            <a href="/login.html" class="btn-login" id="nav-login">Customer Login</a>
+        </nav>
+    </header>
+
+    <div class="cart-page">
+
+        <!-- Header -->
+        <div class="cart-page-header">
+            <a href="javascript:history.back()" class="cart-back-btn" aria-label="Go back">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <div class="cart-page-title">My Cart</div>
+                <div class="cart-item-badge" id="cart-item-count"></div>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="cart-empty" id="cart-empty" style="display:none;">
+            <div class="cart-empty-icon"><i class="bi bi-bag-x"></i></div>
+            <h3>Your cart is empty</h3>
+            <p>Add services from our categories to get started.</p>
+            <a href="/#services" class="cart-empty-cta">
+                <i class="bi bi-grid-1x2"></i> Browse Services
+            </a>
+        </div>
+
+        <!-- Cart items -->
+        <div id="cart-items-wrap">
+            <div class="cart-card" id="cart-items-card">
+                <div id="cart-items-list"></div>
+            </div>
+
+            <!-- Order summary -->
+            <div class="cart-summary-card" id="cart-summary-card">
+                <div id="cart-summary-rows"></div>
+                <div class="summary-total">
+                    <span class="summary-total-label">Total</span>
+                    <span class="summary-total-val" id="cart-grand-total">₹0</span>
+                </div>
+                <div class="advance-info" id="cart-advance-info">
+                    <i class="bi bi-shield-check"></i>
+                    <span id="cart-advance-text"></span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <button class="btn-premium cart-cta-btn" onclick="proceedToBooking()">
+                <i class="bi bi-calendar2-check"></i>&nbsp; Book Appointment
+            </button>
+            <a href="/#services" class="cart-continue-btn">
+                <i class="bi bi-plus-lg"></i> Add More Services
+            </a>
+        </div>
+    </div>
+
+    <script src="/js/cart.js"></script>
+    <script>
+        /* ── Render the cart page ── */
+        function renderCartPage() {
+            const cart  = cartGet();
+            const empty = document.getElementById('cart-empty');
+            const wrap  = document.getElementById('cart-items-wrap');
+
+            if (!cart.length) {
+                if (empty) empty.style.display = 'flex';
+                if (wrap)  wrap.style.display  = 'none';
+                document.getElementById('cart-item-count').textContent = '';
+                return;
+            }
+
+            if (empty) empty.style.display = 'none';
+            if (wrap)  wrap.style.display  = 'block';
+
+            const count = cartCount();
+            document.getElementById('cart-item-count').textContent =
+                count + ' item' + (count > 1 ? 's' : '') + ' selected';
+
+            /* Items list */
+            document.getElementById('cart-items-list').innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-unit">₹${item.price.toLocaleString('en-IN')} each</div>
+                    </div>
+                    <div class="cart-item-stepper">
+                        <button class="cart-step-btn" onclick="pageSetQty(${item.id}, ${item.qty - 1})">−</button>
+                        <span class="cart-step-qty">${item.qty}</span>
+                        <button class="cart-step-btn" onclick="pageSetQty(${item.id}, ${item.qty + 1})">+</button>
+                    </div>
+                    <span class="cart-item-subtotal">₹${(item.price * item.qty).toLocaleString('en-IN')}</span>
+                    <button class="cart-remove-btn" onclick="pageRemove(${item.id})" aria-label="Remove">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </div>`).join('');
+
+            /* Summary rows */
+            document.getElementById('cart-summary-rows').innerHTML = cart.map(item => `
+                <div class="summary-row">
+                    <span class="summary-label">${item.name}${item.qty > 1 ? ' ×' + item.qty : ''}</span>
+                    <span class="summary-value">₹${(item.price * item.qty).toLocaleString('en-IN')}</span>
+                </div>`).join('');
+
+            const total   = cartTotal();
+            const advance = Math.ceil(total * 0.3);
+            document.getElementById('cart-grand-total').textContent = '₹' + total.toLocaleString('en-IN');
+            document.getElementById('cart-advance-text').textContent =
+                'An advance of ₹' + advance.toLocaleString('en-IN') + ' (approx. 30%) is required at booking to confirm your appointment slot.';
+        }
+
+        function pageSetQty(id, qty) {
+            cartSetQty(id, qty);
+            renderCartPage();
+        }
+
+        function pageRemove(id) {
+            cartRemove(id);
+            renderCartPage();
+        }
+
+        function proceedToBooking() {
+            if (!cartCount()) return;
+            location.href = '/booking.html';
+        }
+
+        /* ── Auth nav ── */
+        (function() {
+            const token = localStorage.getItem('salonToken');
+            const user  = JSON.parse(localStorage.getItem('salonUser') || 'null');
+            if (token && user) {
+                const loginBtn = document.getElementById('nav-login');
+                if (loginBtn) {
+                    loginBtn.textContent = 'My Dashboard';
+                    loginBtn.href = '/dashboard.html';
+                }
+            }
+        })();
+
+        document.addEventListener('DOMContentLoaded', renderCartPage);
+    </script>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+        <div class="footer-main">
+            <div class="footer-brand">
+                <img src="/images/kb logo.png" alt="KB Beauty Logo" class="footer-logo">
+                <p class="footer-proprietor">Proprietor: <strong id="footer-proprietor-name">SHAIK SHAHID</strong></p>
+                <a id="footer-phone-link" href="tel:+919640401112" class="footer-phone">
+                    <i class="bi bi-telephone-fill"></i> <span id="footer-phone-text">+91 96404 01112</span>
+                </a>
+                <a id="footer-whatsapp-link" href="https://wa.me/919640401112" class="footer-whatsapp-btn" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-whatsapp"></i> Chat on WhatsApp
+                </a>
+            </div>
+            <div class="footer-location">
+                <h4>Location</h4>
+                <p>3RD FLOOR, VKB RESIDENCY,<br>Kurnool Rd, near bus stand,<br>Vantavari colony, Ongole,<br>Andhra Pradesh 523001.</p>
+                <a href="#" class="footer-map-btn" id="footer-map-btn" target="_blank" rel="noopener noreferrer" style="display:none;">
+                    <i class="bi bi-geo-alt-fill"></i> VIEW ON MAP
+                </a>
+            </div>
+            <div class="footer-social">
+                <h4>Follow Us</h4>
+                <div class="footer-social-icons" id="footer-social-icons"></div>
+                <div style="margin-top:1.5rem;">
+                  <h4 style="font-size:0.9rem;letter-spacing:1.5px;color:#9a7840;text-transform:uppercase;font-family:'Outfit',sans-serif;margin-bottom:0.7rem;">Legal</h4>
+                  <div style="display:flex;flex-direction:column;gap:0.4rem;">
+                    <a href="/privacy-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Privacy Policy</a>
+                    <a href="/terms.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Terms &amp; Conditions</a>
+                    <a href="/refund-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Refund &amp; Cancellation</a>
+                  </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Designed &amp; Built By: <strong>VARUN VANTERU</strong></p>
+            <div class="footer-bottom-contact">
+                <a href="tel:+918125179109"><i class="bi bi-telephone-fill"></i> +91 8125179109</a>
+                <a href="https://wa.me/918125179109" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+    (function() {
+        fetch('/api/settings').then(r => r.json()).then(data => {
+            const c = document.getElementById('footer-social-icons');
+            if (c) {
+                [
+                    { key: 'social_instagram', icon: 'bi-instagram', label: 'Instagram' },
+                    { key: 'social_facebook',  icon: 'bi-facebook',  label: 'Facebook'  },
+                    { key: 'social_youtube',   icon: 'bi-youtube',   label: 'YouTube'   },
+                    { key: 'social_twitter',   icon: 'bi-twitter-x', label: 'Twitter/X' },
+                    { key: 'social_whatsapp',  icon: 'bi-whatsapp',  label: 'WhatsApp'  },
+                    { key: 'social_tiktok',    icon: 'bi-tiktok',    label: 'TikTok'    },
+                ].forEach(({ key, icon, label }) => {
+                    const url = data[key];
+                    if (url && url.trim()) {
+                        const a = document.createElement('a');
+                        a.href = url.trim(); a.target = '_blank'; a.rel = 'noopener noreferrer';
+                        a.className = 'footer-social-link'; a.setAttribute('aria-label', label);
+                        a.innerHTML = `<i class="bi ${icon}"></i>`;
+                        c.appendChild(a);
+                    }
+                });
+            }
+            const mapBtn = document.getElementById('footer-map-btn');
+            if (mapBtn && data.maps_url && data.maps_url.trim()) {
+                mapBtn.href = data.maps_url.trim();
+                mapBtn.style.display = 'inline-flex';
+            }
+        }).catch(() => {});
+    })();
+    </script>
+</body>
+</html>

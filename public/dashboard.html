@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard | KB Beauty Salons & Tattoos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --gold-gradient: linear-gradient(135deg,#2a1f00 0%,#7a5c10 12%,#bf953f 28%,#fcf6ba 45%,#d4af37 55%,#b38728 68%,#fcf6ba 78%,#bf953f 88%,#7a5c10 95%,#2a1f00 100%);
+            --gold-text:     linear-gradient(135deg,#bf953f 0%,#fcf6ba 30%,#d4af37 50%,#fbf5b7 72%,#bf953f 100%);
+            --bg:            #0d0a02;
+            --card-bg:       rgba(22,16,3,0.94);
+            --border:        rgba(180,130,40,0.22);
+            --border-gold:   rgba(212,175,55,0.4);
+            --gold:          #d4af37;
+            --gold-dim:      #b38728;
+            --text:          #e8d5a0;
+            --text-dim:      #c8a050;
+            --text-muted:    #bf953f;
+            --success:       #6fcf8a;
+            --danger:        #e07060;
+            --warning:       #d4af37;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse at 20% 10%, rgba(180,130,40,0.1) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 90%, rgba(100,70,10,0.08) 0%, transparent 55%);
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(13,10,2,0.96);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            height: 68px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 2rem;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+        }
+
+        .topbar-left { display: flex; align-items: center; gap: 1rem; }
+
+        .topbar-logo {
+            width: 40px; height: 40px; object-fit: contain;
+            filter: drop-shadow(0 2px 8px rgba(212,175,55,0.35));
+        }
+
+        .topbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem; font-weight: 900; letter-spacing: 2px;
+            background: var(--gold-text);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        .topbar-right { display: flex; align-items: center; gap: 1rem; }
+
+        .user-chip {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 0.4rem 1rem 0.4rem 0.4rem;
+            background: rgba(180,130,40,0.08);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+        }
+
+        .user-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--gold-gradient);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 0.78rem; color: #1a1000;
+            flex-shrink: 0;
+        }
+
+        .user-name { font-size: 0.85rem; font-weight: 600; color: var(--text-dim); }
+
+        .btn-logout {
+            padding: 0.45rem 1.1rem;
+            background: rgba(224,112,96,0.08);
+            border: 1px solid rgba(224,112,96,0.25);
+            border-radius: 8px;
+            color: #e07060;
+            font-family: inherit; font-size: 0.82rem; font-weight: 700;
+            cursor: pointer; letter-spacing: 0.5px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-logout:hover { background: rgba(224,112,96,0.15); border-color: rgba(224,112,96,0.45); }
+
+        /* ── MAIN LAYOUT ── */
+        .main { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; position: relative; z-index: 1; }
+
+        /* ── WELCOME HERO ── */
+        .welcome-hero {
+            margin-bottom: 2.5rem;
+        }
+
+        .welcome-hero {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 1rem; flex-wrap: wrap;
+        }
+
+        .welcome-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            background: var(--gold-text);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            margin-bottom: 0.3rem;
+        }
+
+        .welcome-hero p { color: var(--text-muted); font-size: 0.88rem; }
+
+        .btn-book-new {
+            display: inline-flex; align-items: center; gap: 0.55rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--gold-gradient);
+            border: none; border-radius: 12px;
+            color: #1a1000; font-family: inherit;
+            font-size: 0.88rem; font-weight: 900; letter-spacing: 1px;
+            cursor: pointer; white-space: nowrap; flex-shrink: 0;
+            box-shadow: 0 4px 18px rgba(212,175,55,0.28), 0 2px 0 #3d2b00;
+            transition: transform 0.15s, box-shadow 0.15s;
+            text-decoration: none;
+            -webkit-text-fill-color: #1a1000;
+        }
+        .btn-book-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(212,175,55,0.38), 0 1px 0 #3d2b00;
+        }
+
+        /* ── STATS GRID ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        @media (max-width: 680px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 380px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.2rem 1.4rem;
+            position: relative; overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent);
+        }
+
+        .stat-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: rgba(212,175,55,0.08);
+            border: 1px solid rgba(212,175,55,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; color: var(--gold);
+            margin-bottom: 0.8rem;
+        }
+
+        .stat-value {
+            font-size: 1.7rem; font-weight: 800; color: var(--text);
+            line-height: 1; margin-bottom: 0.3rem;
+        }
+
+        .stat-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+
+        /* ── TABS ── */
+        .tabs {
+            display: flex; gap: 0.3rem;
+            background: rgba(13,10,2,0.7);
+            border: 1px solid var(--border);
+            border-radius: 14px; padding: 0.35rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .tab-btn {
+            flex: 1; padding: 0.65rem 1rem;
+            background: none; border: none;
+            font-family: inherit; font-size: 0.85rem; font-weight: 700;
+            color: var(--text-muted); cursor: pointer;
+            border-radius: 10px; letter-spacing: 0.5px;
+            transition: all 0.22s;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+
+        .tab-btn .tab-count {
+            background: rgba(180,130,40,0.2);
+            border-radius: 10px; padding: 0.1rem 0.5rem;
+            font-size: 0.72rem; font-weight: 800;
+        }
+
+        .tab-btn.active {
+            background: var(--gold-gradient);
+            color: #1a1000;
+            box-shadow: 0 3px 12px rgba(212,175,55,0.25);
+        }
+
+        .tab-btn.active .tab-count {
+            background: rgba(26,16,0,0.25);
+            color: #1a1000;
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ── APPOINTMENT CARD ── */
+        .appt-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.6rem;
+            margin-bottom: 1.2rem;
+            position: relative; overflow: hidden;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+            animation: fadeUp 0.35s ease;
+        }
+
+        @keyframes fadeUp { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+
+        .appt-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, #7a5c10, #d4af37, #7a5c10, transparent);
+        }
+
+        .appt-card-head {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1.2rem;
+        }
+
+        .appt-meta .appt-num {
+            font-size: 0.68rem; letter-spacing: 2px; text-transform: uppercase;
+            color: var(--text-muted); margin-bottom: 0.3rem;
+        }
+
+        .appt-meta .appt-datetime {
+            font-size: 1.05rem; font-weight: 800; color: var(--text);
+        }
+
+        .appt-meta .appt-time-chip {
+            display: inline-block;
+            margin-left: 0.5rem;
+            font-size: 0.85rem; font-weight: 500; color: var(--text-dim);
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.35rem 0.9rem; border-radius: 20px;
+            font-size: 0.72rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .s-Pending   { background: rgba(212,175,55,0.1);  border: 1px solid rgba(212,175,55,0.3); color: #d4af37; }
+        .s-Confirmed { background: rgba(111,207,138,0.1); border: 1px solid rgba(111,207,138,0.3); color: #6fcf8a; }
+        .s-Completed { background: rgba(150,150,180,0.12); border: 1px solid rgba(150,150,180,0.25); color: #9898b8; }
+        .s-Cancelled { background: rgba(224,112,96,0.1);  border: 1px solid rgba(224,112,96,0.3); color: #e07060; }
+        .s-No-Show   { background: rgba(180,100,50,0.1);  border: 1px solid rgba(180,100,50,0.3); color: #c07040; }
+
+        /* Services list */
+        .services-list {
+            border-top: 1px solid var(--border);
+            padding-top: 1rem; margin-top: 0.2rem;
+        }
+
+        .svc-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.45rem 0;
+            font-size: 0.88rem;
+        }
+
+        .svc-row + .svc-row { border-top: 1px solid rgba(180,130,40,0.1); }
+        .svc-name { color: var(--text); }
+        .svc-qty  { color: var(--text-muted); font-size: 0.78rem; margin-left: 0.35rem; }
+        .svc-price { color: #fcf6ba; font-weight: 700; }
+
+        /* Finance box */
+        .finance-box {
+            margin-top: 1rem;
+            background: rgba(13,10,2,0.65);
+            border: 1px solid rgba(180,130,40,0.18);
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+        }
+
+        .fin-row { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0; font-size: 0.88rem; }
+        .fin-row + .fin-row { border-top: 1px solid rgba(180,130,40,0.08); }
+        .fin-label { color: #d4af37; font-weight: 600; }
+        .fin-value { font-weight: 700; color: #e8d5a0; }
+        .fin-value.total { color: #fcf6ba; font-size: 1rem; }
+        .fin-value.due   { color: #f0a040; }
+        .fin-value.paid  { color: var(--success); }
+
+        /* Info banners */
+        .info-banner {
+            margin-top: 1rem; padding: 0.85rem 1.1rem;
+            border-radius: 10px; font-size: 0.85rem; line-height: 1.6;
+        }
+
+        .info-banner.pending   { background: rgba(212,175,55,0.08);  border: 1px solid rgba(212,175,55,0.3);  color: #d4af37; }
+        .info-banner.confirmed { background: rgba(111,207,138,0.08); border: 1px solid rgba(111,207,138,0.3); color: #6fcf8a; }
+        .info-banner.denied    { background: rgba(224,112,96,0.06);  border: 1px solid rgba(224,112,96,0.22); color: #c05040; }
+
+        /* Pay advance button */
+        .btn-pay {
+            display: block; width: 100%; margin-top: 0.85rem;
+            padding: 0.8rem 1.2rem;
+            background: var(--gold-gradient);
+            border: none; border-radius: 10px;
+            color: #1a1000; font-family: inherit;
+            font-size: 0.9rem; font-weight: 900; letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(212,175,55,0.3);
+            transition: opacity 0.2s, transform 0.15s;
+            -webkit-text-fill-color: #1a1000;
+        }
+        .btn-pay:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* Card actions */
+        .card-actions {
+            display: flex; gap: 0.6rem; margin-top: 1.2rem;
+            padding-top: 1rem; border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .btn-invoice {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.55rem 1.1rem;
+            background: rgba(212,175,55,0.08);
+            border: 1px solid rgba(212,175,55,0.28);
+            border-radius: 8px; color: var(--gold);
+            font-family: inherit; font-size: 0.82rem; font-weight: 700;
+            cursor: pointer; letter-spacing: 0.5px;
+            transition: background 0.2s;
+        }
+        .btn-invoice:hover { background: rgba(212,175,55,0.15); }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center; padding: 4rem 1rem;
+            color: var(--text-muted);
+        }
+        .empty-state i { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 1rem; }
+        .empty-state p { font-size: 0.92rem; line-height: 1.7; }
+        .empty-state a {
+            display: inline-block; margin-top: 1.5rem;
+            padding: 0.7rem 1.8rem;
+            background: var(--gold-gradient);
+            border-radius: 10px; color: #1a1000;
+            font-weight: 900; font-size: 0.85rem;
+            text-decoration: none; letter-spacing: 1px;
+            -webkit-text-fill-color: #1a1000;
+        }
+
+        /* Loading */
+        .loading { text-align: center; padding: 3rem; color: var(--text-muted); }
+        .loading i { font-size: 2rem; color: var(--gold); animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin-icon { display: inline-block; animation: spin 0.8s linear infinite; }
+
+        @media (max-width: 520px) {
+            .topbar { padding: 0 1rem; }
+            .topbar-brand { display: none; }
+            .main { padding: 1.5rem 1rem 4rem; }
+            .tab-btn span:not(.tab-count) { display: none; }
+            .logout-label { display: none; }
+            .topbar-book-label { display: none; }
+            .welcome-hero { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <img src="/images/kb logo.png" alt="KB Beauty" class="topbar-logo">
+            <span class="topbar-brand">KB BEAUTY</span>
+        </div>
+        <div class="topbar-right">
+            <a href="/booking.html" class="btn-book-new" style="padding:0.45rem 1rem;font-size:0.8rem;border-radius:8px;box-shadow:none;">
+                <i class="bi bi-plus"></i> <span class="topbar-book-label">Book</span>
+            </a>
+            <a href="/cart.html" id="dash-cart-btn" title="View Cart"
+               style="position:relative;display:inline-flex;align-items:center;color:#d4af37;font-size:1.2rem;padding:4px 6px;text-decoration:none;transition:color 0.2s;">
+                <i class="bi bi-bag"></i>
+                <span id="dash-cart-badge" data-cart-count
+                      style="display:none;position:absolute;top:-4px;right:-5px;min-width:16px;height:16px;border-radius:8px;
+                             background:linear-gradient(135deg,#d4af37,#fcf6ba);color:#1a1000;font-size:0.58rem;font-weight:900;
+                             display:none;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid #100c01;"></span>
+            </a>
+            <div class="user-chip">
+                <div class="user-avatar" id="user-initials">—</div>
+                <span class="user-name" id="user-name">Loading…</span>
+            </div>
+            <button class="btn-logout" onclick="logout()"><i class="bi bi-box-arrow-right"></i> <span class="logout-label">Logout</span></button>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- Welcome -->
+        <div class="welcome-hero" style="margin-bottom:2.5rem;">
+            <div>
+                <h1 id="welcome-msg">Welcome back!</h1>
+                <p id="welcome-sub">Here's a summary of your appointments at KB Beauty Salons.</p>
+            </div>
+            <a href="/booking.html" class="btn-book-new">
+                <i class="bi bi-calendar-plus"></i> Book Appointment
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="bi bi-calendar3"></i></div>
+                <div class="stat-value" id="stat-total">—</div>
+                <div class="stat-label">Total Bookings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="bi bi-clock"></i></div>
+                <div class="stat-value" id="stat-upcoming">—</div>
+                <div class="stat-label">Upcoming</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
+                <div class="stat-value" id="stat-completed">—</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="bi bi-currency-rupee"></i></div>
+                <div class="stat-value" id="stat-spent">—</div>
+                <div class="stat-label">Total Spent</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('active',this)">
+                <i class="bi bi-calendar-check"></i>
+                <span>Active</span>
+                <span class="tab-count" id="cnt-active">0</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('history',this)">
+                <i class="bi bi-clock-history"></i>
+                <span>History</span>
+                <span class="tab-count" id="cnt-history">0</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('profile',this)">
+                <i class="bi bi-person"></i>
+                <span>Profile</span>
+            </button>
+        </div>
+
+        <!-- Active Appointments -->
+        <div class="tab-panel active" id="panel-active">
+            <div class="loading"><i class="bi bi-arrow-clockwise"></i></div>
+        </div>
+
+        <!-- History -->
+        <div class="tab-panel" id="panel-history">
+            <div class="loading"><i class="bi bi-arrow-clockwise"></i></div>
+        </div>
+
+        <!-- Profile -->
+        <div class="tab-panel" id="panel-profile">
+            <div class="loading"><i class="bi bi-arrow-clockwise"></i></div>
+        </div>
+
+    </div>
+
+    <script>
+    /* ── Auth ──────────────────────────────────────────── */
+    const token = () => localStorage.getItem('salonToken');
+
+    async function apiFetch(url) {
+        let res;
+        try {
+            res = await fetch(url, {
+                headers: { 'Authorization': 'Bearer ' + token(), 'Content-Type': 'application/json' }
+            });
+        } catch (e) {
+            console.error('[apiFetch] Network error:', url, e.message);
+            return null;
+        }
+        if (res.status === 401 || res.status === 403) { logout(); return null; }
+        try { return await res.json(); } catch (e) { return null; }
+    }
+
+    function logout() {
+        localStorage.removeItem('salonToken');
+        localStorage.removeItem('salonUser');
+        location.href = '/login.html';
+    }
+
+    /* ── GST settings cache ─────────────────────────────── */
+    let _gstSettings = { cgst_rate: 0, sgst_rate: 0 };
+
+    /* ── Helpers ───────────────────────────────────────── */
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    function fmtDate(d) {
+        const s = String(d).slice(0,10).split('-');
+        return `${parseInt(s[2])} ${MONTHS[parseInt(s[1])-1]} ${s[0]}`;
+    }
+
+    function fmtTime(t) {
+        if (!t) return '';
+        const [h, m] = String(t).slice(0,5).split(':').map(Number);
+        return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;
+    }
+
+    function statusBadge(s) {
+        const icons = { Pending:'bi-hourglass-split', Confirmed:'bi-check-circle-fill', Completed:'bi-star-fill', Cancelled:'bi-x-circle-fill', 'No-Show':'bi-person-x' };
+        return `<span class="status-badge s-${s}"><i class="bi ${icons[s]||'bi-circle-fill'}"></i> ${s}</span>`;
+    }
+
+    /* ── Render card ───────────────────────────────────── */
+    function renderCard(a, showInvoice = false) {
+        const services    = Array.isArray(a.services) ? a.services : [];
+        const total       = parseFloat(a.total_cost              || 0);
+        const promoDisc   = parseFloat(a.discount_amount         || 0);
+        const manualDisc  = parseFloat(a.manual_discount_amount  || 0);
+        const disc        = promoDisc + manualDisc;
+        const paid        = parseFloat(a.advance_paid  || 0);
+        const req         = parseFloat(a.required_advance || 0);
+        const balAdv      = parseFloat(a.balance_advance || 0);
+        const balDue      = parseFloat(a.balance_due    || 0);
+
+        const svcRows = services.map(s =>
+            `<div class="svc-row">
+                <span class="svc-name">${s.service_name}<span class="svc-qty">${s.quantity > 1 ? '×'+s.quantity : ''}</span></span>
+                <span class="svc-price">₹${(parseFloat(s.price||0) * parseInt(s.quantity||1)).toLocaleString('en-IN')}</span>
+            </div>`
+        ).join('');
+
+        const netAfterDisc = total - disc;
+        const cgst = _gstSettings.cgst_rate || 0;
+        const sgst = _gstSettings.sgst_rate || 0;
+        const cgstAmt = cgst > 0 ? +(netAfterDisc * cgst / 100).toFixed(2) : 0;
+        const sgstAmt = sgst > 0 ? +(netAfterDisc * sgst / 100).toFixed(2) : 0;
+        const grandTotal = netAfterDisc + cgstAmt + sgstAmt;
+
+        const finBox = `
+            <div class="finance-box">
+                <div class="fin-row"><span class="fin-label">Total Price</span><span class="fin-value total">₹${total.toLocaleString('en-IN')}</span></div>
+                ${promoDisc > 0 ? `<div class="fin-row"><span class="fin-label" style="color:#6fcf8a;"><i class="bi bi-ticket-perforated" style="margin-right:3px;font-size:0.75rem;"></i>Promo: ${a.discount_code}</span><span class="fin-value" style="color:#6fcf8a;">−₹${promoDisc.toLocaleString('en-IN')}</span></div>` : ''}
+                ${manualDisc > 0 ? `<div class="fin-row"><span class="fin-label" style="color:#a8e6b8;"><i class="bi bi-person-check" style="margin-right:3px;font-size:0.75rem;"></i>Special Discount${a.manual_discount_type === 'percent' ? ' (%)' : ''}</span><span class="fin-value" style="color:#a8e6b8;">−₹${manualDisc.toLocaleString('en-IN')}</span></div>` : ''}
+                ${disc > 0 ? `<div class="fin-row" style="border-top:1px dashed rgba(212,175,55,0.15);padding-top:0.4rem;"><span class="fin-label">After Discount</span><span class="fin-value">₹${netAfterDisc.toLocaleString('en-IN')}</span></div>` : ''}
+                ${cgstAmt > 0 ? `<div class="fin-row"><span class="fin-label" style="color:#c8a050;">CGST (${cgst}%)</span><span class="fin-value" style="color:#c8a050;">₹${cgstAmt.toLocaleString('en-IN')}</span></div>` : ''}
+                ${sgstAmt > 0 ? `<div class="fin-row"><span class="fin-label" style="color:#c8a050;">SGST (${sgst}%)</span><span class="fin-value" style="color:#c8a050;">₹${sgstAmt.toLocaleString('en-IN')}</span></div>` : ''}
+                ${(cgstAmt > 0 || sgstAmt > 0) ? `<div class="fin-row" style="border-top:1px dashed rgba(212,175,55,0.2);padding-top:0.4rem;"><span class="fin-label" style="font-weight:700;color:#d4af37;">Grand Total (incl. GST)</span><span class="fin-value total" style="color:#d4af37;">₹${grandTotal.toLocaleString('en-IN')}</span></div>` : ''}
+                ${req > 0 && paid === 0 ? `<div class="fin-row"><span class="fin-label">Advance to Pay</span><span class="fin-value">₹${req.toLocaleString('en-IN')}</span></div>` : ''}
+                ${paid > 0 ? `<div class="fin-row"><span class="fin-label">${balDue === 0 ? 'Total Paid' : 'Advance Paid'}</span><span class="fin-value paid">₹${paid.toLocaleString('en-IN')}</span></div>` : ''}
+                ${balDue > 0 ? `<div class="fin-row"><span class="fin-label">Remaining Balance</span><span class="fin-value due">₹${balDue.toLocaleString('en-IN')}</span></div>` : ''}
+            </div>`;
+
+        let infoBanner = '';
+        if (a.status === 'Pending') {
+            infoBanner = `<div class="info-banner pending">
+                <i class="bi bi-hourglass-split" style="margin-right:6px;"></i>
+                Awaiting admin confirmation. We'll reach out shortly.
+            </div>`;
+        } else if (a.status === 'Cancelled') {
+            const reason = a.admin_note || 'Appointment was cancelled.';
+            infoBanner = `<div class="info-banner denied">
+                <i class="bi bi-x-circle-fill" style="margin-right:6px;"></i>
+                <strong>Appointment Declined</strong><br>
+                <span style="font-size:0.83rem;opacity:0.85;">Reason: ${reason}</span>
+            </div>`;
+        } else if (a.show_payment_prompt) {
+            infoBanner = `<div class="info-banner confirmed">
+                <i class="bi bi-check-circle-fill" style="color:#6fcf8a;margin-right:6px;"></i>
+                <strong>Appointment Confirmed!</strong> Pay the advance to secure your slot.
+                <button class="btn-pay" onclick="payAdvance(${a.appointment_id},${balAdv},${total},this)">
+                    <i class="bi bi-credit-card" style="margin-right:6px;"></i>Pay Advance ₹${balAdv.toLocaleString('en-IN')}
+                </button>
+            </div>`;
+        } else if (a.show_balance_payment) {
+            infoBanner = `<div class="info-banner confirmed" style="flex-direction:column;align-items:flex-start;gap:0.6rem;">
+                <div><i class="bi bi-check-circle-fill" style="color:#6fcf8a;margin-right:6px;"></i>
+                <strong>Appointment Confirmed!</strong> Please pay the remaining balance to complete your booking.</div>
+                <button class="btn-pay" onclick="payAdvance(${a.appointment_id},${balDue},${total},this,true)">
+                    <i class="bi bi-credit-card" style="margin-right:6px;"></i>Pay Balance ₹${balDue.toLocaleString('en-IN')}
+                </button>
+            </div>`;
+        } else if (a.status === 'Confirmed') {
+            infoBanner = `<div class="info-banner confirmed">
+                <i class="bi bi-check-circle-fill" style="margin-right:6px;"></i>
+                Your appointment is confirmed. See you soon!
+            </div>`;
+        }
+
+        const invoiceBtn = (showInvoice && (a.status === 'Completed'))
+            ? `<div class="card-actions">
+                   <button class="btn-invoice" onclick="downloadInvoice(${a.appointment_id})">
+                       <i class="bi bi-file-earmark-arrow-down"></i> Download Invoice
+                   </button>
+               </div>`
+            : '';
+
+        return `
+            <div class="appt-card" id="card-${a.appointment_id}" data-appt='${JSON.stringify(a)}'>
+                <div class="appt-card-head">
+                    <div class="appt-meta">
+                        <div class="appt-num">Booking #${a.appointment_id}</div>
+                        <div class="appt-datetime">
+                            ${fmtDate(a.appointment_date)}
+                            <span class="appt-time-chip">${fmtTime(a.appointment_time)}</span>
+                        </div>
+                    </div>
+                    ${statusBadge(a.status)}
+                </div>
+                <div class="services-list">${svcRows || '<p style="color:var(--text-muted);font-size:0.85rem;">No services recorded.</p>'}</div>
+                ${finBox}
+                ${infoBanner}
+                ${invoiceBtn}
+            </div>`;
+    }
+
+    /* ── Render panels ─────────────────────────────────── */
+    let _allAppts = [];
+    let _profile  = {};
+
+    function renderActive() {
+        const active = _allAppts.filter(a => ['Pending','Confirmed'].includes(a.status));
+        document.getElementById('cnt-active').textContent = active.length;
+        const panel = document.getElementById('panel-active');
+        if (!active.length) {
+            panel.innerHTML = `<div class="empty-state">
+                <i class="bi bi-calendar-plus"></i>
+                <p>No active appointments.<br>Book a service to get started.</p>
+                <a href="/booking.html">Book Now</a>
+            </div>`;
+        } else {
+            panel.innerHTML = active.map(a => renderCard(a, false)).join('');
+        }
+    }
+
+    function renderHistory() {
+        const history = _allAppts.filter(a => ['Completed','Cancelled','No-Show'].includes(a.status));
+        document.getElementById('cnt-history').textContent = history.length;
+        const panel = document.getElementById('panel-history');
+        if (!history.length) {
+            panel.innerHTML = `<div class="empty-state">
+                <i class="bi bi-clock-history"></i>
+                <p>No past appointments yet.</p>
+            </div>`;
+        } else {
+            panel.innerHTML = history.map(a => renderCard(a, true)).join('');
+        }
+    }
+
+    function renderProfile() {
+        const p = _profile;
+        document.getElementById('panel-profile').innerHTML = `
+            <div class="appt-card" style="max-width:520px;">
+                <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border);">
+                    <div style="width:56px;height:56px;border-radius:50%;background:var(--gold-gradient);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:#1a1000;flex-shrink:0;">
+                        ${(p.name||'?').substring(0,2).toUpperCase()}
+                    </div>
+                    <div>
+                        <div style="font-size:1.1rem;font-weight:800;color:var(--text);">${p.name||'—'}</div>
+                        <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">Member since ${p.created_at ? fmtDate(String(p.created_at).slice(0,10)) : '—'}</div>
+                    </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:0.8rem;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.9rem;">
+                        <span style="color:var(--text-muted);"><i class="bi bi-telephone" style="width:18px;margin-right:6px;"></i>Mobile</span>
+                        <span style="font-weight:700;color:var(--text);">${p.mobile_number||'—'}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.9rem;">
+                        <span style="color:var(--text-muted);"><i class="bi bi-envelope" style="width:18px;margin-right:6px;"></i>Email</span>
+                        <span style="font-weight:700;color:var(--text);">${p.email||'—'}</span>
+                    </div>
+                </div>
+                <div style="margin-top:1.5rem;padding:0.8rem 1rem;background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:10px;font-size:0.82rem;color:#bf953f;line-height:1.6;">
+                    <i class="bi bi-info-circle" style="margin-right:5px;color:#d4af37;"></i>
+                    Your login credentials: <strong style="color:#fcf6ba;">Email</strong> as username and
+                    <strong style="color:#fcf6ba;">Mobile number</strong> as password.
+                    Contact us to update your details.
+                </div>
+            </div>`;
+    }
+
+    function renderStats() {
+        const total     = _allAppts.length;
+        const upcoming  = _allAppts.filter(a => ['Pending','Confirmed'].includes(a.status)).length;
+        const completed = _allAppts.filter(a => a.status === 'Completed').length;
+        const spent     = _allAppts
+            .filter(a => a.status === 'Completed')
+            .reduce((s, a) => s + parseFloat(a.total_cost||0), 0);
+
+        document.getElementById('stat-total').textContent     = total;
+        document.getElementById('stat-upcoming').textContent  = upcoming;
+        document.getElementById('stat-completed').textContent = completed;
+        document.getElementById('stat-spent').textContent     = '₹' + spent.toLocaleString('en-IN');
+    }
+
+    /* ── Tab switch ───────────────────────────────────── */
+    function switchTab(tab, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('panel-' + tab).classList.add('active');
+    }
+
+    /* ── Invoice PDF ───────────────────────────────────── */
+    async function downloadInvoice(apptId) {
+        const card = document.getElementById('card-' + apptId);
+        if (!card) return;
+        const a = JSON.parse(card.dataset.appt);
+        const services = Array.isArray(a.services) ? a.services : [];
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+        const W = 210, M = 18;
+
+        // ── Load KB logo as base64
+        let logoData = null;
+        try {
+            const resp = await fetch('/images/kb logo.png');
+            const blob = await resp.blob();
+            logoData = await new Promise(res => {
+                const rd = new FileReader();
+                rd.onload = () => res(rd.result);
+                rd.readAsDataURL(blob);
+            });
+        } catch(e) {}
+
+        // ── White background
+        doc.setFillColor(255, 255, 255);
+        doc.rect(0, 0, W, 297, 'F');
+
+        // ── Top double-gold rule
+        doc.setDrawColor(212, 175, 55);
+        doc.setLineWidth(1.2);
+        doc.line(M, 10, W - M, 10);
+        doc.setLineWidth(0.3);
+        doc.line(M, 12.5, W - M, 12.5);
+
+        // ── Logo (left) + Brand text
+        if (logoData) {
+            doc.addImage(logoData, 'PNG', M, 16, 26, 17);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7);
+            doc.setTextColor(150, 118, 55);
+            doc.text('PREMIUM SALONS & TATTOOS', M + 29, 22);
+            doc.text('kbbeauty.shop', M + 29, 28);
+        } else {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(19);
+            doc.setTextColor(180, 140, 40);
+            doc.text('KB BEAUTY SALONS', M, 25);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7.5);
+            doc.setTextColor(150, 118, 55);
+            doc.text('PREMIUM SALONS & TATTOOS  |  kbbeauty.shop', M, 31);
+        }
+
+        // ── "INVOICE" title (right)
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(26);
+        doc.setTextColor(212, 175, 55);
+        doc.text('INVOICE', W - M, 24, { align: 'right' });
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(110, 85, 30);
+        const _apptDateStr = String(a.appointment_date);
+        const year = _apptDateStr.match(/^(\d{4})/) ? _apptDateStr.slice(0, 4) : new Date(a.appointment_date).getFullYear();
+        doc.text(`No:  KB-${year}-${apptId}`, W - M, 31, { align: 'right' });
+        doc.text(`Date: ${fmtDate(a.appointment_date)}`, W - M, 37, { align: 'right' });
+
+        // ── Divider below header
+        doc.setDrawColor(212, 175, 55);
+        doc.setLineWidth(0.3);
+        doc.line(M, 43, W - M, 43);
+        doc.setLineWidth(1.0);
+        doc.line(M, 45, W - M, 45);
+
+        // ── Billed To (left)
+        let y = 55;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        doc.setTextColor(180, 140, 50);
+        doc.text('BILLED TO', M, y);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(30, 22, 5);
+        doc.text(_profile.name || 'Customer', M, y + 7);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(90, 68, 22);
+        let infoY = y + 14;
+        if (_profile.mobile_number) { doc.text('Mobile: ' + _profile.mobile_number, M, infoY); infoY += 6; }
+        if (_profile.email)         { doc.text('Email: '  + _profile.email,         M, infoY); infoY += 6; }
+
+        // ── Appointment box (right)
+        const bx = 122, bw = 70, by = y - 4;
+        doc.setFillColor(253, 249, 236);
+        doc.setDrawColor(212, 175, 55);
+        doc.setLineWidth(0.4);
+        doc.roundedRect(bx, by, bw, 30, 2.5, 2.5, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        doc.setTextColor(180, 140, 50);
+        doc.text('APPOINTMENT DETAILS', bx + 5, by + 8);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(50, 38, 10);
+        doc.text('Date: ' + fmtDate(a.appointment_date), bx + 5, by + 16);
+        doc.text('Time: ' + fmtTime(a.appointment_time), bx + 5, by + 23);
+
+        // ── Thin line before table
+        const sepY = Math.max(infoY + 5, by + 36);
+        doc.setDrawColor(220, 200, 140);
+        doc.setLineWidth(0.25);
+        doc.line(M, sepY, W - M, sepY);
+
+        // ── Services table
+        const tableBody = services.map(s => [
+            s.service_name,
+            String(s.quantity || 1),
+            'Rs. ' + parseFloat(s.price || 0).toLocaleString('en-IN'),
+            'Rs. ' + (parseFloat(s.price || 0) * parseInt(s.quantity || 1)).toLocaleString('en-IN')
+        ]);
+
+        doc.autoTable({
+            startY: sepY + 5,
+            head: [['Service', 'Qty', 'Unit Price', 'Amount']],
+            body: tableBody,
+            theme: 'plain',
+            headStyles: {
+                fillColor: [248, 241, 215],
+                textColor: [100, 75, 15],
+                fontSize: 8.5,
+                fontStyle: 'bold',
+                lineWidth: 0,
+                cellPadding: { top: 5, bottom: 5, left: 4, right: 4 }
+            },
+            bodyStyles: {
+                fontSize: 9,
+                textColor: [40, 30, 5],
+                lineWidth: 0,
+                cellPadding: { top: 4, bottom: 4, left: 4, right: 4 }
+            },
+            alternateRowStyles: { fillColor: [252, 249, 242] },
+            columnStyles: {
+                0: { cellWidth: 86 },
+                1: { halign: 'center', cellWidth: 18 },
+                2: { halign: 'right', cellWidth: 40 },
+                3: { halign: 'right', cellWidth: 30 }
+            },
+            margin: { left: M, right: M }
+        });
+
+        const fy = doc.lastAutoTable.finalY;
+
+        // ── Line under table
+        doc.setDrawColor(212, 175, 55);
+        doc.setLineWidth(0.25);
+        doc.line(M, fy + 3, W - M, fy + 3);
+
+        // ── Totals block
+        const totalCost    = parseFloat(a.total_cost              || 0);
+        const promoDiscInv = parseFloat(a.discount_amount         || 0);
+        const manualDiscInv= parseFloat(a.manual_discount_amount  || 0);
+        const discAmt      = promoDiscInv + manualDiscInv;
+        const advPaid      = parseFloat(a.advance_paid || 0);
+        const netAD        = totalCost - discAmt;
+        const invCgst      = _gstSettings.cgst_rate || 0;
+        const invSgst      = _gstSettings.sgst_rate || 0;
+        const invCgstAmt   = invCgst > 0 ? +(netAD * invCgst / 100).toFixed(2) : 0;
+        const invSgstAmt   = invSgst > 0 ? +(netAD * invSgst / 100).toFixed(2) : 0;
+        const hasGST       = invCgstAmt > 0 || invSgstAmt > 0;
+        const grandTotalInv = netAD + invCgstAmt + invSgstAmt;
+        const balance      = Math.max(0, grandTotalInv - advPaid);
+        const gstRows      = (invCgstAmt > 0 ? 1 : 0) + (invSgstAmt > 0 ? 1 : 0) + (hasGST ? 1 : 0);
+        const tbRows       = (promoDiscInv > 0 ? 1 : 0) + (manualDiscInv > 0 ? 1 : 0) + (discAmt > 0 ? 1 : 0) + gstRows + (balance > 0 ? 3 : 2);
+        const tbH          = 8 + tbRows * 10;
+        const tbX = W - M - 82, tbW = 82;
+
+        doc.setFillColor(252, 248, 235);
+        doc.setDrawColor(212, 175, 55);
+        doc.setLineWidth(0.4);
+        doc.roundedRect(tbX, fy + 8, tbW, tbH, 2.5, 2.5, 'FD');
+
+        const lx = tbX + 6, rx = tbX + tbW - 5;
+        let ty2 = fy + 18;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(100, 78, 25);
+        doc.text('Total Price', lx, ty2);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(35, 25, 5);
+        doc.text('Rs. ' + totalCost.toLocaleString('en-IN'), rx, ty2, { align: 'right' });
+
+        if (promoDiscInv > 0) {
+            ty2 += 10;
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 78, 25);
+            doc.text('Promo: ' + (a.discount_code || 'Code'), lx, ty2);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(25, 130, 55);
+            doc.text('-Rs. ' + promoDiscInv.toLocaleString('en-IN'), rx, ty2, { align: 'right' });
+        }
+        if (manualDiscInv > 0) {
+            ty2 += 10;
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 78, 25);
+            doc.text(a.manual_discount_type === 'percent' ? 'Special Discount (%)' : 'Special Discount (Fixed)', lx, ty2);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(25, 130, 55);
+            doc.text('-Rs. ' + manualDiscInv.toLocaleString('en-IN'), rx, ty2, { align: 'right' });
+        }
+        if (discAmt > 0) {
+            ty2 += 10;
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 78, 25);
+            doc.text('After Discount', lx, ty2);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(35, 25, 5);
+            doc.text('Rs. ' + netAD.toLocaleString('en-IN'), rx, ty2, { align: 'right' });
+        }
+
+        if (invCgstAmt > 0) {
+            ty2 += 10;
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 78, 25);
+            doc.text(`CGST (${invCgst}%)`, lx, ty2);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(35, 25, 5);
+            doc.text('Rs. ' + invCgstAmt.toLocaleString('en-IN'), rx, ty2, { align: 'right' });
+        }
+
+        if (invSgstAmt > 0) {
+            ty2 += 10;
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 78, 25);
+            doc.text(`SGST (${invSgst}%)`, lx, ty2);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(35, 25, 5);
+            doc.text('Rs. ' + invSgstAmt.toLocaleString('en-IN'), rx, ty2, { align: 'right' });
+        }
+
+        if (hasGST) {
+            ty2 += 10;
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 78, 25);
+            doc.text('Grand Total (incl. GST)', lx, ty2);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(160, 100, 15);
+            doc.text('Rs. ' + grandTotalInv.toLocaleString('en-IN'), rx, ty2, { align: 'right' });
+        }
+
+        ty2 += 10;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 78, 25);
+        doc.text(balance === 0 ? 'Total Paid' : 'Advance Paid', lx, ty2);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(25, 130, 55);
+        doc.text('Rs. ' + advPaid.toLocaleString('en-IN'), rx, ty2, { align: 'right' });
+
+        if (balance > 0) {
+            ty2 += 10;
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 78, 25);
+            doc.text('Remaining Balance', lx, ty2);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(195, 75, 20);
+            doc.text('Rs. ' + balance.toLocaleString('en-IN'), rx, ty2, { align: 'right' });
+        }
+
+        // ── Status stamp
+        const stampColors = { Completed:[20,140,60], Confirmed:[180,140,30], Pending:[195,120,20], Cancelled:[180,50,50] };
+        const sc = stampColors[a.status] || [120,100,60];
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(...sc);
+        // Stamp border box
+        const stW = doc.getTextWidth(a.status.toUpperCase()) + 10;
+        doc.setDrawColor(...sc);
+        doc.setLineWidth(1.0);
+        doc.roundedRect(M, fy + 10, stW, 14, 2, 2);
+        doc.text(a.status.toUpperCase(), M + 5, fy + 20);
+
+        // ── Bottom double-gold rule
+        const pgH = doc.internal.pageSize.height;
+        doc.setDrawColor(212, 175, 55);
+        doc.setLineWidth(1.0);
+        doc.line(M, pgH - 22, W - M, pgH - 22);
+        doc.setLineWidth(0.3);
+        doc.line(M, pgH - 19.5, W - M, pgH - 19.5);
+
+        // ── Footer text
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(140, 110, 50);
+        doc.text('Thank you for choosing KB Beauty Salons & Tattoos. We look forward to seeing you again!', W / 2, pgH - 14, { align: 'center' });
+        doc.setFontSize(7);
+        doc.setTextColor(170, 140, 75);
+        doc.text('kbbeauty.shop  \u2022  This is a computer-generated invoice', W / 2, pgH - 9, { align: 'center' });
+
+        doc.save(`KB-Invoice-${year}-${apptId}.pdf`);
+    }
+
+    /* ── Pay advance / balance (with optional promo code) ── */
+    // isBalancePayment=true  → customer is paying remaining balance; promo reduces this payment
+    // isBalancePayment=false → customer is paying advance; promo reduces future balance only
+    async function payAdvance(apptId, amount, totalCost, triggerBtn, isBalancePayment = false) {
+        // Discount state held in closure — no globals, no DOM data attributes
+        let appliedDiscount = 0;
+        let appliedCode     = null;
+
+        const { isConfirmed } = await Swal.fire({
+            title: '',
+            html: `
+                <!-- Dark gold header -->
+                <div style="background:linear-gradient(160deg,#1a1000,#2e1f00,#3d2e00);
+                            margin:-1.25em -1.4em 0;padding:1.5rem 1.8rem 1.3rem;
+                            border-radius:12px 12px 0 0;text-align:center;">
+                    <div style="font-size:1.2rem;font-weight:900;letter-spacing:3px;
+                                background:linear-gradient(135deg,#bf953f,#fcf6ba,#d4af37);
+                                -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+                                background-clip:text;margin-bottom:3px;">KB BEAUTY</div>
+                    <div style="font-size:0.65rem;color:#c9a84c;letter-spacing:3px;text-transform:uppercase;">
+                        ${isBalancePayment ? 'Pay Remaining Balance' : 'Pay Advance & Apply Promo'}
+                    </div>
+                </div>
+
+                <div style="padding:1.1rem 0 0;text-align:left;">
+
+                    <!-- Full breakdown card (always visible) -->
+                    <div style="background:#fffbf0;border:1px solid #e8d48a;border-radius:10px;
+                                padding:0.85rem 1rem 0.5rem;margin-bottom:1rem;font-size:0.82rem;">
+
+                        <!-- Total Price row -->
+                        <div style="display:flex;justify-content:space-between;align-items:center;
+                                    color:#8a6520;padding-bottom:0.45rem;
+                                    border-bottom:1px solid #f0e4a0;">
+                            <span>Total Price</span>
+                            <span style="font-weight:700;color:#1a1000;">₹${totalCost.toLocaleString('en-IN')}</span>
+                        </div>
+
+                        <!-- Promo discount rows (hidden until applied) -->
+                        <div id="swal-disc-row" style="display:none;flex-direction:column;gap:0.3rem;
+                             padding:0.45rem 0;border-bottom:1px solid #f0e4a0;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;
+                                        color:#1a7f37;">
+                                <span id="swal-disc-label" style="font-weight:700;"></span>
+                                <span id="swal-disc-val" style="font-weight:700;"></span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;
+                                        color:#6a5020;">
+                                <span>After Discount</span>
+                                <span id="swal-after-disc" style="font-weight:700;color:#1a1000;"></span>
+                            </div>
+                            <!-- You Save badge -->
+                            <div id="swal-save-badge"
+                                 style="margin-top:0.2rem;padding:0.3rem 0.6rem;border-radius:6px;
+                                        background:rgba(26,127,55,0.1);border:1px solid rgba(26,127,55,0.25);
+                                        color:#1a7f37;font-size:0.75rem;font-weight:700;text-align:center;"></div>
+                        </div>
+
+                        <!-- Advance / Balance row -->
+                        <div style="display:flex;justify-content:space-between;align-items:center;
+                                    padding-top:0.45rem;color:#8a6520;">
+                            <span>${isBalancePayment ? 'Balance to Pay' : 'Advance to Pay'}</span>
+                            <span style="font-weight:700;color:#1a1000;">₹${amount.toLocaleString('en-IN')}</span>
+                        </div>
+
+                        <!-- Remaining after advance (shown only for advance payments after promo) -->
+                        ${!isBalancePayment ? `
+                        <div id="swal-remaining-row" style="display:none;justify-content:space-between;
+                             align-items:center;padding-top:0.35rem;color:#6a5020;">
+                            <span>Remaining Balance After Advance</span>
+                            <span id="swal-remaining-val" style="font-weight:700;color:#c07030;"></span>
+                        </div>` : ''}
+
+                        <!-- Final payable (balance payments only — changes with promo) -->
+                        ${isBalancePayment ? `
+                        <div id="swal-final-row" style="display:flex;justify-content:space-between;
+                             align-items:center;margin-top:0.45rem;padding-top:0.45rem;
+                             border-top:1.5px dashed #e0c870;">
+                            <span style="font-size:0.9rem;font-weight:900;color:#1a1000;">You Pay Now</span>
+                            <span id="swal-final-val"
+                                  style="font-size:1rem;font-weight:900;color:#b87333;">
+                                ₹${amount.toLocaleString('en-IN')}
+                            </span>
+                        </div>` : ''}
+                    </div>
+
+                    <!-- Promo input -->
+                    <label style="font-size:0.67rem;font-weight:700;letter-spacing:1.8px;
+                                  color:#b89030;text-transform:uppercase;display:block;margin-bottom:0.4rem;">
+                        Promo Code <span style="color:#c8a050;font-weight:400;letter-spacing:0;">(optional)</span>
+                    </label>
+                    <div style="display:flex;gap:0.5rem;">
+                        <input id="swal-promo-input" type="text" placeholder="e.g. WELCOME20"
+                               autocomplete="off" spellcheck="false"
+                               style="flex:1;padding:0.68rem 0.9rem;
+                                      background:#fff;border:1.5px solid #d4af37;border-radius:8px;
+                                      color:#1a1000;font-family:Outfit,sans-serif;font-size:0.9rem;
+                                      font-weight:700;outline:none;text-transform:uppercase;letter-spacing:1px;">
+                        <button id="swal-apply-btn" type="button"
+                                style="padding:0.68rem 1.1rem;
+                                       background:linear-gradient(135deg,#c49a28,#f5d97a,#c49a28);
+                                       border:none;border-radius:8px;color:#1a1000;
+                                       cursor:pointer;font-weight:900;font-size:0.82rem;
+                                       white-space:nowrap;box-shadow:0 2px 8px rgba(184,144,48,0.3);">
+                            Apply
+                        </button>
+                    </div>
+                    <div id="swal-promo-msg" style="min-height:24px;margin-top:0.55rem;
+                         font-size:0.8rem;font-weight:700;"></div>
+                </div>`,
+            showCancelButton: true,
+            confirmButtonText: '<i class="bi bi-credit-card" style="margin-right:6px;"></i> Proceed to Pay',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#b38728',
+            cancelButtonColor: '#6b5a3e',
+            customClass: { popup: 'kb-pay-popup' },
+            didOpen: () => {
+                // Inject popup dark styling once
+                if (!document.getElementById('kb-swal-style')) {
+                    const s = document.createElement('style');
+                    s.id = 'kb-swal-style';
+                    s.textContent = `
+                        .kb-pay-popup { background:#fffdf5 !important; border-radius:14px !important;
+                                        box-shadow:0 12px 48px rgba(80,55,10,0.22) !important;
+                                        padding:0 !important; overflow:hidden !important; }
+                        .kb-pay-popup .swal2-html-container { margin:0 !important; padding:0 1.4em 0 !important; }
+                        .kb-pay-popup .swal2-actions { padding:0 1.4em 1.4em !important; gap:0.6rem !important; }
+                        .kb-pay-popup .swal2-confirm, .kb-pay-popup .swal2-cancel {
+                            font-family: Outfit, sans-serif !important; font-weight:700 !important;
+                            font-size:0.85rem !important; border-radius:8px !important;
+                            padding:0.65rem 1.4rem !important; }
+                    `;
+                    document.head.appendChild(s);
+                }
+
+                const input    = document.getElementById('swal-promo-input');
+                const applyBtn = document.getElementById('swal-apply-btn');
+                const msgEl    = document.getElementById('swal-promo-msg');
+                const discRow  = document.getElementById('swal-disc-row');
+
+                function resetCalc() {
+                    appliedDiscount = 0; appliedCode = null;
+                    discRow.style.display = 'none';
+                    msgEl.innerHTML = '';
+                    const remRow = document.getElementById('swal-remaining-row');
+                    if (remRow) remRow.style.display = 'none';
+                    const finalVal = document.getElementById('swal-final-val');
+                    if (finalVal) finalVal.textContent = `₹${amount.toLocaleString('en-IN')}`;
+                }
+
+                function showCalc(discount, code) {
+                    const afterDisc   = Math.max(0, totalCost - discount);
+                    const payableNow  = isBalancePayment ? Math.max(0, amount - discount) : amount;
+                    const remainAfter = isBalancePayment ? 0 : Math.max(0, afterDisc - amount);
+
+                    document.getElementById('swal-disc-label').textContent  = `Promo: ${code}`;
+                    document.getElementById('swal-disc-val').textContent     = `−₹${discount.toLocaleString('en-IN')}`;
+                    document.getElementById('swal-after-disc').textContent   = `₹${afterDisc.toLocaleString('en-IN')}`;
+                    document.getElementById('swal-save-badge').textContent   = `🎉 You save ₹${discount.toLocaleString('en-IN')} on this booking!`;
+                    discRow.style.display = 'flex';
+
+                    const finalVal = document.getElementById('swal-final-val');
+                    if (finalVal) finalVal.textContent = `₹${payableNow.toLocaleString('en-IN')}`;
+
+                    const remRow = document.getElementById('swal-remaining-row');
+                    const remVal = document.getElementById('swal-remaining-val');
+                    if (remRow && remVal) {
+                        remVal.textContent    = `₹${remainAfter.toLocaleString('en-IN')}`;
+                        remRow.style.display  = 'flex';
+                    }
+                }
+
+                async function validatePromo() {
+                    const code = input.value.trim().toUpperCase();
+                    input.value = code;
+                    if (!code) { resetCalc(); return; }
+
+                    applyBtn.disabled    = true;
+                    applyBtn.textContent = '…';
+                    msgEl.style.color    = '#8a6520';
+                    msgEl.textContent    = 'Checking promo code…';
+
+                    try {
+                        const r = await fetch('/api/promo-codes/validate', {
+                            method:  'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body:    JSON.stringify({ code, order_amount: totalCost })
+                        }).then(x => x.json());
+
+                        if (r.valid) {
+                            appliedDiscount = parseFloat(r.discount_amount) || 0;
+                            appliedCode     = r.code;
+                            showCalc(appliedDiscount, r.code);
+                            msgEl.style.color = '#1a7f37';
+                            msgEl.innerHTML   = `<i class="bi bi-check-circle-fill" style="margin-right:5px;"></i>
+                                "${r.code}" applied — you save ₹${appliedDiscount.toLocaleString('en-IN')}`;
+                        } else {
+                            resetCalc();
+                            msgEl.style.color = '#c0392b';
+                            msgEl.innerHTML   = `<i class="bi bi-x-circle-fill" style="margin-right:5px;"></i>
+                                ${r.error || 'Invalid promo code.'}`;
+                        }
+                    } catch (_) {
+                        resetCalc();
+                        msgEl.style.color = '#c0392b';
+                        msgEl.textContent = 'Network error. Please try again.';
+                    } finally {
+                        applyBtn.disabled    = false;
+                        applyBtn.textContent = 'Apply';
+                    }
+                }
+
+                applyBtn.addEventListener('click', validatePromo);
+                input.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') { e.preventDefault(); validatePromo(); }
+                });
+                input.focus();
+            },
+        });
+
+        if (!isConfirmed) return;
+
+        // For balance payments: discount reduces what's charged now.
+        // For advance payments: discount is saved to reduce the final balance; advance stays fixed.
+        const finalAmount = isBalancePayment
+            ? Math.max(0.01, amount - appliedDiscount)
+            : amount;
+
+        // Persist promo to appointment record
+        if (appliedDiscount > 0 && appliedCode) {
+            await fetch(`/api/customer/appointments/${apptId}/apply-promo`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
+                body: JSON.stringify({ code: appliedCode, discount_amount: appliedDiscount, order_amount: totalCost })
+            }).catch(() => {});
+        }
+
+        if (triggerBtn) {
+            triggerBtn.disabled = true;
+            triggerBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin-icon"></i> Redirecting…';
+        }
+
+        try {
+            const txnid = 'KB' + apptId + '_' + Date.now();
+            const pRes  = await fetch('/api/payments/initiate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
+                body: JSON.stringify({
+                    txnid,
+                    amount:      parseFloat(finalAmount).toFixed(2),
+                    productinfo: 'KB Beauty Advance',
+                    firstname:   _profile.name          || 'Customer',
+                    email:       _profile.email         || '',
+                    phone:       _profile.mobile_number || ''
+                })
+            });
+            const pData = await pRes.json();
+
+            if (!pData.payuUrl) {
+                if (triggerBtn) { triggerBtn.disabled = false; triggerBtn.innerHTML = '<i class="bi bi-credit-card"></i> Pay'; }
+                Swal.fire('Payment Error', 'Could not initiate payment. Please try again.', 'error');
+                return;
+            }
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = pData.payuUrl;
+            Object.entries(pData.params).forEach(([k, v]) => {
+                const inp = document.createElement('input');
+                inp.type = 'hidden'; inp.name = k; inp.value = v;
+                form.appendChild(inp);
+            });
+            document.body.appendChild(form);
+            form.submit();
+        } catch (_) {
+            if (triggerBtn) { triggerBtn.disabled = false; triggerBtn.innerHTML = '<i class="bi bi-credit-card"></i> Pay'; }
+            Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
+        }
+    }
+
+    /* ── Init ──────────────────────────────────────────── */
+    function showLoadError(msg) {
+        ['panel-active','panel-history','panel-profile'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = `<div class="empty-state" style="color:#e07060;">
+                <i class="bi bi-exclamation-circle"></i><p>${msg}</p></div>`;
+        });
+    }
+
+    async function init() {
+        if (!token()) { location.href = '/login.html'; return; }
+
+        // Load user info from localStorage first (instant display)
+        const stored = JSON.parse(localStorage.getItem('salonUser') || '{}');
+        if (stored.name) {
+            document.getElementById('user-name').textContent     = stored.name;
+            document.getElementById('user-initials').textContent = stored.name.substring(0,2).toUpperCase();
+            document.getElementById('welcome-msg').textContent   = 'Welcome back, ' + stored.name.split(' ')[0] + '!';
+        }
+
+        // Fetch profile + appointments + settings in parallel
+        let profile, appts, settings;
+        try {
+            [profile, appts, settings] = await Promise.all([
+                apiFetch('/api/customer/me'),
+                apiFetch('/api/customer/appointments'),
+                fetch('/api/settings').then(r => r.json()).catch(() => ({}))
+            ]);
+        } catch (e) {
+            console.error('[init] fetch failed:', e);
+            showLoadError('Could not load your data. Please try refreshing.');
+            return;
+        }
+
+        // If auth failed, logout() already redirected
+        if (!profile || !appts) return;
+
+        // If server returned error objects instead of expected data
+        if (profile.error || !Array.isArray(appts)) {
+            console.error('[init] API error:', profile.error || 'appointments is not an array', appts);
+            showLoadError('Server error loading data. Please try again later.');
+            return;
+        }
+
+        _profile  = profile;
+        _allAppts = appts;
+        if (settings) _gstSettings = { cgst_rate: settings.cgst_rate ?? 0, sgst_rate: settings.sgst_rate ?? 0 };
+
+        // Update header
+        document.getElementById('user-name').textContent     = profile.name;
+        document.getElementById('user-initials').textContent = profile.name.substring(0,2).toUpperCase();
+        document.getElementById('welcome-msg').textContent   = 'Welcome back, ' + profile.name.split(' ')[0] + '!';
+        document.getElementById('welcome-sub').textContent   = profile.email
+            ? `Logged in as ${profile.email}`
+            : `Mobile: ${profile.mobile_number}`;
+
+        renderStats();
+        renderActive();
+        renderHistory();
+        renderProfile();
+
+        // Poll for appointment updates every 30 s (silent — no spinner)
+        _startPolling();
+    }
+
+    let _pollTimer = null;
+
+    function _startPolling() {
+        if (_pollTimer) return;
+        _pollTimer = setInterval(_pollAppointments, 30_000);
+        // Also refresh immediately when user switches back to this tab
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') _pollAppointments();
+        });
+    }
+
+    async function _pollAppointments() {
+        if (!token()) return;
+        try {
+            const [appts, settings] = await Promise.all([
+                apiFetch('/api/customer/appointments'),
+                fetch('/api/settings').then(r => r.json()).catch(() => null)
+            ]);
+            if (!Array.isArray(appts)) return;
+            _allAppts = appts;
+            if (settings) _gstSettings = { cgst_rate: settings.cgst_rate ?? 0, sgst_rate: settings.sgst_rate ?? 0 };
+            renderStats();
+            renderActive();
+            renderHistory();
+        } catch (_) { /* silent — user not disrupted */ }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    </script>
+    <script src="/js/cart.js"></script>
+    <script src="/js/main.js"></script>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+        <div class="footer-main">
+            <div class="footer-brand">
+                <img src="/images/kb logo.png" alt="KB Beauty Logo" class="footer-logo">
+                <p class="footer-proprietor">Proprietor: <strong id="footer-proprietor-name">SHAIK SHAHID</strong></p>
+                <a id="footer-phone-link" href="tel:+919640401112" class="footer-phone">
+                    <i class="bi bi-telephone-fill"></i> <span id="footer-phone-text">+91 96404 01112</span>
+                </a>
+                <a id="footer-whatsapp-link" href="https://wa.me/919640401112" class="footer-whatsapp-btn" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-whatsapp"></i> Chat on WhatsApp
+                </a>
+            </div>
+            <div class="footer-location">
+                <h4>Location</h4>
+                <p>3RD FLOOR, VKB RESIDENCY,<br>Kurnool Rd, near bus stand,<br>Vantavari colony, Ongole,<br>Andhra Pradesh 523001.</p>
+                <a href="#" class="footer-map-btn" id="footer-map-btn" target="_blank" rel="noopener noreferrer" style="display:none;">
+                    <i class="bi bi-geo-alt-fill"></i> VIEW ON MAP
+                </a>
+            </div>
+            <div class="footer-social">
+                <h4>Follow Us</h4>
+                <div class="footer-social-icons" id="footer-social-icons"></div>
+                <div style="margin-top:1.5rem;">
+                  <h4 style="font-size:0.9rem;letter-spacing:1.5px;color:#9a7840;text-transform:uppercase;font-family:'Outfit',sans-serif;margin-bottom:0.7rem;">Legal</h4>
+                  <div style="display:flex;flex-direction:column;gap:0.4rem;">
+                    <a href="/privacy-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Privacy Policy</a>
+                    <a href="/terms.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Terms &amp; Conditions</a>
+                    <a href="/refund-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Refund &amp; Cancellation</a>
+                  </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Designed &amp; Built By: <strong>VARUN VANTERU</strong></p>
+            <div class="footer-bottom-contact">
+                <a href="tel:+918125179109"><i class="bi bi-telephone-fill"></i> +91 8125179109</a>
+                <a href="https://wa.me/918125179109" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

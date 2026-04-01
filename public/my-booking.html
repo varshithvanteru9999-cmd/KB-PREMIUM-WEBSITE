@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings | KB Beauty Salons & Tattoos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .tracker-wrap {
+            min-height: 100vh;
+            padding: 120px 1.5rem 4rem;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .tracker-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .tracker-logo {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 4px 12px rgba(212,175,55,0.35));
+        }
+
+        .tracker-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 35%, #d4af37 55%, #fbf5b7 75%, #bf953f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
+        }
+
+        .tracker-header p {
+            color: #9a7840;
+            font-size: 0.88rem;
+            letter-spacing: 1.5px;
+            margin-top: 0.4rem;
+        }
+
+        /* Mobile lookup box */
+        .lookup-box {
+            background: rgba(22,16,3,0.92);
+            border: 1px solid rgba(212,175,55,0.28);
+            border-radius: 1.2rem;
+            padding: 1.8rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            gap: 0.8rem;
+            align-items: flex-end;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .lookup-box .field { flex: 1; }
+
+        .lookup-box label {
+            display: block;
+            color: #d4af37;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .lookup-box input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: rgba(13,10,2,0.85);
+            border: 1px solid rgba(180,130,40,0.28);
+            border-radius: 10px;
+            color: #e8d5a0;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            -webkit-text-fill-color: #e8d5a0;
+            transition: border-color 0.2s;
+        }
+
+        .lookup-box input::placeholder { color: #7a5a28; -webkit-text-fill-color: #7a5a28; opacity: 1; }
+
+        .lookup-box input:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212,175,55,0.10);
+        }
+
+        .lookup-box input:-webkit-autofill,
+        .lookup-box input:-webkit-autofill:hover,
+        .lookup-box input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px #0d0a02 inset !important;
+            -webkit-text-fill-color: #e8d5a0 !important;
+            caret-color: #e8d5a0;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        .btn-lookup {
+            padding: 0.85rem 1.5rem;
+            background: linear-gradient(135deg, #2a1f00, #7a5c10, #bf953f, #fcf6ba, #d4af37, #b38728);
+            border: none;
+            border-radius: 10px;
+            color: #1a1000;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 4px 0 #3d2b00, 0 6px 18px rgba(0,0,0,0.5);
+            transition: all 0.3s;
+            -webkit-text-fill-color: #1a1000;
+        }
+
+        .btn-lookup:hover { transform: translateY(2px); box-shadow: 0 2px 0 #3d2b00, 0 4px 12px rgba(212,175,55,0.25); }
+
+        /* Appointment cards */
+        .appt-card {
+            background: rgba(22,16,3,0.92);
+            border: 1px solid rgba(180,130,40,0.22);
+            border-radius: 1.2rem;
+            padding: 1.6rem;
+            margin-bottom: 1.2rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .appt-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, #7a5c10, #d4af37, #7a5c10, transparent);
+            opacity: 0.7;
+        }
+
+        .appt-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .appt-id {
+            color: #5a4520;
+            font-size: 0.68rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+
+        .appt-datetime {
+            color: #e8d5a0;
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .appt-datetime span {
+            color: #c8a050;
+            font-size: 0.88rem;
+            font-weight: 400;
+            margin-left: 0.5rem;
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .status-pending   { background: rgba(212,175,55,0.12); border: 1px solid rgba(212,175,55,0.3); color: #d4af37; }
+        .status-confirmed { background: rgba(80,180,100,0.12); border: 1px solid rgba(80,180,100,0.3); color: #6fcf8a; }
+        .status-completed { background: rgba(100,100,120,0.15); border: 1px solid rgba(140,140,160,0.25); color: #9090b0; }
+        .status-cancelled { background: rgba(224,112,96,0.10); border: 1px solid rgba(224,112,96,0.25); color: #e07060; }
+        .status-no-show   { background: rgba(180,100,50,0.12); border: 1px solid rgba(180,100,50,0.25); color: #c07040; }
+
+        /* Services list */
+        .appt-services {
+            border-top: 1px solid rgba(180,130,40,0.18);
+            padding-top: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .service-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.4rem 0;
+        }
+
+        .service-row + .service-row { border-top: 1px solid rgba(180,130,40,0.10); }
+
+        .service-name { color: #e8d5a0; font-size: 0.9rem; }
+        .service-price { color: #fcf6ba; font-size: 0.88rem; font-weight: 700; }
+
+        /* Finance section */
+        .appt-finance {
+            margin-top: 1rem;
+            background: rgba(13,10,2,0.6);
+            border: 1px solid rgba(180,130,40,0.18);
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+        }
+
+        .fin-row { display: contents; }
+        .fin-label { color: #7a5a28; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; align-self: center; }
+        .fin-value { color: #e8d5a0; font-size: 0.9rem; font-weight: 700; text-align: right; }
+        .fin-value.highlight { color: #fcf6ba; font-size: 1rem; }
+        .fin-value.balance { color: #f0a040; }
+
+        /* Advance prompt */
+        .advance-prompt {
+            margin-top: 1rem;
+            padding: 0.9rem 1.2rem;
+            background: rgba(212,175,55,0.08);
+            border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 10px;
+            color: #e8d5a0;
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        .advance-prompt strong { color: #fcf6ba; }
+        .btn-pay-advance {
+            display: block;
+            width: 100%;
+            margin-top: 0.9rem;
+            padding: 0.75rem 1.2rem;
+            background: linear-gradient(135deg, #bf953f, #d4af37, #fcf6ba, #d4af37);
+            border: none;
+            border-radius: 0.6rem;
+            color: #1a1000;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(212,175,55,0.35);
+            transition: opacity 0.2s, transform 0.15s;
+        }
+        .btn-pay-advance:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-pay-advance:disabled { opacity: 0.6; cursor: default; transform: none; }
+
+        /* Pending info */
+        .pending-info {
+            margin-top: 1rem;
+            padding: 0.9rem 1.2rem;
+            background: rgba(212,175,55,0.06);
+            border: 1px solid rgba(212,175,55,0.18);
+            border-radius: 10px;
+            color: #9a7840;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #5a4520;
+        }
+
+        .empty-state i { font-size: 3rem; color: #3a2c10; margin-bottom: 1rem; display: block; }
+        .empty-state p { font-size: 0.95rem; line-height: 1.7; }
+
+        /* Loading state */
+        .loading-state { text-align: center; padding: 2rem; color: #9a7840; }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 2rem;
+            color: #5a4520;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s;
+        }
+        .back-link:hover { color: #d4af37; }
+
+        @media (max-width: 480px) {
+            .lookup-box { flex-direction: column; }
+            .btn-lookup { width: 100%; }
+            .appt-finance { grid-template-columns: 1fr; }
+            .fin-value { text-align: left; }
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin-icon { display: inline-block; animation: spin 0.8s linear infinite; }
+    </style>
+</head>
+<body class="reveal active">
+    <div class="gradient-bg"></div>
+    <div class="gradient-bg-mid"></div>
+    <header id="main-header" class="scrolled">
+        <a href="/"><img src="/images/kb logo.png" alt="KB Beauty Logo" class="logo-img"></a>
+        <nav>
+            <a href="/login.html" class="btn-login">Customer Login</a>
+        </nav>
+    </header>
+
+    <div class="tracker-wrap">
+        <div class="tracker-header">
+            <img src="/images/kb logo.png" alt="KB Beauty" class="tracker-logo">
+            <h1>My Bookings</h1>
+            <p>Enter your mobile number to view your appointments</p>
+        </div>
+
+        <div class="lookup-box">
+            <div class="field">
+                <label for="lookup-mobile">Mobile Number</label>
+                <input type="tel" id="lookup-mobile" placeholder="e.g. 9876543210" maxlength="15">
+            </div>
+            <button class="btn-lookup" onclick="fetchBookings()">
+                <i class="bi bi-search" style="margin-right:6px;"></i>Check
+            </button>
+        </div>
+
+        <div id="results-container"></div>
+
+        <a href="/" class="back-link">← Back to website</a>
+    </div>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/main.js"></script>
+    <style>
+        .swal2-popup { background: rgba(22,16,3,0.98) !important; border: 1px solid rgba(212,175,55,0.25) !important; border-radius: 1.2rem !important; font-family: 'Outfit', sans-serif !important; color: #e8d5a0 !important; box-shadow: 0 24px 60px rgba(0,0,0,0.7) !important; }
+        .swal2-popup.swal2-toast { padding: 0.9rem 1.4rem !important; border-radius: 10px !important; background: rgba(22,16,3,0.98) !important; }
+        .swal2-title { color: #e8d5a0 !important; font-size: 0.9rem !important; font-family: 'Outfit', sans-serif !important; font-weight: 700 !important; }
+        .swal2-icon.swal2-warning { border-color: rgba(212,175,55,0.4) !important; color: #d4af37 !important; }
+        .swal2-timer-progress-bar { background: rgba(212,175,55,0.45) !important; }
+    </style>
+    <script>
+        const toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true });
+
+        function fmtDate(d) {
+            const dateStr = String(d).slice(0, 10); // extract YYYY-MM-DD regardless of format
+            const dt = new Date(dateStr + 'T00:00:00');
+            return dt.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function fmtTime(hhmm) {
+            if (!hhmm) return '';
+            const [h, m] = String(hhmm).slice(0,5).split(':').map(Number);
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const h12  = h % 12 || 12;
+            return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+        }
+
+        function statusBadge(status) {
+            const map = {
+                'Pending':   ['status-pending',   'bi-hourglass-split',   'Pending Confirmation'],
+                'Confirmed': ['status-confirmed',  'bi-check-circle-fill', 'Confirmed'],
+                'Completed': ['status-completed',  'bi-star-fill',         'Completed'],
+                'Cancelled': ['status-cancelled',  'bi-x-circle-fill',     'Cancelled'],
+                'No-Show':   ['status-no-show',    'bi-person-x',          'No-Show'],
+            };
+            const [cls, icon, label] = map[status] || ['status-pending', 'bi-question-circle', status];
+            return `<span class="status-badge ${cls}"><i class="bi ${icon}"></i>${label}</span>`;
+        }
+
+        function renderAppointments(appointments) {
+            const container = document.getElementById('results-container');
+
+            if (!appointments.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="bi bi-calendar-x"></i>
+                        <p>No bookings found for this mobile number.<br>
+                        Make sure you entered the same number used when booking.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = appointments.map(appt => {
+                const services = Array.isArray(appt.services) ? appt.services : [];
+                const total    = parseFloat(appt.total_cost || 0);
+                const advance  = parseFloat(appt.required_advance || 0);
+                const paid     = parseFloat(appt.advance_paid || 0);
+                const balance  = parseFloat(appt.balance_advance || 0);
+
+                const serviceRows = services.map(s =>
+                    `<div class="service-row">
+                        <span class="service-name">${s.service_name}${s.quantity > 1 ? ` ×${s.quantity}` : ''}</span>
+                        <span class="service-price">₹${parseFloat(s.price || 0).toFixed(0)}</span>
+                    </div>`
+                ).join('');
+
+                const financeHtml = `
+                    <div class="appt-finance">
+                        <span class="fin-label">Total Price</span>
+                        <span class="fin-value highlight">₹${total.toFixed(0)}</span>
+                        ${advance > 0 ? `
+                        <span class="fin-label">Advance to Pay</span>
+                        <span class="fin-value">₹${advance.toFixed(0)}</span>
+                        <span class="fin-label">${balance === 0 ? 'Total Paid' : 'Advance Paid'}</span>
+                        <span class="fin-value">₹${paid.toFixed(0)}</span>
+                        ${balance > 0 ? `
+                        <span class="fin-label">Remaining Balance</span>
+                        <span class="fin-value balance">₹${balance.toFixed(0)}</span>` : ''}` : ''}
+                    </div>`;
+
+                const infoHtml = appt.status === 'Pending'
+                    ? `<div class="pending-info">
+                           <i class="bi bi-hourglass-split" style="color:#d4af37;margin-right:6px;"></i>
+                           Your booking is awaiting admin confirmation. We'll confirm shortly.
+                           Please keep your phone reachable.
+                       </div>`
+                    : appt.show_payment_prompt
+                    ? `<div class="advance-prompt">
+                           <i class="bi bi-check-circle-fill" style="color:#6fcf8a;margin-right:6px;"></i>
+                           <strong>Your appointment is confirmed!</strong><br>
+                           Please pay the advance of <strong>₹${balance.toFixed(0)}</strong> to secure your slot.
+                           <button class="btn-pay-advance" onclick="payAdvance(${appt.appointment_id},${balance},${appt.total_cost},'${appt.customer_name || ''}','${appt.customer_mobile || appt.mobile_number || ''}','${appt.customer_email || ''}')">
+                               <i class="bi bi-credit-card" style="margin-right:6px;"></i>Pay Advance ₹${balance.toFixed(0)}
+                           </button>
+                       </div>`
+                    : '';
+
+                return `
+                    <div class="appt-card">
+                        <div class="appt-top">
+                            <div>
+                                <div class="appt-id">Booking #${appt.appointment_id}</div>
+                                <div class="appt-datetime">
+                                    ${fmtDate(appt.appointment_date)}
+                                    <span>${fmtTime(appt.appointment_time)}</span>
+                                </div>
+                            </div>
+                            ${statusBadge(appt.status)}
+                        </div>
+                        <div class="appt-services">${serviceRows}</div>
+                        ${financeHtml}
+                        ${infoHtml}
+                    </div>`;
+            }).join('');
+        }
+
+        async function fetchBookings() {
+            const mobile = document.getElementById('lookup-mobile').value.trim();
+            if (!mobile) {
+                toast.fire({ icon: 'warning', title: 'Please enter your mobile number.' });
+                return;
+            }
+
+            // Persist mobile so it survives refreshes
+            localStorage.setItem('kbGuestMobile', mobile);
+
+            const container = document.getElementById('results-container');
+            container.innerHTML = '<div class="loading-state"><i class="bi bi-arrow-clockwise spin-icon" style="color:#d4af37;font-size:1.8rem;"></i></div>';
+
+            try {
+                const res  = await fetch(`/api/appointments/my?mobile_number=${encodeURIComponent(mobile)}`);
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to load');
+                renderAppointments(data);
+            } catch (err) {
+                container.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><p>Could not load bookings. Please try again.</p></div>`;
+            }
+        }
+
+        // Auto-load on page open if mobile is already stored
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('kbGuestMobile');
+            if (saved) {
+                document.getElementById('lookup-mobile').value = saved;
+                fetchBookings();
+            }
+        });
+
+        // Allow Enter key in input
+        document.getElementById('lookup-mobile').addEventListener('keydown', e => {
+            if (e.key === 'Enter') fetchBookings();
+        });
+
+        // ── Pay advance after admin confirms ──
+        async function payAdvance(apptId, amount, totalCost, name, mobile, email) {
+            const btn = event.currentTarget;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-arrow-clockwise spin-icon"></i> Redirecting…';
+
+            try {
+                const txnid = 'KB' + apptId + '_' + Date.now();
+                const pRes  = await fetch('/api/payments/initiate', {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({
+                        txnid,
+                        amount:      parseFloat(amount).toFixed(2),
+                        productinfo: 'KB Beauty Advance',
+                        firstname:   name  || 'Customer',
+                        email:       email || '',
+                        phone:       mobile
+                    })
+                });
+                const pData = await pRes.json();
+                if (!pData.payuUrl) {
+                    toast.fire({ icon: 'error', title: 'Payment gateway error. Please try again.' });
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="bi bi-credit-card" style="margin-right:6px;"></i>Pay Advance ₹${parseFloat(amount).toFixed(0)}`;
+                    return;
+                }
+
+                // Submit to PayU
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = pData.payuUrl;
+                Object.entries(pData.params).forEach(([k, v]) => {
+                    const inp = document.createElement('input');
+                    inp.type = 'hidden'; inp.name = k; inp.value = v;
+                    form.appendChild(inp);
+                });
+                document.body.appendChild(form);
+                form.submit();
+            } catch (err) {
+                toast.fire({ icon: 'error', title: 'Network error. Please try again.' });
+                btn.disabled = false;
+                btn.innerHTML = `<i class="bi bi-credit-card" style="margin-right:6px;"></i>Pay Advance ₹${parseFloat(amount).toFixed(0)}`;
+            }
+        }
+    </script>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+        <div class="footer-main">
+            <div class="footer-brand">
+                <img src="/images/kb logo.png" alt="KB Beauty Logo" class="footer-logo">
+                <p class="footer-proprietor">Proprietor: <strong id="footer-proprietor-name">SHAIK SHAHID</strong></p>
+                <a id="footer-phone-link" href="tel:+919640401112" class="footer-phone">
+                    <i class="bi bi-telephone-fill"></i> <span id="footer-phone-text">+91 96404 01112</span>
+                </a>
+                <a id="footer-whatsapp-link" href="https://wa.me/919640401112" class="footer-whatsapp-btn" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-whatsapp"></i> Chat on WhatsApp
+                </a>
+            </div>
+            <div class="footer-location">
+                <h4>Location</h4>
+                <p>3RD FLOOR, VKB RESIDENCY,<br>Kurnool Rd, near bus stand,<br>Vantavari colony, Ongole,<br>Andhra Pradesh 523001.</p>
+                <a href="#" class="footer-map-btn" id="footer-map-btn" target="_blank" rel="noopener noreferrer" style="display:none;">
+                    <i class="bi bi-geo-alt-fill"></i> VIEW ON MAP
+                </a>
+            </div>
+            <div class="footer-social">
+                <h4>Follow Us</h4>
+                <div class="footer-social-icons" id="footer-social-icons"></div>
+                <div style="margin-top:1.5rem;">
+                  <h4 style="font-size:0.9rem;letter-spacing:1.5px;color:#9a7840;text-transform:uppercase;font-family:'Outfit',sans-serif;margin-bottom:0.7rem;">Legal</h4>
+                  <div style="display:flex;flex-direction:column;gap:0.4rem;">
+                    <a href="/privacy-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Privacy Policy</a>
+                    <a href="/terms.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Terms &amp; Conditions</a>
+                    <a href="/refund-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Refund &amp; Cancellation</a>
+                  </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Designed &amp; Built By: <strong>VARUN VANTERU</strong></p>
+            <div class="footer-bottom-contact">
+                <a href="tel:+918125179109"><i class="bi bi-telephone-fill"></i> +91 8125179109</a>
+                <a href="https://wa.me/918125179109" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

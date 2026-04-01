@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy | KB Beauty Salons & Tattoos</title>
+  <meta name="description" content="Learn how KB Beauty Salons & Tattoos collects, uses, and protects your personal information. Your privacy is our priority.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .legal-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 120px 2rem 5rem;
+    }
+    .legal-hero {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+    .legal-hero .eyebrow {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #b89030;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .legal-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 40%, #d4af37 60%, #bf953f 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .legal-hero .updated {
+      color: #7a6030;
+      font-size: 0.85rem;
+    }
+    .legal-hero .updated strong { color: #c8a050; }
+    .shimmer-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #7a5c10, #d4af37, #fcf6ba, #d4af37, #7a5c10, transparent);
+      margin: 2rem auto;
+      max-width: 400px;
+    }
+    /* TOC */
+    .toc-card {
+      background: rgba(22,16,3,0.82);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 1rem;
+      padding: 1.8rem 2rem;
+      margin-bottom: 3rem;
+    }
+    .toc-card h3 {
+      font-family: 'Playfair Display', serif;
+      color: #f5e6b8;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .toc-list {
+      list-style: none;
+      padding: 0; margin: 0;
+      columns: 2;
+      column-gap: 2rem;
+    }
+    .toc-list li { margin-bottom: 0.45rem; }
+    .toc-list a {
+      color: #c8a050;
+      text-decoration: none;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+    .toc-list a::before {
+      content: '';
+      display: inline-block;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: #d4af37;
+      flex-shrink: 0;
+    }
+    .toc-list a:hover { color: #f5e6b8; }
+    /* Sections */
+    .legal-section {
+      margin-bottom: 2.8rem;
+      scroll-margin-top: 90px;
+    }
+    .legal-section h2 {
+      font-family: 'Playfair Display', serif;
+      color: #f5e6b8;
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid rgba(212,175,55,0.15);
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .legal-section h2 .sec-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: #d4af37;
+      color: #0d0800;
+      font-size: 0.75rem;
+      font-weight: 900;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 2px rgba(212,175,55,0.3);
+    }
+    .legal-section p, .legal-section li {
+      color: #c8a050;
+      font-size: 0.95rem;
+      line-height: 1.85;
+    }
+    .legal-section ul, .legal-section ol {
+      padding-left: 1.5rem;
+      margin: 0.8rem 0;
+    }
+    .legal-section li { margin-bottom: 0.4rem; }
+    .legal-section strong { color: #e8d5a0; }
+    .legal-section a { color: #d4af37; text-decoration: none; transition: color 0.2s; }
+    .legal-section a:hover { color: #fcf6ba; }
+    .info-box {
+      background: rgba(212,175,55,0.06);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-left: 3px solid #d4af37;
+      border-radius: 0.5rem;
+      padding: 1.1rem 1.4rem;
+      margin: 1.2rem 0;
+    }
+    .info-box p { margin: 0; }
+    .contact-block {
+      background: rgba(22,16,3,0.82);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 1rem;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 3rem;
+    }
+    .contact-block h3 {
+      font-family: 'Playfair Display', serif;
+      color: #f5e6b8;
+      font-size: 1.3rem;
+      margin-bottom: 0.8rem;
+    }
+    .contact-block p { color: #c8a050; font-size: 0.9rem; margin-bottom: 1.4rem; }
+    .contact-links { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .contact-links a {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0.7rem 1.5rem;
+      border: 1px solid rgba(212,175,55,0.35);
+      border-radius: 8px;
+      color: #d4af37;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .contact-links a:hover { background: rgba(212,175,55,0.1); border-color: #d4af37; color: #fcf6ba; }
+    @media (max-width: 600px) {
+      .toc-list { columns: 1; }
+      .legal-wrap { padding: 100px 1.2rem 4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="gradient-bg"></div>
+  <div class="gradient-bg-mid"></div>
+
+  <header id="main-header" class="scrolled">
+    <a href="/"><img src="/images/kb logo.png" alt="KB Beauty Logo" class="logo-img"></a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/refund-policy.html">Refund Policy</a>
+      <a href="/login.html" class="btn-login">Customer Login</a>
+    </nav>
+  </header>
+
+  <div class="legal-wrap">
+    <div class="legal-hero">
+      <span class="eyebrow">Legal</span>
+      <h1>Privacy Policy</h1>
+      <p class="updated">Last updated: <strong>31 March 2026</strong></p>
+      <div class="shimmer-line"></div>
+      <p style="color:#c8a050;font-size:0.95rem;max-width:580px;margin:0 auto;line-height:1.8;">
+        At KB Beauty Salons &amp; Tattoos, your privacy is sacred to us. This policy explains exactly what information we collect, why we collect it, and how we keep it safe.
+      </p>
+    </div>
+
+    <div class="toc-card">
+      <h3>Contents</h3>
+      <ul class="toc-list">
+        <li><a href="#s1">Information We Collect</a></li>
+        <li><a href="#s2">How We Use Your Information</a></li>
+        <li><a href="#s3">Information Sharing</a></li>
+        <li><a href="#s4">Data Security</a></li>
+        <li><a href="#s5">Cookies & Tracking</a></li>
+        <li><a href="#s6">Payment Data</a></li>
+        <li><a href="#s7">Your Rights</a></li>
+        <li><a href="#s8">Data Retention</a></li>
+        <li><a href="#s9">Third-Party Links</a></li>
+        <li><a href="#s10">Policy Updates</a></li>
+        <li><a href="#s11">Contact Us</a></li>
+      </ul>
+    </div>
+
+    <div class="legal-section" id="s1">
+      <h2><span class="sec-num">1</span> Information We Collect</h2>
+      <p>When you use our website or book an appointment, we may collect the following categories of information:</p>
+      <p><strong>Information you provide directly:</strong></p>
+      <ul>
+        <li><strong>Full name</strong> — to personalise your booking and communications</li>
+        <li><strong>Mobile number</strong> — used as your account password and for appointment reminders</li>
+        <li><strong>Email address</strong> — to send booking confirmations, invoices, and updates</li>
+        <li><strong>Service preferences</strong> — the treatments and packages you select</li>
+        <li><strong>Appointment history</strong> — dates, times, services availed, and payment records</li>
+      </ul>
+      <p><strong>Information collected automatically:</strong></p>
+      <ul>
+        <li>Browser type and device information</li>
+        <li>Pages visited and time spent on our website</li>
+        <li>IP address (for fraud prevention)</li>
+      </ul>
+      <div class="info-box">
+        <p><i class="bi bi-shield-check" style="color:#d4af37;margin-right:6px;"></i> <strong>We never collect</strong> sensitive data such as your Aadhaar number, PAN card, financial account details, or biometric information.</p>
+      </div>
+    </div>
+
+    <div class="legal-section" id="s2">
+      <h2><span class="sec-num">2</span> How We Use Your Information</h2>
+      <p>We use your information strictly for legitimate purposes related to delivering our services:</p>
+      <ul>
+        <li>To <strong>create and manage your account</strong> on our customer portal</li>
+        <li>To <strong>process and confirm bookings</strong> and send appointment reminders</li>
+        <li>To <strong>generate and deliver invoices</strong> via email with PDF attachment</li>
+        <li>To <strong>process payments</strong> securely through PayU payment gateway</li>
+        <li>To <strong>respond to enquiries</strong> submitted via phone or WhatsApp</li>
+        <li>To <strong>improve our services</strong> by analysing booking patterns and preferences</li>
+        <li>To <strong>communicate promotional offers</strong> — only if you have opted in</li>
+        <li>To <strong>comply with legal obligations</strong> under applicable Indian law</li>
+      </ul>
+      <p>We will never use your data for purposes beyond what is described here without your explicit consent.</p>
+    </div>
+
+    <div class="legal-section" id="s3">
+      <h2><span class="sec-num">3</span> Information Sharing</h2>
+      <p>We do <strong>not sell, rent, or trade</strong> your personal information to third parties. We may share limited data only in the following circumstances:</p>
+      <ul>
+        <li><strong>PayU Payment Gateway</strong> — transaction details are shared with PayU (a PCI-DSS-compliant payment processor) solely to process your payment. We do not store your card details.</li>
+        <li><strong>Email Service Provider (Gmail/SMTP)</strong> — your email address is used to deliver booking confirmations and invoices.</li>
+        <li><strong>Legal compliance</strong> — if required by law, court order, or government authority in India.</li>
+      </ul>
+      <div class="info-box">
+        <p><i class="bi bi-lock-fill" style="color:#d4af37;margin-right:6px;"></i> All third-party providers we use are required to maintain the confidentiality and security of your data.</p>
+      </div>
+    </div>
+
+    <div class="legal-section" id="s4">
+      <h2><span class="sec-num">4</span> Data Security</h2>
+      <p>We take the protection of your personal data seriously and implement appropriate technical and organisational measures:</p>
+      <ul>
+        <li>Passwords are <strong>hashed using PBKDF2-SHA512</strong> — they are never stored in plain text</li>
+        <li>Session tokens are stored securely and expire automatically</li>
+        <li>All communications between your browser and our server use <strong>HTTPS encryption</strong></li>
+        <li>Our database is hosted on a secured server with restricted access</li>
+        <li>Payment processing is handled entirely by <strong>PayU's secure infrastructure</strong></li>
+      </ul>
+      <p>While we employ industry-standard security practices, no method of transmission over the internet is 100% secure. We encourage you to use a strong, unique password (mobile number) and not share your account credentials.</p>
+    </div>
+
+    <div class="legal-section" id="s5">
+      <h2><span class="sec-num">5</span> Cookies &amp; Tracking</h2>
+      <p>Our website uses minimal, essential cookies to ensure core functionality:</p>
+      <ul>
+        <li><strong>Session cookies</strong> — to keep you logged in to the customer portal during your visit</li>
+        <li><strong>Local storage</strong> — to save your cart items and language preference between visits</li>
+      </ul>
+      <p>We do <strong>not</strong> use advertising cookies, behavioural tracking pixels, or third-party analytics trackers. You can clear cookies at any time via your browser settings without affecting your ability to use our services.</p>
+    </div>
+
+    <div class="legal-section" id="s6">
+      <h2><span class="sec-num">6</span> Payment Data</h2>
+      <p>All online payments are processed through <strong>PayU Payment Gateway</strong>, a RBI-regulated payment service provider. When you make a payment:</p>
+      <ul>
+        <li>You are redirected to PayU's secure payment page</li>
+        <li>Your card or UPI details are entered directly on PayU's servers</li>
+        <li>We <strong>never see, receive, or store</strong> your card number, CVV, or UPI PIN</li>
+        <li>We only receive a transaction confirmation (success/failure) and the amount paid</li>
+      </ul>
+      <p>Advance payments and balance amounts are recorded against your appointment for invoicing purposes only.</p>
+    </div>
+
+    <div class="legal-section" id="s7">
+      <h2><span class="sec-num">7</span> Your Rights</h2>
+      <p>You have the following rights regarding your personal data:</p>
+      <ul>
+        <li><strong>Access</strong> — you can view all your booking history and personal data via the Customer Dashboard</li>
+        <li><strong>Correction</strong> — contact us to update your name or email address</li>
+        <li><strong>Deletion</strong> — request deletion of your account and associated data by contacting us. Note: data required for completed financial transactions may be retained as per applicable law.</li>
+        <li><strong>Portability</strong> — request a copy of your data in a readable format</li>
+        <li><strong>Objection</strong> — opt out of any marketing communications at any time</li>
+      </ul>
+      <p>To exercise any of these rights, please contact us at <a href="mailto:kbbeautylounge@gmail.com">kbbeautylounge@gmail.com</a> or via WhatsApp at <a href="https://wa.me/919640401112" target="_blank" rel="noopener">+91 96404 01112</a>.</p>
+    </div>
+
+    <div class="legal-section" id="s8">
+      <h2><span class="sec-num">8</span> Data Retention</h2>
+      <p>We retain your personal data only as long as necessary:</p>
+      <ul>
+        <li><strong>Account data</strong> — retained as long as your account is active</li>
+        <li><strong>Appointment &amp; billing records</strong> — retained for a minimum of <strong>7 years</strong> as required under the Indian Accounting Standards and tax laws</li>
+        <li><strong>Session tokens</strong> — automatically purged after expiry (typically 7 days)</li>
+        <li><strong>Inactive accounts</strong> — accounts with no activity for 3 years may be archived or deleted after notice</li>
+      </ul>
+    </div>
+
+    <div class="legal-section" id="s9">
+      <h2><span class="sec-num">9</span> Third-Party Links</h2>
+      <p>Our website may contain links to third-party platforms such as Instagram, Facebook, YouTube, or Google Maps. Once you leave our website, this Privacy Policy no longer applies. We encourage you to review the privacy policies of any external sites you visit. We are not responsible for the privacy practices of third-party websites.</p>
+    </div>
+
+    <div class="legal-section" id="s10">
+      <h2><span class="sec-num">10</span> Policy Updates</h2>
+      <p>We may update this Privacy Policy from time to time to reflect changes in our practices or applicable law. When we do:</p>
+      <ul>
+        <li>The "Last updated" date at the top of this page will be revised</li>
+        <li>Significant changes will be communicated via email to registered customers</li>
+        <li>Continued use of our services after the update constitutes acceptance of the revised policy</li>
+      </ul>
+    </div>
+
+    <div class="legal-section" id="s11">
+      <h2><span class="sec-num">11</span> Contact Us</h2>
+      <p>For any privacy-related questions, concerns, or requests, please reach out to us:</p>
+      <ul>
+        <li><strong>Business Name:</strong> KB Beauty Salons &amp; Tattoos</li>
+        <li><strong>Proprietor:</strong> Shaik Shahid</li>
+        <li><strong>Address:</strong> 3rd Floor, VKB Residency, Kurnool Rd, near Bus Stand, Vantavari Colony, Ongole, Andhra Pradesh 523001</li>
+        <li><strong>Phone:</strong> <a href="tel:+919640401112">+91 96404 01112</a></li>
+        <li><strong>WhatsApp:</strong> <a href="https://wa.me/919640401112" target="_blank" rel="noopener">Chat on WhatsApp</a></li>
+      </ul>
+    </div>
+
+    <div class="contact-block">
+      <h3>Have a Privacy Question?</h3>
+      <p>We're happy to clarify anything about how we handle your data. Reach out to us directly.</p>
+      <div class="contact-links">
+        <a href="tel:+919640401112"><i class="bi bi-telephone-fill"></i> Call Us</a>
+        <a href="https://wa.me/919640401112" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+        <a href="/terms.html"><i class="bi bi-file-text"></i> Terms &amp; Conditions</a>
+        <a href="/refund-policy.html"><i class="bi bi-arrow-counterclockwise"></i> Refund Policy</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <img src="/images/kb logo.png" alt="KB Beauty Logo" class="footer-logo">
+        <p class="footer-proprietor">Proprietor: <strong id="footer-proprietor-name">SHAIK SHAHID</strong></p>
+        <a id="footer-phone-link" href="tel:+919640401112" class="footer-phone">
+            <i class="bi bi-telephone-fill"></i> <span id="footer-phone-text">+91 96404 01112</span>
+        </a>
+        <a id="footer-whatsapp-link" href="https://wa.me/919640401112" class="footer-whatsapp-btn" target="_blank" rel="noopener noreferrer">
+            <i class="bi bi-whatsapp"></i> Chat on WhatsApp
+        </a>
+      </div>
+      <div class="footer-location">
+        <h4>Location</h4>
+        <p>3RD FLOOR, VKB RESIDENCY,<br>Kurnool Rd, near bus stand,<br>Vantavari colony, Ongole,<br>Andhra Pradesh 523001.</p>
+        <a href="#" class="footer-map-btn" id="footer-map-btn" target="_blank" rel="noopener noreferrer" style="display:none;"><i class="bi bi-geo-alt-fill"></i> VIEW ON MAP</a>
+      </div>
+      <div class="footer-social">
+        <h4>Follow Us</h4>
+        <div class="footer-social-icons" id="footer-social-icons"></div>
+        <div style="margin-top:1.5rem;">
+          <h4 style="font-size:0.9rem;letter-spacing:1.5px;color:#9a7840;text-transform:uppercase;font-family:'Outfit',sans-serif;margin-bottom:0.7rem;">Legal</h4>
+          <div style="display:flex;flex-direction:column;gap:0.4rem;">
+            <a href="/privacy-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Privacy Policy</a>
+            <a href="/terms.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Terms &amp; Conditions</a>
+            <a href="/refund-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Refund &amp; Cancellation</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>Designed &amp; Built By: <strong>VARUN VANTERU</strong></p>
+      <div class="footer-bottom-contact">
+        <a href="tel:+918125179109"><i class="bi bi-telephone-fill"></i> +91 8125179109</a>
+        <a href="https://wa.me/918125179109" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+      </div>
+    </div>
+  </footer>
+  <script src="/js/main.js"></script>
+</body>
+</html>

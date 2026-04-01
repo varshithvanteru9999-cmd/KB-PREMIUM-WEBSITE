@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | KB Beauty Salons</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Outfit:wght@200;300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        /* ── Flatpickr dark gold theme ── */
+        .fp-wrap { position: relative; }
+        .fp-wrap .fp-icon { position: absolute; right: 0.85rem; top: 50%; transform: translateY(-50%); color: #d4af37; pointer-events: none; font-size: 0.9rem; }
+        .fp-wrap input { padding-right: 2.4rem !important; cursor: pointer; caret-color: transparent; }
+        .flatpickr-calendar { background: #1a1400 !important; border: 1px solid rgba(212,175,55,0.35) !important; border-radius: 1rem !important; box-shadow: 0 20px 60px rgba(0,0,0,0.8) !important; font-family: 'Outfit', sans-serif !important; color: #e8d5a0 !important; z-index: 999999 !important; }
+        .flatpickr-calendar.arrowTop::before,.flatpickr-calendar.arrowTop::after { border-bottom-color: rgba(212,175,55,0.4) !important; }
+        .flatpickr-months { background: rgba(22,16,3,0.95) !important; border-radius: 1rem 1rem 0 0 !important; padding: 0.4rem 0 !important; border-bottom: 1px solid rgba(212,175,55,0.18) !important; }
+        .flatpickr-month,.flatpickr-current-month { color: #e8d5a0 !important; fill: #e8d5a0 !important; font-weight: 700 !important; }
+        .flatpickr-current-month select,.flatpickr-current-month input.cur-year { color: #e8d5a0 !important; background: transparent !important; font-weight: 700 !important; }
+        .flatpickr-prev-month svg,.flatpickr-next-month svg { fill: #d4af37 !important; }
+        .flatpickr-weekdays { background: rgba(212,175,55,0.06) !important; }
+        span.flatpickr-weekday { color: #9a7840 !important; font-size: 0.72rem !important; font-weight: 800 !important; letter-spacing: 1.5px !important; }
+        .flatpickr-day { color: #c8a050 !important; border-radius: 0.5rem !important; font-size: 0.88rem !important; }
+        .flatpickr-day:hover { background: rgba(212,175,55,0.15) !important; border-color: rgba(212,175,55,0.4) !important; color: #fcf6ba !important; }
+        .flatpickr-day.selected,.flatpickr-day.selected:hover { background: linear-gradient(135deg,#bf953f,#d4af37,#fcf6ba,#d4af37) !important; border-color: transparent !important; color: #1a1000 !important; font-weight: 800 !important; }
+        .flatpickr-day.today { border-color: rgba(212,175,55,0.6) !important; color: #fcf6ba !important; font-weight: 700 !important; }
+        .flatpickr-day.flatpickr-disabled,.flatpickr-day.prevMonthDay,.flatpickr-day.nextMonthDay { color: rgba(140,100,50,0.25) !important; }
+        /* ── Admin time slot dropdown ── */
+        .admin-time-wrap { position: relative; }
+        .admin-time-trigger {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; background: rgba(13,10,2,0.85);
+            border: 1px solid rgba(212,175,55,0.25); border-radius: 0.65rem;
+            padding: 0.72rem 1rem; color: #9a7840; font-family: inherit;
+            font-size: 0.9rem; cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s; user-select: none; box-sizing: border-box;
+        }
+        .admin-time-trigger.has-value { color: #e8d5a0; }
+        .admin-time-trigger:hover,.admin-time-trigger.open { border-color: rgba(212,175,55,0.55); box-shadow: 0 0 0 3px rgba(212,175,55,0.08); }
+        .admin-time-trigger i { color: #d4af37; font-size: 0.9rem; flex-shrink: 0; }
+        .admin-time-trigger.open #svc-cat-chevron { transform: rotate(180deg); }
+        .admin-time-dropdown {
+            position: absolute; top: calc(100% + 5px); left: 0; right: 0;
+            background: #1a1400; border: 1px solid rgba(212,175,55,0.35);
+            border-radius: 1rem; box-shadow: 0 20px 60px rgba(0,0,0,0.75);
+            max-height: 220px; overflow-y: auto; z-index: 99999;
+            display: none; padding: 0.4rem 0;
+        }
+        .admin-time-dropdown.open { display: block; }
+        .admin-time-dropdown::-webkit-scrollbar { width: 4px; }
+        .admin-time-dropdown::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 2px; }
+        .admin-time-option {
+            padding: 0.55rem 1.1rem; color: #c8a050; font-size: 0.88rem;
+            font-family: inherit; cursor: pointer; transition: background 0.15s;
+            border-radius: 0.4rem; margin: 0 0.3rem;
+        }
+        .admin-time-option:hover { background: rgba(212,175,55,0.12); color: #fcf6ba; }
+        .admin-time-option.selected { background: linear-gradient(135deg,#bf953f,#d4af37,#fcf6ba,#d4af37); color: #1a1000; font-weight: 800; }
+        /* ── Full-page forms (replaces drawers) ── */
+        .form-page { display: none; animation: fpIn 0.22s ease; }
+        @keyframes fpIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        .form-page-header { display:flex; align-items:center; gap:1rem; padding-bottom:1.4rem; margin-bottom:1.8rem; border-bottom:1px solid rgba(212,175,55,0.15); }
+        .back-btn { display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; flex-shrink:0; background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.25); color:#d4af37; cursor:pointer; transition:background 0.2s,border-color 0.2s; }
+        .back-btn:hover { background:rgba(212,175,55,0.22); border-color:rgba(212,175,55,0.55); }
+        .breadcrumb-nav { display:flex; align-items:center; gap:0.45rem; }
+        .bc-link { color:var(--text-muted); font-size:0.82rem; cursor:pointer; transition:color 0.2s; }
+        .bc-link:hover { color:#d4af37; }
+        .bc-sep { color:rgba(212,175,55,0.3); font-size:0.68rem; }
+        .bc-current { color:#e8d5a0; font-size:0.82rem; font-weight:700; }
+        .form-page-body { max-width:880px; }
+        .form-section { background:var(--card-bg); border:1px solid var(--border); border-radius:14px; padding:1.4rem 1.6rem; margin-bottom:1.2rem; box-shadow:0 2px 16px rgba(0,0,0,0.2); }
+        .form-section-label { font-size:0.7rem; font-weight:800; letter-spacing:1.5px; color:#9a7840; text-transform:uppercase; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
+        .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+        @media (max-width:620px) { .form-grid-2 { grid-template-columns:1fr; } }
+        .form-page-actions { display:flex; gap:0.75rem; align-items:center; padding-top:1.4rem; margin-top:0.3rem; border-top:1px solid rgba(212,175,55,0.1); max-width:880px; }
+        /* ── Service searchable dropdown ── */
+        .svc-search-wrap { position: relative; }
+        .svc-search-trigger {
+            display: flex; align-items: center; gap: 0.55rem;
+            background: rgba(13,10,2,0.85); border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 0.65rem; padding: 0.72rem 1rem;
+            cursor: pointer; user-select: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .svc-search-trigger:hover, .svc-search-trigger.open {
+            border-color: rgba(212,175,55,0.55); box-shadow: 0 0 0 3px rgba(212,175,55,0.08);
+        }
+        .svc-search-trigger span { flex: 1; font-size: 0.85rem; color: #9a7840; font-family: inherit; }
+        .svc-search-trigger.has-value span { color: #e8d5a0; }
+        .svc-chevron { color: #d4af37; font-size: 0.78rem; transition: transform 0.2s; flex-shrink: 0; }
+        .svc-search-trigger.open .svc-chevron { transform: rotate(180deg); }
+        .svc-search-dropdown {
+            display: none; position: absolute; top: calc(100% + 5px); left: 0; right: 0; z-index: 9999;
+            background: #1a1400; border: 1px solid rgba(212,175,55,0.35);
+            border-radius: 1rem; box-shadow: 0 20px 60px rgba(0,0,0,0.75);
+            overflow: hidden;
+        }
+        .svc-search-dropdown.open { display: block; }
+        .svc-search-input-wrap {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.7rem 1rem; border-bottom: 1px solid rgba(212,175,55,0.12);
+        }
+        .svc-search-input {
+            flex: 1; background: transparent; border: none; outline: none;
+            color: #e8d5a0; font-size: 0.85rem; font-family: inherit;
+        }
+        .svc-search-input::placeholder { color: rgba(154,120,64,0.6); }
+        .svc-search-list { max-height: 200px; overflow-y: auto; padding: 0.35rem 0; }
+        .svc-search-list::-webkit-scrollbar { width: 4px; }
+        .svc-search-list::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 2px; }
+        .svc-search-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.55rem 1rem; cursor: pointer; transition: background 0.15s;
+            border-radius: 0.4rem; margin: 0 0.3rem;
+        }
+        .svc-search-item:hover { background: rgba(212,175,55,0.1); }
+        .svc-search-item.selected { background: linear-gradient(135deg,#bf953f,#d4af37,#fcf6ba,#d4af37) !important; }
+        .svc-search-item.selected .svc-item-name,
+        .svc-search-item.selected .svc-item-price { color: #1a1000 !important; font-weight: 800; }
+        .svc-item-name { font-size: 0.85rem; color: #c8a050; }
+        .svc-item-price { font-size: 0.78rem; color: #9a7840; white-space: nowrap; margin-left: 0.5rem; }
+        .svc-no-results { padding: 0.8rem 1rem; font-size: 0.82rem; color: rgba(154,120,64,0.5); text-align: center; }
+        .admin-time-option.unavailable { color: rgba(140,100,50,0.3) !important; cursor: default; pointer-events: none; text-decoration: line-through; }
+
+        /* ── Circular sidebar toggle ── */
+        .sidebar-toggle-circle {
+            position: fixed;
+            top: calc(var(--topbar-height) / 2);
+            left: var(--sidebar-width);
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            width: 28px; height: 28px;
+            background: var(--sidebar-bg);
+            border: 2px solid rgba(212,175,55,0.4);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: left 0.28s cubic-bezier(0.4,0,0.2,1), background 0.2s, border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 10px rgba(180,130,40,0.15), 0 0 0 3px rgba(237,227,212,0.9);
+        }
+        .sidebar-toggle-circle:hover {
+            background: rgba(212,175,55,0.15);
+            border-color: rgba(212,175,55,0.7);
+            box-shadow: 0 2px 10px rgba(180,130,40,0.2), 0 0 0 3px rgba(237,227,212,0.9), 0 0 12px rgba(212,175,55,0.25);
+        }
+        .sidebar-toggle-circle i {
+            font-size: 0.65rem;
+            color: var(--gold-standard);
+            transition: transform 0.28s;
+        }
+        .sidebar-collapsed-state .sidebar-toggle-circle {
+            left: var(--sidebar-collapsed);
+        }
+        .sidebar-collapsed-state .sidebar-toggle-circle i {
+            transform: rotate(180deg);
+        }
+        @media (max-width: 768px) {
+            .sidebar-toggle-circle { display: none; }
+        }
+
+        /* ── SweetAlert2 Cream/Gold Theme ── */
+        /* ── SweetAlert2 Dark Gold Theme ── */
+        .swal2-popup {
+            background: rgba(14,10,2,0.98) !important;
+            border: 1px solid rgba(212,175,55,0.22) !important;
+            border-radius: 1.4rem !important;
+            font-family: 'Outfit', sans-serif !important;
+            color: #e8d5a0 !important;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.8), 0 0 60px rgba(212,175,55,0.05), inset 0 1px 0 rgba(212,175,55,0.08) !important;
+        }
+        .swal2-popup.swal2-toast {
+            padding: 0.9rem 1.4rem !important;
+            border-radius: 10px !important;
+            background: rgba(14,10,2,0.98) !important;
+            gap: 0.75rem !important;
+        }
+        .swal2-title {
+            color: #e8d5a0 !important;
+            font-family: 'Playfair Display', serif !important;
+            font-size: 1.2rem !important;
+            letter-spacing: 0.3px !important;
+        }
+        .swal2-popup.swal2-toast .swal2-title {
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 0.88rem !important;
+            font-weight: 700 !important;
+            color: #e8d5a0 !important;
+        }
+        .swal2-html-container { color: #9a7840 !important; font-size: 0.92rem !important; }
+        .swal2-confirm {
+            background: linear-gradient(135deg,#2a1f00 0%,#7a5c10 15%,#bf953f 30%,#fcf6ba 50%,#d4af37 65%,#b38728 80%,#2a1f00 100%) !important;
+            color: #1a1000 !important;
+            font-weight: 800 !important;
+            border-radius: 8px !important;
+            font-family: 'Outfit', sans-serif !important;
+            letter-spacing: 1px !important;
+            text-transform: uppercase !important;
+            font-size: 0.82rem !important;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3) !important;
+        }
+        .swal2-cancel {
+            background: transparent !important;
+            border: 1px solid rgba(212,175,55,0.3) !important;
+            color: #d4af37 !important;
+            border-radius: 8px !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 0.82rem !important;
+            letter-spacing: 0.5px !important;
+        }
+        .swal2-cancel:hover { background: rgba(212,175,55,0.06) !important; border-color: rgba(212,175,55,0.35) !important; color: #d4af37 !important; }
+        .swal2-icon.swal2-error   { border-color: rgba(224,112,96,0.35) !important; color: #e07060 !important; }
+        .swal2-icon.swal2-warning { border-color: rgba(212,175,55,0.4) !important;  color: #d4af37 !important; }
+        .swal2-icon.swal2-question { border-color: rgba(212,175,55,0.35) !important; color: #d4af37 !important; }
+        .swal2-icon.swal2-success { border-color: rgba(111,207,138,0.35) !important; color: #6fcf8a !important; }
+        .swal2-icon.swal2-success .swal2-success-ring { border-color: rgba(111,207,138,0.2) !important; }
+        .swal2-icon.swal2-success [class^=swal2-success-line] { background: #6fcf8a !important; }
+        .swal2-timer-progress-bar { background: rgba(212,175,55,0.45) !important; }
+        .swal2-backdrop-show { backdrop-filter: blur(6px) !important; background: rgba(0,0,0,0.72) !important; }
+        /* Custom inputs inside SweetAlert2 */
+        .kb-swal-field {
+            display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.9rem; text-align: left;
+        }
+        .kb-swal-label {
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #d4af37;
+        }
+        .kb-swal-input, .kb-swal-select {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(212,175,55,0.22);
+            border-radius: 8px;
+            color: #e8d5a0;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            -webkit-text-fill-color: #e8d5a0;
+        }
+        .kb-swal-input:focus, .kb-swal-select:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212,175,55,0.1);
+            background: rgba(212,175,55,0.05);
+        }
+        .kb-swal-select option { background: #0e0a02; color: #e8d5a0; }
+        .kb-swal-hint {
+            font-size: 0.85rem; color: #d4af37; margin-bottom: 1.2rem; line-height: 1.6; font-weight: 600;
+        }
+        .kb-swal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-dim);
+        }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.4; display: block; }
+        .empty-state p { font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <!-- Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Circular toggle button on sidebar edge -->
+    <div class="sidebar-toggle-circle" id="sidebar-toggle-circle" onclick="toggleSidebar()" title="Toggle Sidebar">
+        <i class="bi bi-chevron-left"></i>
+    </div>
+
+    <!-- ═══════════════ SIDEBAR ═══════════════ -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo-wrap">
+            <div class="sidebar-logo-icon">KB</div>
+            <div class="sidebar-logo-text">
+                <span class="brand">KB BEAUTY</span>
+                <span class="sub">Admin Panel</span>
+            </div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-label">Main</div>
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-tooltip="Dashboard" onclick="switchTab('dashboard', this)">
+                        <span class="nav-icon"><i class="bi bi-pie-chart"></i></span>
+                        <span class="nav-label">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tooltip="Appointments" onclick="switchTab('appointments', this)">
+                        <span class="nav-icon"><i class="bi bi-calendar-check"></i></span>
+                        <span class="nav-label">Appointments</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-label">Manage</div>
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tooltip="Services" onclick="switchTab('services', this)">
+                        <span class="nav-icon"><i class="bi bi-flower1"></i></span>
+                        <span class="nav-label">Services</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tooltip="Customers" onclick="switchTab('customers', this)">
+                        <span class="nav-icon"><i class="bi bi-people"></i></span>
+                        <span class="nav-label">Customers</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tooltip="Discounts" onclick="switchTab('discounts', this)">
+                        <span class="nav-icon"><i class="bi bi-ticket-perforated"></i></span>
+                        <span class="nav-label">Discounts</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="nav-section" style="margin-top: auto;">
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tooltip="Settings" onclick="switchTab('settings', this)">
+                        <span class="nav-icon"><i class="bi bi-sliders"></i></span>
+                        <span class="nav-label">Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-footer">
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <a href="#" class="nav-link logout-link" data-tooltip="Logout" onclick="logout()">
+                        <span class="nav-icon"><i class="bi bi-box-arrow-right"></i></span>
+                        <span class="nav-label">Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- ═══════════════ MAIN ═══════════════ -->
+    <main class="main-content" id="main-content">
+
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="topbar-left">
+                <!-- Mobile hamburger only -->
+                <button class="toggle-btn" id="mobile-toggle" onclick="toggleSidebar()" style="display:none;">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div class="topbar-title">
+                    <h1 id="page-title">Dashboard</h1>
+                    <p>Welcome back, <span id="admin-name">Admin</span></p>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="topbar-badge">
+                    <i class="bi bi-circle-fill" style="color:#6fcf8a; font-size:0.55rem;"></i>
+                    Live
+                </div>
+                <div class="topbar-badge">
+                    <i class="bi bi-shop"></i>
+                    KB Beauty Ongole
+                </div>
+                <div class="user-pill">
+                    <div class="user-avatar" id="user-initials">AD</div>
+                    <span class="user-name" id="user-name-pill">Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="page-content">
+
+            <!-- ── Dashboard ── -->
+            <section id="dashboard-view">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-calendar-check"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-val" id="stat-bookings">0</span>
+                            <span class="stat-label">Total Bookings</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-currency-rupee"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-val" id="stat-revenue">₹0</span>
+                            <span class="stat-label">Total Revenue</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-people"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-val" id="stat-customers">0</span>
+                            <span class="stat-label">Active Customers</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Recent Appointments</h2>
+                    </div>
+                    <div class="table-scroll">
+                        <table id="recent-appointments-table">
+                            <thead><tr>
+                                <th>Customer</th>
+                                <th>Phone</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Total Price</th>
+                                <th>Amount Paid</th>
+                                <th>Remaining</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── Appointments ── -->
+            <section id="appointments-view" style="display:none;">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>All Appointments</h2>
+                        <button class="btn-action primary-action" onclick="openNewApptDrawer()" style="padding:0.55rem 1.2rem;font-size:0.82rem;">
+                            <i class="bi bi-plus-lg" style="margin-right:6px;"></i>New Appointment
+                        </button>
+                    </div>
+                    <div class="table-scroll">
+                        <table id="all-appointments-table">
+                            <thead><tr>
+                                <th>Customer</th>
+                                <th>Phone</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Total Price</th>
+                                <th>Amount Paid</th>
+                                <th>Remaining</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── Services ── -->
+            <section id="services-view" style="display:none;">
+
+                <!-- Service List Table -->
+                <div class="table-container" style="margin-bottom:2rem;">
+                    <div class="table-header">
+                        <h2>Service Management</h2>
+                        <div style="display:flex;gap:0.6rem;">
+                            <button class="btn-action" onclick="openAddCategoryDrawer()" title="Add new category">
+                                <i class="bi bi-folder-plus" style="margin-right:6px;"></i>Add Category
+                            </button>
+                            <button class="btn-action primary-action" onclick="openAddServiceDrawer()">
+                                <i class="bi bi-plus" style="margin-right:6px;"></i>Add Service
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter bar -->
+                    <div style="display:flex;align-items:center;gap:0.8rem;padding:0.9rem 1.4rem;border-bottom:1px solid rgba(212,175,55,0.1);flex-wrap:wrap;">
+                        <!-- Section tabs -->
+                        <div style="display:flex;gap:0.4rem;" id="svc-gender-tabs">
+                            <button class="svc-filter-tab active" data-gender="all"    onclick="filterServices('gender','all',this)">All</button>
+                            <button class="svc-filter-tab"        data-gender="men"    onclick="filterServices('gender','men',this)"><i class="bi bi-person-fill" style="font-size:0.75rem;margin-right:3px;"></i>Men</button>
+                            <button class="svc-filter-tab"        data-gender="women"  onclick="filterServices('gender','women',this)"><i class="bi bi-person-fill-up" style="font-size:0.75rem;margin-right:3px;"></i>Women</button>
+                        </div>
+                        <!-- Category dropdown (custom themed) -->
+                        <div class="admin-time-wrap" id="svc-cat-wrap" style="min-width:180px;">
+                            <button type="button" class="admin-time-trigger" id="svc-cat-trigger"
+                                    onclick="toggleCatFilterDrop()" style="padding:0.45rem 1rem;">
+                                <span id="svc-cat-label" style="flex:1;text-align:left;font-size:0.82rem;">All Categories</span>
+                                <i class="bi bi-chevron-down" style="font-size:0.7rem;color:#d4af37;transition:transform 0.2s;" id="svc-cat-chevron"></i>
+                            </button>
+                            <div class="admin-time-dropdown" id="svc-cat-dropdown" style="max-height:260px;">
+                                <!-- Populated by loadServices() in admin.js -->
+                            </div>
+                        </div>
+                        <!-- Search -->
+                        <input id="svc-search-filter" type="text" placeholder="Search services…"
+                            oninput="filterServices('search',this.value,null)"
+                            style="background:rgba(13,10,2,0.8);border:1px solid rgba(212,175,55,0.22);
+                                   border-radius:0.55rem;padding:0.45rem 0.85rem;color:#e8d5a0;
+                                   font-family:inherit;font-size:0.82rem;outline:none;min-width:180px;flex:1;">
+                        <!-- Count badge -->
+                        <span id="svc-count-badge" style="margin-left:auto;color:#9a7840;font-size:0.78rem;white-space:nowrap;"></span>
+                    </div>
+
+                    <div class="table-scroll">
+                        <table id="services-manage-table">
+                            <thead><tr>
+                                <th>Service Name</th>
+                                <th>Category</th>
+                                <th>Section</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Category Images Panel -->
+                <div class="img-mgmt-section">
+                    <div class="img-mgmt-header">
+                        <div>
+                            <h3 class="img-mgmt-title">
+                                <i class="bi bi-image-fill"></i>
+                                Category Images
+                                <span class="img-mgmt-badge">Professional Work</span>
+                            </h3>
+                            <p class="img-mgmt-hint">These images display on the homepage service cards. Click any card to upload or replace its image.</p>
+                        </div>
+                        <!-- Section tabs for category images -->
+                        <div style="display:flex;gap:0.4rem;" id="catimg-gender-tabs">
+                            <button class="svc-filter-tab active" data-gender="all"   onclick="filterCatImages('all',this)">All</button>
+                            <button class="svc-filter-tab"        data-gender="men"   onclick="filterCatImages('men',this)"><i class="bi bi-person-fill" style="font-size:0.75rem;margin-right:3px;"></i>Men</button>
+                            <button class="svc-filter-tab"        data-gender="women" onclick="filterCatImages('women',this)"><i class="bi bi-person-fill-up" style="font-size:0.75rem;margin-right:3px;"></i>Women</button>
+                        </div>
+                    </div>
+                    <div class="catimg-grid" id="catimages-grid">
+                        <!-- Rendered by loadCatImages() in admin.js -->
+                        <div class="catimg-skeleton"></div>
+                        <div class="catimg-skeleton"></div>
+                        <div class="catimg-skeleton"></div>
+                        <div class="catimg-skeleton"></div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ── Customers ── -->
+            <section id="customers-view" style="display:none;">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Customer List</h2>
+                    </div>
+                    <div class="table-scroll">
+                        <table id="customers-table">
+                            <thead><tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Registered On</th>
+                                <th>Actions</th>
+                            </tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── Settings ── -->
+            <section id="settings-view" style="display:none;">
+                <div style="max-width:660px;">
+
+                    <!-- Contact & Owner Information card -->
+                    <div class="table-container" style="padding:0; margin-bottom:1.4rem;">
+                        <div class="table-header">
+                            <h2><i class="bi bi-person-badge" style="margin-right:0.6rem;font-size:0.95rem;"></i>Contact &amp; Owner Information</h2>
+                        </div>
+                        <div style="padding:1.6rem; display:flex; flex-direction:column; gap:1.3rem;">
+                            <div>
+                                <label class="settings-label">Proprietor Name</label>
+                                <input type="text" id="setting-proprietor-name" class="settings-input" placeholder="e.g. SHAIK SHAHID">
+                                <p class="settings-hint">This name appears in the footer.</p>
+                            </div>
+                            <div class="settings-grid-2">
+                                <div>
+                                    <label class="settings-label">Service Mobile Number</label>
+                                    <input type="text" id="setting-service-mobile" class="settings-input" placeholder="e.g. +91 96404 01112">
+                                </div>
+                                <div>
+                                    <label class="settings-label">Service WhatsApp Number</label>
+                                    <input type="text" id="setting-service-whatsapp" class="settings-input" placeholder="e.g. 919640401112">
+                                    <p class="settings-hint">Format: Country code + number (no + or spaces)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Working Hours & Slots card -->
+                    <div class="table-container" style="padding:0; margin-bottom:1.4rem;">
+                        <div class="table-header">
+                            <h2><i class="bi bi-clock" style="margin-right:0.6rem;font-size:0.95rem;"></i>Schedule &amp; Slots</h2>
+                        </div>
+                        <div style="padding:1.6rem; display:flex; flex-direction:column; gap:1.3rem;">
+
+                            <div class="settings-grid-2">
+                                <div>
+                                    <label class="settings-label">Working Hours Start</label>
+                                    <input type="time" id="setting-working-start" class="settings-input">
+                                </div>
+                                <div>
+                                    <label class="settings-label">Working Hours End</label>
+                                    <input type="time" id="setting-working-end" class="settings-input">
+                                </div>
+                            </div>
+
+                            <div class="settings-grid-2">
+                                <div>
+                                    <label class="settings-label">Slot Interval</label>
+                                    <select id="setting-slot-duration" class="settings-input">
+                                        <option value="15">15 minutes</option>
+                                        <option value="30">30 minutes</option>
+                                        <option value="45">45 minutes</option>
+                                        <option value="60">60 minutes</option>
+                                        <option value="90">90 minutes</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="settings-label">Total Staff Capacity</label>
+                                    <input type="number" id="setting-max-concurrent" min="1" max="20" class="settings-input" placeholder="e.g. 3">
+                                    <p class="settings-hint">Max simultaneous appointments across all services</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="settings-label">Working Days</label>
+                                <div class="days-grid" id="working-days-wrap">
+                                    <span class="day-toggle" data-day="1" onclick="this.classList.toggle('active')"><span>Mon</span></span>
+                                    <span class="day-toggle" data-day="2" onclick="this.classList.toggle('active')"><span>Tue</span></span>
+                                    <span class="day-toggle" data-day="3" onclick="this.classList.toggle('active')"><span>Wed</span></span>
+                                    <span class="day-toggle" data-day="4" onclick="this.classList.toggle('active')"><span>Thu</span></span>
+                                    <span class="day-toggle" data-day="5" onclick="this.classList.toggle('active')"><span>Fri</span></span>
+                                    <span class="day-toggle" data-day="6" onclick="this.classList.toggle('active')"><span>Sat</span></span>
+                                    <span class="day-toggle" data-day="0" onclick="this.classList.toggle('active')"><span>Sun</span></span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Advance Payment card -->
+                    <div class="table-container" style="padding:0; margin-bottom:1.4rem;">
+                        <div class="table-header">
+                            <h2><i class="bi bi-currency-rupee" style="margin-right:0.6rem;font-size:0.95rem;"></i>Advance Payment</h2>
+                        </div>
+                        <div style="padding:1.6rem; display:flex; flex-direction:column; gap:1.3rem;">
+                            <div class="settings-grid-2">
+                                <div>
+                                    <label class="settings-label" id="setting-value-label">Advance Amount</label>
+                                    <input type="number" id="setting-advance-value" min="0" step="1" class="settings-input" placeholder="e.g. 200">
+                                </div>
+                                <div>
+                                    <label class="settings-label">Advance Type</label>
+                                    <select id="setting-advance-type" class="settings-input">
+                                        <option value="fixed">Fixed Amount (₹)</option>
+                                        <option value="percent">Percentage (%)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <p class="settings-hint"><i class="bi bi-info-circle" style="color:var(--gold-standard);margin-right:4px;"></i>This advance is collected at booking time to secure the slot. Set to 0 to disable advance payment.</p>
+                        </div>
+                    </div>
+
+                    <!-- GST Settings card -->
+                    <div class="table-container" style="padding:0; margin-bottom:1.4rem;">
+                        <div class="table-header">
+                            <h2><i class="bi bi-receipt" style="margin-right:0.6rem;font-size:0.95rem;"></i>GST / Tax Settings</h2>
+                        </div>
+                        <div style="padding:1.6rem; display:flex; flex-direction:column; gap:1.3rem;">
+                            <div class="settings-grid-2">
+                                <div>
+                                    <label class="settings-label">CGST Rate (%)</label>
+                                    <input type="number" id="setting-cgst-rate" min="0" max="28" step="0.5" class="settings-input" placeholder="e.g. 9">
+                                    <p class="settings-hint">Central GST percentage (e.g. 9%)</p>
+                                </div>
+                                <div>
+                                    <label class="settings-label">SGST Rate (%)</label>
+                                    <input type="number" id="setting-sgst-rate" min="0" max="28" step="0.5" class="settings-input" placeholder="e.g. 9">
+                                    <p class="settings-hint">State GST percentage (e.g. 9%)</p>
+                                </div>
+                            </div>
+                            <p class="settings-hint"><i class="bi bi-info-circle" style="color:var(--gold-standard);margin-right:4px;"></i>Set both to 0 to hide GST. Total GST = CGST + SGST applied on net amount (after discount). Shown on invoices and appointment summaries.</p>
+                        </div>
+                    </div>
+
+                    <!-- Social Media Links card -->
+                    <div class="table-container" style="padding:0; margin-bottom:1.4rem;">
+                        <div class="table-header">
+                            <h2><i class="bi bi-share" style="margin-right:0.6rem;font-size:0.95rem;"></i>Social Media Links</h2>
+                        </div>
+                        <div style="padding:1.6rem; display:flex; flex-direction:column; gap:1.1rem;">
+                            <p class="settings-hint"><i class="bi bi-info-circle" style="color:var(--gold-standard);margin-right:4px;"></i>Paste full URLs. Only filled links will appear on the website footer. Leave empty to hide.</p>
+                            <div>
+                                <label class="settings-label"><i class="bi bi-geo-alt-fill" style="margin-right:5px;"></i>Google Maps Location Link</label>
+                                <input type="url" id="setting-maps-url" class="settings-input" placeholder="https://maps.app.goo.gl/...">
+                                <p class="settings-hint">Share link from Google Maps. Appears as "VIEW ON MAP" button in footer.</p>
+                            </div>
+                            <div class="settings-grid-2">
+                                <div>
+                                    <label class="settings-label"><i class="bi bi-instagram" style="margin-right:5px;"></i>Instagram</label>
+                                    <input type="url" id="setting-social-instagram" class="settings-input" placeholder="https://instagram.com/yourpage">
+                                </div>
+                                <div>
+                                    <label class="settings-label"><i class="bi bi-facebook" style="margin-right:5px;"></i>Facebook</label>
+                                    <input type="url" id="setting-social-facebook" class="settings-input" placeholder="https://facebook.com/yourpage">
+                                </div>
+                            </div>
+                            <div class="settings-grid-2">
+                                <div>
+                                    <label class="settings-label"><i class="bi bi-youtube" style="margin-right:5px;"></i>YouTube</label>
+                                    <input type="url" id="setting-social-youtube" class="settings-input" placeholder="https://youtube.com/@yourchannel">
+                                </div>
+                                <div>
+                                    <label class="settings-label"><i class="bi bi-twitter-x" style="margin-right:5px;"></i>Twitter / X</label>
+                                    <input type="url" id="setting-social-twitter" class="settings-input" placeholder="https://x.com/yourhandle">
+                                </div>
+                            </div>
+                            <div class="settings-grid-2">
+                                <div>
+                                    <label class="settings-label"><i class="bi bi-whatsapp" style="margin-right:5px;"></i>WhatsApp Link</label>
+                                    <input type="url" id="setting-social-whatsapp" class="settings-input" placeholder="https://wa.me/91XXXXXXXXXX">
+                                </div>
+                                <div>
+                                    <label class="settings-label"><i class="bi bi-tiktok" style="margin-right:5px;"></i>TikTok</label>
+                                    <input type="url" id="setting-social-tiktok" class="settings-input" placeholder="https://tiktok.com/@yourhandle">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-action primary-action" onclick="saveAdvanceSetting()" style="width:100%; padding:1rem 2rem;">
+                        <i class="bi bi-floppy" style="margin-right:8px;"></i>Save All Settings
+                    </button>
+                </div>
+
+                <!-- ── Gallery Images ── -->
+                <div class="img-mgmt-section" style="margin-top:2rem;max-width:none;">
+                    <div class="img-mgmt-header">
+                        <div>
+                            <h3 class="img-mgmt-title">
+                                <i class="bi bi-images"></i>
+                                Homepage Gallery
+                                <span class="img-mgmt-badge">Scrolling Strip</span>
+                            </h3>
+                            <p class="img-mgmt-hint">Images shown in the infinite-scroll portfolio strip on the homepage. Upload, reorder, show/hide, or delete.</p>
+                        </div>
+                        <button class="btn-action primary-action" onclick="openGalleryUpload()" style="white-space:nowrap;flex-shrink:0;">
+                            <i class="bi bi-cloud-upload" style="margin-right:6px;"></i>Upload Photo
+                        </button>
+                    </div>
+
+                    <!-- Drop-zone upload form -->
+                    <div class="gallery-upload-zone" id="gallery-upload-panel" style="display:none;">
+                        <div class="gallery-upload-inner">
+                            <div class="gallery-dropzone" id="gallery-dropzone"
+                                 ondragover="event.preventDefault();this.classList.add('drag-over')"
+                                 ondragleave="this.classList.remove('drag-over')"
+                                 ondrop="handleGalleryDrop(event)">
+                                <label for="gallery-upload-file" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:0.6rem;">
+                                    <i class="bi bi-cloud-arrow-up" style="font-size:2.2rem;color:var(--gold-standard);"></i>
+                                    <span style="font-size:0.9rem;color:var(--text-dim);font-weight:600;">Drop image here or <span style="color:var(--gold-standard);text-decoration:underline;">browse</span></span>
+                                    <span style="font-size:0.75rem;color:var(--text-muted);">JPEG · PNG · WebP · max 8 MB</span>
+                                </label>
+                                <input type="file" id="gallery-upload-file" accept="image/*" style="display:none;" onchange="previewGalleryUpload(this)">
+                            </div>
+                            <div id="gallery-upload-preview" style="display:none;">
+                                <div style="position:relative;display:inline-block;">
+                                    <img id="gallery-preview-img" alt="Preview" class="gallery-upload-preview-img">
+                                    <button onclick="clearGalleryPreview()" class="gallery-preview-clear"><i class="bi bi-x-lg"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="gallery-upload-meta">
+                            <div class="field-group" style="margin-bottom:0;">
+                                <label class="field-label">Caption <span style="font-weight:400;opacity:0.5;">(optional)</span></label>
+                                <input type="text" id="gallery-upload-caption" class="field-input" placeholder="e.g. Hair Transformation, Bridal Makeup…">
+                            </div>
+                            <div class="field-group" style="margin-bottom:0;">
+                                <label class="field-label">Display Order <span style="font-weight:400;opacity:0.5;">(lower = first)</span></label>
+                                <input type="number" id="gallery-upload-sort" class="field-input" value="0" min="0">
+                            </div>
+                            <div style="display:flex;gap:0.75rem;align-items:center;margin-top:0.3rem;">
+                                <button class="btn-ghost" onclick="closeGalleryUpload()">Cancel</button>
+                                <button class="btn-action primary-action" id="gallery-upload-btn" onclick="submitGalleryUpload()">
+                                    <i class="bi bi-cloud-upload" style="margin-right:6px;"></i>Upload to Gallery
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gallery image grid -->
+                    <div class="gallery-mgmt-grid" id="gallery-admin-grid">
+                        <div class="catimg-skeleton"></div>
+                        <div class="catimg-skeleton"></div>
+                        <div class="catimg-skeleton"></div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ═══════════════ DISCOUNTS ═══════════════ -->
+            <section id="discounts-view" style="display:none;">
+                <div class="table-header" style="padding:0 0 1.4rem;">
+                    <h2 style="font-size:1.25rem;"><i class="bi bi-ticket-perforated" style="margin-right:0.6rem;color:var(--gold-standard);"></i>Promo Codes &amp; Discounts</h2>
+                    <button class="btn-action primary-action" onclick="openAddPromoDrawer()" style="padding:0.55rem 1.2rem;font-size:0.82rem;">
+                        <i class="bi bi-plus-lg" style="margin-right:6px;"></i>New Promo Code
+                    </button>
+                </div>
+
+                <div class="table-container" style="padding:0;">
+                    <div class="table-scroll">
+                        <table id="promo-codes-table" style="width:100%;border-collapse:collapse;min-width:680px;">
+                            <thead><tr>
+                                <th>Code</th>
+                                <th>Discount</th>
+                                <th>Min Order</th>
+                                <th>Uses</th>
+                                <th>Expiry</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr></thead>
+                            <tbody><tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted);">Loading…</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+    <!-- ═══ FORM PAGES (full-page replacements for drawers) ═══ -->
+
+    <!-- ── Add / Edit Promo Code ── -->
+    <section id="add-promo-page" class="form-page">
+        <div class="form-page-header">
+            <button class="back-btn" onclick="closeAddPromoDrawer()"><i class="bi bi-arrow-left"></i></button>
+            <div class="breadcrumb-nav">
+                <span class="bc-link" onclick="closeAddPromoDrawer()">Discounts</span>
+                <i class="bi bi-chevron-right bc-sep"></i>
+                <span class="bc-current" id="promo-drawer-title">New Promo Code</span>
+            </div>
+        </div>
+        <div class="form-page-body">
+            <input type="hidden" id="promo-edit-id">
+            <div class="form-section">
+                <div class="form-section-label"><i class="bi bi-ticket-perforated"></i> Promo Code Details</div>
+                <div class="field-group">
+                    <label class="field-label">Code <span style="font-size:0.7rem;color:var(--text-muted)">(auto-uppercased)</span></label>
+                    <input type="text" id="promo-code" class="field-input" placeholder="e.g. WELCOME20" style="text-transform:uppercase;" maxlength="50">
+                </div>
+                <div class="field-group" style="margin-bottom:0;">
+                    <label class="field-label">Description <span style="font-size:0.7rem;color:var(--text-muted)">(optional)</span></label>
+                    <input type="text" id="promo-description" class="field-input" placeholder="e.g. 20% off for new customers">
+                </div>
+            </div>
+            <div class="form-section">
+                <div class="form-section-label"><i class="bi bi-percent"></i> Discount Settings</div>
+                <div class="form-grid-2">
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Discount Type</label>
+                        <select id="promo-type" class="field-input" onchange="updatePromoValueLabel()">
+                            <option value="percent">Percentage (%)</option>
+                            <option value="fixed">Fixed Amount (₹)</option>
+                        </select>
+                    </div>
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label" id="promo-value-label">Discount %</label>
+                        <input type="number" id="promo-value" class="field-input" min="0.01" step="0.01" placeholder="e.g. 20">
+                    </div>
+                </div>
+            </div>
+            <div class="form-section">
+                <div class="form-section-label"><i class="bi bi-sliders"></i> Limits &amp; Validity</div>
+                <div class="form-grid-2">
+                    <div class="field-group">
+                        <label class="field-label">Min Order Amount (₹)</label>
+                        <input type="number" id="promo-min-order" class="field-input" min="0" value="0" placeholder="0 = no minimum">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label" id="promo-cap-label">Max Discount Cap (₹) <span style="font-size:0.7rem;color:var(--text-muted)">% only</span></label>
+                        <input type="number" id="promo-max-cap" class="field-input" min="0" placeholder="Leave blank = no cap">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Max Uses <span style="font-size:0.7rem;color:var(--text-muted)">(blank = unlimited)</span></label>
+                        <input type="number" id="promo-max-uses" class="field-input" min="1" placeholder="Unlimited">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Valid Until <span style="font-size:0.7rem;color:var(--text-muted)">(blank = never)</span></label>
+                        <div class="fp-wrap">
+                            <input type="text" id="promo-valid-until" class="field-input" placeholder="No expiry" readonly>
+                            <i class="bi bi-calendar3 fp-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="field-toggle-row" id="promo-active-row" style="display:none;margin-top:0.5rem;">
+                    <span class="field-toggle-label">Active</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="promo-is-active" checked>
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="form-page-actions">
+            <button class="btn-ghost" onclick="closeAddPromoDrawer()">Cancel</button>
+            <button class="btn-action primary-action" id="promo-save-btn" onclick="submitPromoCode()">
+                <i class="bi bi-floppy" style="margin-right:6px;"></i>Save Code
+            </button>
+        </div>
+    </section>
+
+    <!-- ── View Appointment ── -->
+    <section id="view-appt-page" class="form-page">
+        <div class="form-page-header">
+            <button class="back-btn" onclick="closeViewApptDrawer()"><i class="bi bi-arrow-left"></i></button>
+            <div class="breadcrumb-nav">
+                <span class="bc-link" onclick="closeViewApptDrawer()">Appointments</span>
+                <i class="bi bi-chevron-right bc-sep"></i>
+                <span class="bc-current">Appointment Details</span>
+            </div>
+        </div>
+        <div class="form-page-body">
+            <div id="view-appt-content"></div>
+        </div>
+        <div class="form-page-actions">
+            <button class="btn-ghost" onclick="closeViewApptDrawer()">Close</button>
+            <button class="btn-action primary-action" id="view-appt-edit-btn">
+                <i class="bi bi-pencil" style="margin-right:6px;"></i>Edit Appointment
+            </button>
+        </div>
+    </section>
+
+    <!-- ── New Appointment ── -->
+    <section id="new-appt-page" class="form-page">
+        <div class="form-page-header">
+            <button class="back-btn" onclick="closeNewApptDrawer()"><i class="bi bi-arrow-left"></i></button>
+            <div class="breadcrumb-nav">
+                <span class="bc-link" onclick="closeNewApptDrawer()">Appointments</span>
+                <i class="bi bi-chevron-right bc-sep"></i>
+                <span class="bc-current">New Appointment</span>
+            </div>
+        </div>
+        <div class="form-page-body">
+            <div class="form-section">
+                <div class="form-section-label"><i class="bi bi-person"></i> Customer</div>
+                <div style="position:relative;margin-bottom:0.75rem;">
+                    <input type="text" id="new-appt-cust-search" class="field-input"
+                           placeholder="Search existing customer by name or mobile…"
+                           oninput="searchNewApptCustomer(this.value)" autocomplete="off">
+                    <div id="new-appt-cust-dropdown"
+                         style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;
+                                background:#1a1200;border:1px solid rgba(212,175,55,0.3);
+                                border-radius:0.5rem;max-height:220px;overflow-y:auto;box-shadow:0 6px 24px rgba(0,0,0,0.5);"></div>
+                </div>
+                <div class="form-grid-2">
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Full Name <span style="color:#e07060;">*</span></label>
+                        <input type="text" id="new-appt-cust-name" class="field-input" placeholder="e.g. Priya Sharma">
+                    </div>
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Mobile <span style="color:#e07060;">*</span></label>
+                        <input type="text" id="new-appt-cust-mobile" class="field-input" placeholder="10-digit number" maxlength="15">
+                    </div>
+                </div>
+                <div class="field-group" style="margin-top:0.75rem;margin-bottom:0;">
+                    <label class="field-label">Email <span style="font-size:0.7rem;color:var(--text-muted);">(optional)</span></label>
+                    <input type="email" id="new-appt-cust-email" class="field-input" placeholder="customer@email.com">
+                </div>
+                <div id="new-appt-cust-badge" style="display:none;margin-top:0.6rem;font-size:0.75rem;
+                     padding:0.35rem 0.7rem;border-radius:0.4rem;background:rgba(111,207,138,0.12);
+                     border:1px solid rgba(111,207,138,0.3);color:#6fcf8a;"></div>
+            </div>
+            <div class="form-section">
+                <div class="form-section-label"><i class="bi bi-calendar3"></i> Schedule</div>
+                <div class="form-grid-2">
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Date <span style="color:#e07060;">*</span></label>
+                        <div class="fp-wrap">
+                            <input type="text" id="new-appt-date" class="field-input" placeholder="Select date" readonly>
+                            <i class="bi bi-calendar3 fp-icon"></i>
+                        </div>
+                    </div>
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Time <span style="color:#e07060;">*</span></label>
+                        <div class="admin-time-wrap" id="new-appt-time-wrap">
+                            <div class="admin-time-trigger" id="new-appt-time-trigger" onclick="toggleAdminTimeDrop('new-appt')">
+                                <span id="new-appt-time-label">Pick a date first</span>
+                                <i class="bi bi-clock"></i>
+                            </div>
+                            <div class="admin-time-dropdown" id="new-appt-time-dropdown"></div>
+                        </div>
+                        <input type="hidden" id="new-appt-time-val">
+                    </div>
+                </div>
+            </div>
+            <div class="form-section">
+                <div class="form-section-label"><i class="bi bi-tag"></i> Status &amp; Note</div>
+                <div class="form-grid-2">
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Initial Status</label>
+                        <select id="new-appt-status" class="field-input status-select">
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                    </div>
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Admin Note <span style="font-size:0.7rem;color:var(--text-muted);">(optional)</span></label>
+                        <textarea id="new-appt-note" class="field-input" rows="1"
+                                  style="resize:none;font-size:0.83rem;" placeholder="Internal note…"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="form-section">
+                <div class="form-section-label"><i class="bi bi-scissors"></i> Services</div>
+                <div id="new-appt-services-list" style="margin-bottom:0.8rem;"></div>
+                <div class="svc-search-wrap" id="new-appt-svc-wrap">
+                    <div class="svc-search-trigger" id="new-appt-svc-trigger" onclick="toggleSvcDrop('new-appt')">
+                        <i class="bi bi-scissors" style="color:#d4af37;font-size:0.85rem;flex-shrink:0;"></i>
+                        <span id="new-appt-svc-label">Search &amp; select a service…</span>
+                        <i class="bi bi-chevron-down svc-chevron" id="new-appt-svc-chevron"></i>
+                    </div>
+                    <div class="svc-search-dropdown" id="new-appt-svc-dropdown">
+                        <div class="svc-search-input-wrap">
+                            <i class="bi bi-search" style="color:#9a7840;font-size:0.8rem;flex-shrink:0;"></i>
+                            <input type="text" id="new-appt-svc-search" class="svc-search-input"
+                                   placeholder="Type to filter…" oninput="filterSvcDrop('new-appt',this.value)" autocomplete="off">
+                        </div>
+                        <div class="svc-search-list" id="new-appt-svc-list"></div>
+                    </div>
+                    <input type="hidden" id="new-appt-add-svc">
+                </div>
+                <button class="btn-action add-svc-btn" onclick="addNewApptService()" style="margin-top:0.5rem;width:100%;">
+                    <i class="bi bi-plus-lg" style="margin-right:5px;"></i>Add Selected Service
+                </button>
+                <div id="new-appt-total" class="appt-total-line" style="margin-top:0.6rem;"></div>
+            </div>
+        </div>
+        <div class="form-page-actions">
+            <button class="btn-ghost" onclick="closeNewApptDrawer()">Cancel</button>
+            <button class="btn-action primary-action" id="new-appt-btn" onclick="submitNewAppt()">
+                <i class="bi bi-calendar-check" style="margin-right:6px;"></i>Create Appointment
+            </button>
+        </div>
+    </section>
+
+    <!-- ── Edit Appointment ── -->
+    <section id="edit-appt-page" class="form-page">
+        <div class="form-page-header">
+            <button class="back-btn" onclick="closeEditApptDrawer()"><i class="bi bi-arrow-left"></i></button>
+            <div class="breadcrumb-nav">
+                <span class="bc-link" onclick="closeEditApptDrawer()">Appointments</span>
+                <i class="bi bi-chevron-right bc-sep"></i>
+                <span class="bc-current">Edit Appointment</span>
+            </div>
+        </div>
+        <div class="form-page-body">
+            <input type="hidden" id="edit-appt-id">
+            <div class="form-section">
+                <div class="form-section-label"><i class="bi bi-person"></i> Customer</div>
+                <div class="form-grid-2">
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Name</label>
+                        <input type="text" id="edit-appt-customer" class="field-input field-readonly" disabled>
+                    </div>
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Mobile</label>
+                        <input type="text" id="edit-appt-mobile" class="field-input field-readonly" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="form-section">
+                <div class="form-section-label"><i class="bi bi-calendar3"></i> Schedule</div>
+                <div class="form-grid-2">
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Date</label>
+                        <div class="fp-wrap">
+                            <input type="text" id="edit-appt-date" class="field-input" placeholder="Select date" readonly>
+                            <i class="bi bi-calendar3 fp-icon"></i>
+                        </div>
+                    </div>
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Time</label>
+                        <div class="admin-time-wrap" id="edit-appt-time-wrap">
+                            <div class="admin-time-trigger" id="edit-appt-time-trigger" onclick="toggleAdminTimeDrop('edit-appt')">
+                                <span id="edit-appt-time-label">Select time</span>
+                                <i class="bi bi-clock"></i>
+                            </div>
+                            <div class="admin-time-dropdown" id="edit-appt-time-dropdown"></div>
+                        </div>
+                        <input type="hidden" id="edit-appt-time">
+                    </div>
+                </div>
+            </div>
+            <div class="form-section">
+                <div class="form-section-label"><i class="bi bi-tag"></i> Status</div>
+                <select id="edit-appt-status" class="field-input status-select" style="max-width:260px;">
+                    <option value="Pending">Pending</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div class="form-section">
+                <div class="form-section-label"><i class="bi bi-scissors"></i> Services</div>
+                <div id="edit-appt-services-list" style="margin-bottom:0.8rem;"></div>
+                <div class="svc-search-wrap" id="edit-appt-svc-wrap">
+                    <div class="svc-search-trigger" id="edit-appt-svc-trigger" onclick="toggleSvcDrop('edit-appt')">
+                        <i class="bi bi-scissors" style="color:#d4af37;font-size:0.85rem;flex-shrink:0;"></i>
+                        <span id="edit-appt-svc-label">Search &amp; select a service…</span>
+                        <i class="bi bi-chevron-down svc-chevron" id="edit-appt-svc-chevron"></i>
+                    </div>
+                    <div class="svc-search-dropdown" id="edit-appt-svc-dropdown">
+                        <div class="svc-search-input-wrap">
+                            <i class="bi bi-search" style="color:#9a7840;font-size:0.8rem;flex-shrink:0;"></i>
+                            <input type="text" id="edit-appt-svc-search" class="svc-search-input"
+                                   placeholder="Type to filter…" oninput="filterSvcDrop('edit-appt',this.value)" autocomplete="off">
+                        </div>
+                        <div class="svc-search-list" id="edit-appt-svc-list"></div>
+                    </div>
+                    <input type="hidden" id="edit-appt-add-svc">
+                </div>
+                <button class="btn-action add-svc-btn" onclick="addApptService()" style="margin-top:0.5rem;width:100%;">
+                    <i class="bi bi-plus-lg" style="margin-right:5px;"></i>Add Selected Service
+                </button>
+                <div id="edit-appt-total" class="appt-total-line" style="margin-top:0.6rem;"></div>
+            </div>
+        </div>
+        <div class="form-page-actions">
+            <button class="btn-ghost" onclick="closeEditApptDrawer()">Cancel</button>
+            <button class="btn-action primary-action" id="edit-appt-btn" onclick="submitEditAppt()">
+                <i class="bi bi-floppy" style="margin-right:6px;"></i>Save Changes
+            </button>
+        </div>
+    </section>
+
+    <!-- ── Add Service ── -->
+    <section id="add-service-page" class="form-page">
+        <div class="form-page-header">
+            <button class="back-btn" onclick="closeAddServiceDrawer()"><i class="bi bi-arrow-left"></i></button>
+            <div class="breadcrumb-nav">
+                <span class="bc-link" onclick="closeAddServiceDrawer()">Services</span>
+                <i class="bi bi-chevron-right bc-sep"></i>
+                <span class="bc-current">Add New Service</span>
+            </div>
+        </div>
+        <div class="form-page-body">
+            <div class="form-section">
+                <div class="form-section-label"><i class="bi bi-scissors"></i> Service Details</div>
+                <div class="field-group">
+                    <label class="field-label">Service Name</label>
+                    <input type="text" id="svc-name" class="field-input" placeholder="e.g. Hair Spa, Facial…">
+                </div>
+                <div class="form-grid-2">
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Category</label>
+                        <select id="svc-category" class="field-input">
+                            <option value="">Loading categories…</option>
+                        </select>
+                    </div>
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Price (₹)</label>
+                        <input type="number" id="svc-price" class="field-input" min="0" step="1" placeholder="e.g. 500">
+                    </div>
+                </div>
+                <div class="field-toggle-row" style="margin-top:1rem;">
+                    <span class="field-toggle-label">Active / Enabled</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="svc-enabled" checked>
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="form-page-actions">
+            <button class="btn-ghost" onclick="closeAddServiceDrawer()">Cancel</button>
+            <button class="btn-action primary-action" id="add-svc-btn" onclick="submitAddService()">
+                <i class="bi bi-plus" style="margin-right:6px;"></i>Add Service
+            </button>
+        </div>
+    </section>
+
+    <!-- ── Add Category ── -->
+    <section id="add-category-page" class="form-page">
+        <div class="form-page-header">
+            <button class="back-btn" onclick="closeAddCategoryDrawer()"><i class="bi bi-arrow-left"></i></button>
+            <div class="breadcrumb-nav">
+                <span class="bc-link" onclick="closeAddCategoryDrawer()">Services</span>
+                <i class="bi bi-chevron-right bc-sep"></i>
+                <span class="bc-current">Add New Category</span>
+            </div>
+        </div>
+        <div class="form-page-body">
+            <div class="form-section">
+                <div class="form-section-label"><i class="bi bi-folder-plus"></i> Category Details</div>
+                <div class="form-grid-2">
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Category Name</label>
+                        <input type="text" id="cat-name" class="field-input" placeholder="e.g. Hair Services, Nail Art…">
+                    </div>
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Section</label>
+                        <select id="cat-gender" class="field-input">
+                            <option value="men">Men</option>
+                            <option value="women">Women</option>
+                        </select>
+                    </div>
+                </div>
+                <p class="form-hint" style="margin-top:1rem;">After creating the category, you can upload its image from the <strong>Category Images</strong> section below.</p>
+            </div>
+        </div>
+        <div class="form-page-actions">
+            <button class="btn-ghost" onclick="closeAddCategoryDrawer()">Cancel</button>
+            <button class="btn-action primary-action" id="add-cat-btn" onclick="submitAddCategory()">
+                <i class="bi bi-folder-plus" style="margin-right:6px;"></i>Create Category
+            </button>
+        </div>
+    </section>
+
+    <!-- ── Edit Service ── -->
+    <section id="edit-service-page" class="form-page">
+        <div class="form-page-header">
+            <button class="back-btn" onclick="closeEditServiceDrawer()"><i class="bi bi-arrow-left"></i></button>
+            <div class="breadcrumb-nav">
+                <span class="bc-link" onclick="closeEditServiceDrawer()">Services</span>
+                <i class="bi bi-chevron-right bc-sep"></i>
+                <span class="bc-current">Edit Service</span>
+            </div>
+        </div>
+        <div class="form-page-body">
+            <div class="form-section">
+                <div class="form-section-label"><i class="bi bi-scissors"></i> Service Details</div>
+                <div class="form-grid-2">
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Service Name</label>
+                        <input type="text" id="edit-svc-name-display" class="field-input field-readonly" disabled style="opacity:0.5;">
+                    </div>
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Price (₹)</label>
+                        <input type="number" id="edit-svc-price" class="field-input" min="0" step="1">
+                    </div>
+                </div>
+                <div class="field-toggle-row" style="margin-top:1rem;">
+                    <span class="field-toggle-label">Active / Enabled</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="edit-svc-enabled">
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+                <input type="hidden" id="edit-svc-id">
+            </div>
+        </div>
+        <div class="form-page-actions">
+            <button class="btn-ghost" onclick="closeEditServiceDrawer()">Cancel</button>
+            <button class="btn-action primary-action" id="edit-svc-btn" onclick="submitEditService()">
+                <i class="bi bi-floppy" style="margin-right:6px;"></i>Save Changes
+            </button>
+        </div>
+    </section>
+
+    <!-- ── View Customer ── -->
+    <section id="view-customer-page" class="form-page">
+        <div class="form-page-header">
+            <button class="back-btn" onclick="closeViewCustomer()"><i class="bi bi-arrow-left"></i></button>
+            <div class="breadcrumb-nav">
+                <span class="bc-link" onclick="closeViewCustomer()">Customers</span>
+                <i class="bi bi-chevron-right bc-sep"></i>
+                <span class="bc-current">Customer Profile</span>
+            </div>
+        </div>
+        <div class="form-page-body">
+            <div id="view-cust-content"></div>
+        </div>
+        <div class="form-page-actions">
+            <button class="btn-ghost" onclick="closeViewCustomer()">Close</button>
+            <button class="btn-action primary-action" id="view-cust-edit-btn">
+                <i class="bi bi-pencil" style="margin-right:6px;"></i>Edit Customer
+            </button>
+        </div>
+    </section>
+
+    <!-- ── Edit Customer ── -->
+    <section id="edit-customer-page" class="form-page">
+        <div class="form-page-header">
+            <button class="back-btn" onclick="closeEditCustomer()"><i class="bi bi-arrow-left"></i></button>
+            <div class="breadcrumb-nav">
+                <span class="bc-link" onclick="closeEditCustomer()">Customers</span>
+                <i class="bi bi-chevron-right bc-sep"></i>
+                <span class="bc-current">Edit Customer</span>
+            </div>
+        </div>
+        <div class="form-page-body">
+            <div class="form-section">
+                <div class="form-section-label"><i class="bi bi-person"></i> Customer Details</div>
+                <input type="hidden" id="edit-cust-id">
+                <div class="field-group">
+                    <label class="field-label">Full Name</label>
+                    <input type="text" id="edit-cust-name" class="field-input" placeholder="Customer full name">
+                </div>
+                <div class="form-grid-2">
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Mobile Number</label>
+                        <input type="tel" id="edit-cust-mobile" class="field-input" placeholder="10-digit mobile">
+                    </div>
+                    <div class="field-group" style="margin-bottom:0;">
+                        <label class="field-label">Email Address</label>
+                        <input type="email" id="edit-cust-email" class="field-input" placeholder="Optional">
+                    </div>
+                </div>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.8rem;margin-bottom:0;line-height:1.5;">
+                    <i class="bi bi-info-circle"></i>&nbsp; Changing the mobile number will also update the customer's login password to the new number.
+                </p>
+            </div>
+        </div>
+        <div class="form-page-actions">
+            <button class="btn-ghost" onclick="closeEditCustomer()">Cancel</button>
+            <button class="btn-action primary-action" id="edit-cust-btn" onclick="submitEditCustomer()">
+                <i class="bi bi-floppy" style="margin-right:6px;"></i>Save Changes
+            </button>
+        </div>
+    </section>
+
+        </div><!-- /page-content -->
+    </main>
+
+    <!-- ═══════════════ TRANSLATIONS MODAL ═══════════════ -->
+    <div class="modal-backdrop" id="trans-modal-backdrop">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">Service Translations</div>
+                    <div class="modal-subtitle" id="trans-svc-subtitle">Enter translations for each language</div>
+                </div>
+                <button class="modal-close" onclick="closeTranslationsModal()"><i class="bi bi-x"></i></button>
+            </div>
+            <div class="lang-tabs">
+                <div class="lang-tab active" onclick="switchLangTab('te', this)">Telugu (తెలుగు)</div>
+                <div class="lang-tab" onclick="switchLangTab('hi', this)">Hindi (हिन्दी)</div>
+            </div>
+            <div class="modal-body">
+                <div class="lang-panel active" id="lang-panel-te">
+                    <div class="field-group">
+                        <label class="field-label">What it is</label>
+                        <textarea class="field-input field-textarea" id="te-what" placeholder="ఈ సేవ ఏమిటి?"></textarea>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Why you need it</label>
+                        <textarea class="field-input field-textarea" id="te-why" placeholder="ఇది ఎందుకు అవసరం?"></textarea>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">How it helps</label>
+                        <textarea class="field-input field-textarea" id="te-how" placeholder="ఇది ఎలా సహాయపడుతుంది?"></textarea>
+                    </div>
+                </div>
+                <div class="lang-panel" id="lang-panel-hi">
+                    <div class="field-group">
+                        <label class="field-label">What it is</label>
+                        <textarea class="field-input field-textarea" id="hi-what" placeholder="यह सेवा क्या है?"></textarea>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Why you need it</label>
+                        <textarea class="field-input field-textarea" id="hi-why" placeholder="इसकी आवश्यकता क्यों है?"></textarea>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">How it helps</label>
+                        <textarea class="field-input field-textarea" id="hi-how" placeholder="यह कैसे मदद करता है?"></textarea>
+                    </div>
+                </div>
+                <input type="hidden" id="trans-svc-id">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="closeTranslationsModal()">Cancel</button>
+                <button class="btn-action primary-action" id="trans-save-btn" onclick="submitTranslations()">
+                    <i class="bi bi-translate" style="margin-right:6px;"></i>Save Translations
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ TOAST CONTAINER ═══════════════ -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="/js/admin.js"></script>
+    <script>
+        // Show mobile hamburger on small screens
+        if (window.innerWidth <= 768) {
+            document.getElementById('mobile-toggle').style.display = 'flex';
+        }
+        window.addEventListener('resize', () => {
+            document.getElementById('mobile-toggle').style.display =
+                window.innerWidth <= 768 ? 'flex' : 'none';
+        });
+    </script>
+</body>
+</html>

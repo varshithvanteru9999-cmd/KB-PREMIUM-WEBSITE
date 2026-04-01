@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful | KB Beauty</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .result-central {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+        }
+        .result-card {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(20, 14, 32, 0.88);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            border-radius: 1.5rem;
+            padding: 2.5rem 2.2rem;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.75), inset 0 1px 0 rgba(252,246,186,0.06);
+        }
+        .success-icon {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, #bf953f, #fcf6ba, #d4af37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 16px rgba(212,175,55,0.5));
+            margin-bottom: 1rem;
+        }
+        .result-card h1 {
+            font-family: 'Playfair Display', serif;
+            background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 40%, #d4af37 70%, #bf953f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+        }
+        .result-card p {
+            color: #e8d5a0;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+        .txn-box {
+            background: rgba(30,20,50,0.6);
+            border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 0.8rem;
+            padding: 0.9rem 1.2rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.82rem;
+            color: #c8a060;
+            text-align: left;
+            word-break: break-all;
+        }
+        .txn-box span { color: #fcf6ba; font-weight: 700; }
+    </style>
+</head>
+<body class="reveal active">
+    <div class="gradient-bg"></div>
+    <div class="gradient-bg-mid"></div>
+
+    <div class="result-central">
+        <div class="result-card">
+            <div class="success-icon"><i class="bi bi-check-circle-fill"></i></div>
+            <h1>Payment Successful</h1>
+            <p>Your appointment is confirmed. We look forward to seeing you at KB Beauty Salons.</p>
+
+            <div class="txn-box" id="txn-info"></div>
+
+            <a href="/dashboard.html" class="btn-premium" style="display:inline-block; padding: 1rem 2.5rem; margin-bottom: 0.8rem;">View My Dashboard</a>
+            <br>
+            <a href="/" style="display:inline-block; margin-top:0.5rem; color:#9a7840; font-size:0.88rem; text-decoration:none;">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        // PayU POSTs params to this page
+        const p = new URLSearchParams(window.location.search);
+        const txnid  = p.get('txnid')  || document.referrer;
+        const status = p.get('status') || 'Success';
+        const amount = p.get('amount');
+        const box = document.getElementById('txn-info');
+        if (txnid || amount) {
+            box.innerHTML = `
+                ${txnid  ? `Transaction ID: <span>${txnid}</span><br>` : ''}
+                ${amount ? `Amount Paid: <span>₹${parseFloat(amount).toFixed(2)}</span>` : ''}
+            `;
+        } else {
+            box.style.display = 'none';
+        }
+    </script>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+        <div class="footer-main">
+            <div class="footer-brand">
+                <img src="/images/kb logo.png" alt="KB Beauty Logo" class="footer-logo">
+                <p class="footer-proprietor">Proprietor: <strong id="footer-proprietor-name">SHAIK SHAHID</strong></p>
+                <a id="footer-phone-link" href="tel:+919640401112" class="footer-phone">
+                    <i class="bi bi-telephone-fill"></i> <span id="footer-phone-text">+91 96404 01112</span>
+                </a>
+                <a id="footer-whatsapp-link" href="https://wa.me/919640401112" class="footer-whatsapp-btn" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-whatsapp"></i> Chat on WhatsApp
+                </a>
+            </div>
+            <div class="footer-location">
+                <h4>Location</h4>
+                <p>3RD FLOOR, VKB RESIDENCY,<br>Kurnool Rd, near bus stand,<br>Vantavari colony, Ongole,<br>Andhra Pradesh 523001.</p>
+                <a href="#" class="footer-map-btn" id="footer-map-btn" target="_blank" rel="noopener noreferrer" style="display:none;">
+                    <i class="bi bi-geo-alt-fill"></i> VIEW ON MAP
+                </a>
+            </div>
+            <div class="footer-social">
+                <h4>Follow Us</h4>
+                <div class="footer-social-icons" id="footer-social-icons"></div>
+                <div style="margin-top:1.5rem;">
+                  <h4 style="font-size:0.9rem;letter-spacing:1.5px;color:#9a7840;text-transform:uppercase;font-family:'Outfit',sans-serif;margin-bottom:0.7rem;">Legal</h4>
+                  <div style="display:flex;flex-direction:column;gap:0.4rem;">
+                    <a href="/privacy-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Privacy Policy</a>
+                    <a href="/terms.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Terms &amp; Conditions</a>
+                    <a href="/refund-policy.html" style="color:#c8a050;font-size:0.85rem;text-decoration:none;" onmouseover="this.style.color='#f5e6b8'" onmouseout="this.style.color='#c8a050'">Refund &amp; Cancellation</a>
+                  </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Designed &amp; Built By: <strong>VARUN VANTERU</strong></p>
+            <div class="footer-bottom-contact">
+                <a href="tel:+918125179109"><i class="bi bi-telephone-fill"></i> +91 8125179109</a>
+                <a href="https://wa.me/918125179109" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+    (function() {
+        fetch('/api/settings').then(r => r.json()).then(data => {
+            const c = document.getElementById('footer-social-icons');
+            if (c) {
+                [
+                    { key: 'social_instagram', icon: 'bi-instagram', label: 'Instagram' },
+                    { key: 'social_facebook',  icon: 'bi-facebook',  label: 'Facebook'  },
+                    { key: 'social_youtube',   icon: 'bi-youtube',   label: 'YouTube'   },
+                    { key: 'social_twitter',   icon: 'bi-twitter-x', label: 'Twitter/X' },
+                    { key: 'social_whatsapp',  icon: 'bi-whatsapp',  label: 'WhatsApp'  },
+                    { key: 'social_tiktok',    icon: 'bi-tiktok',    label: 'TikTok'    },
+                ].forEach(({ key, icon, label }) => {
+                    const url = data[key];
+                    if (url && url.trim()) {
+                        const a = document.createElement('a');
+                        a.href = url.trim(); a.target = '_blank'; a.rel = 'noopener noreferrer';
+                        a.className = 'footer-social-link'; a.setAttribute('aria-label', label);
+                        a.innerHTML = `<i class="bi ${icon}"></i>`;
+                        c.appendChild(a);
+                    }
+                });
+            }
+            const mapBtn = document.getElementById('footer-map-btn');
+            if (mapBtn && data.maps_url && data.maps_url.trim()) {
+                mapBtn.href = data.maps_url.trim();
+                mapBtn.style.display = 'inline-flex';
+            }
+        }).catch(() => {});
+    })();
+    </script>
+</body>
+</html>
