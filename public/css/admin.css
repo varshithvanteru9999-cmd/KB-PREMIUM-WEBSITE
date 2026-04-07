@@ -1218,6 +1218,25 @@ td.action-btns { white-space: nowrap; }
 .gender-badge.men   { background: rgba(64,160,255,0.12); color: #60b8ff; border: 1px solid rgba(64,160,255,0.2); }
 .gender-badge.women { background: rgba(255,130,190,0.12); color: #ff8ec8; border: 1px solid rgba(255,130,190,0.2); }
 
+/* ── Date pill/theme styling ──────────────────────────────── */
+.appt-date-pill {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    background: rgba(212,175,55,0.06);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 6px;
+    color: var(--gold-standard);
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+.appt-date-pill:hover {
+    background: rgba(212,175,55,0.1);
+    border-color: rgba(212,175,55,0.4);
+    box-shadow: 0 0 10px rgba(212,175,55,0.1);
+}
+
 /* ── Category image card gender label ─────────────────────── */
 .cat-gender-chip {
     position: absolute;
@@ -1659,4 +1678,61 @@ td.action-btns { white-space: nowrap; }
     .gallery-mgmt-grid  { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
     .gallery-upload-inner { flex-direction: column; }
     .gallery-upload-preview-img { width: 100%; height: 160px; }
+}
+
+/* ── Appointments Filter ── */
+.appt-filter-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.appt-filter-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.appt-filter-input-wrap i {
+    position: absolute;
+    left: 12px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    pointer-events: none;
+}
+#appt-date-filter {
+    padding: 0.55rem 1rem 0.55rem 2.4rem;
+    background: rgba(30,20,5,0.45);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-main);
+    font-size: 0.82rem;
+    width: 260px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+#appt-date-filter:hover {
+    border-color: var(--gold-standard);
+    background: rgba(30,20,5,0.65);
+}
+#appt-date-filter:focus {
+    outline: none;
+    border-color: var(--gold-standard);
+    box-shadow: 0 0 12px rgba(212,175,55,0.15);
+}
+.btn-clear {
+    background: rgba(224,112,96,0.1);
+    border: 1px solid rgba(224,112,96,0.25);
+    color: var(--danger);
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: var(--transition);
+}
+.btn-clear:hover {
+    background: rgba(224,112,96,0.2);
+    border-color: var(--danger);
 }

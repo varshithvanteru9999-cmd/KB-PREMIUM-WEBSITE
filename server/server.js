@@ -349,7 +349,7 @@ app.get('/api/categories', async (req, res) => {
             query += ' WHERE gender = $1';
             params.push(gender);
         }
-        query += ' ORDER BY category_id';
+        query += " ORDER BY CASE WHEN name = 'Haircut' THEN 0 ELSE 1 END, category_id";
         const result = await db.query(query, params);
         res.json(result.rows);
     } catch (err) {
@@ -401,6 +401,7 @@ app.get('/api/services', async (req, res) => {
             }
         }
 
+        query += " ORDER BY CASE WHEN s.name = 'Hair Cut' THEN 0 ELSE 1 END, s.service_id";
         const result = await db.query(query, params);
         res.json(result.rows);
     } catch (err) {
@@ -846,14 +847,39 @@ app.delete('/api/admin/gallery/:id', authenticateToken, isAdmin, async (req, res
 
 app.get('/api/admin/stats', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const bookings = await db.query('SELECT COUNT(*) AS count FROM appointments');
-        const revenue = await db.query('SELECT SUM(total_cost) AS sum FROM appointments WHERE status = "Completed"');
-        const customers = await db.query('SELECT COUNT(*) AS count FROM customers');
+        const { from, to } = req.query;
+        let whereClause = '';
+        let params = [];
+
+        if (from && to) {
+            whereClause = ' AND appointment_date BETWEEN ? AND ?';
+            params = [from, to];
+        } else if (from) {
+            whereClause = ' AND appointment_date >= ?';
+            params = [from];
+        } else if (to) {
+            whereClause = ' AND appointment_date <= ?';
+            params = [to];
+        }
+
+        const activeBookings  = await db.query('SELECT COUNT(*) AS count FROM appointments WHERE status IN ("Pending", "Confirmed")' + whereClause, params);
+        const globalBookings  = await db.query('SELECT COUNT(*) AS count FROM appointments WHERE 1=1' + whereClause, params);
+        const totalRevenue    = await db.query('SELECT SUM(total_cost) AS sum FROM appointments WHERE status = "Completed"' + whereClause, params);
+        const activeCustomers  = await db.query('SELECT COUNT(DISTINCT customer_id) AS count FROM appointments WHERE status = "Confirmed"' + whereClause, params);
+        
+        let globalCustomers;
+        if (whereClause) {
+            globalCustomers = await db.query('SELECT COUNT(DISTINCT customer_id) AS count FROM appointments WHERE 1=1' + whereClause, params);
+        } else {
+            globalCustomers = await db.query('SELECT COUNT(*) AS count FROM customers');
+        }
         
         res.json({
-            totalBookings:  parseInt(bookings.rows[0]?.count  || 0),
-            totalRevenue:   parseFloat(revenue.rows[0]?.sum   || 0),
-            totalCustomers: parseInt(customers.rows[0]?.count || 0)
+            activeBookings:  parseInt(activeBookings.rows[0]?.count  || 0),
+            globalBookings:  parseInt(globalBookings.rows[0]?.count  || 0),
+            totalRevenue:    parseFloat(totalRevenue.rows[0]?.sum    || 0),
+            activeCustomers: parseInt(activeCustomers.rows[0]?.count || 0),
+            globalCustomers: parseInt(globalCustomers.rows[0]?.count || 0)
         });
     } catch (err) {
         console.error('[GET /api/admin/stats]', err.message);
@@ -1338,19 +1364,19 @@ app.post('/api/admin/appointments/create', authenticateToken, isAdmin, async (re
         // Upsert customer
         let customerId;
         const existing = await client.query(
-            'SELECT customer_id, password_hash FROM customers WHERE mobile_number = ?',
+            'SELECT customer_id, password_hash FROM customers WHERE mobile_number = $1',
             [customerInfo.mobile_number]
         );
-        if (existing.length) {
-            customerId = existing[0].customer_id;
+        if (existing.rows && existing.rows.length > 0) {
+            customerId = existing.rows[0].customer_id;
             await client.query(
-                'UPDATE customers SET name=?, email=COALESCE(?,email) WHERE customer_id=?',
+                'UPDATE customers SET name=$1, email=COALESCE($2,email) WHERE customer_id=$3',
                 [customerInfo.name, customerInfo.email || null, customerId]
             );
             // Set password if not yet set
-            if (!existing[0].password_hash) {
+            if (!existing.rows[0].password_hash) {
                 await client.query(
-                    'UPDATE customers SET password_hash=? WHERE customer_id=?',
+                    'UPDATE customers SET password_hash=$1 WHERE customer_id=$2',
                     [hashPassword(customerInfo.mobile_number), customerId]
                 );
             }

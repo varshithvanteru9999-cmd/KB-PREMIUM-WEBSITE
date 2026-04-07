@@ -17,6 +17,20 @@ function _fmtTime12(t) {
     return `${hr}:${String(m).padStart(2,'0')} ${ampm}`;
 }
 
+function _fmtDateDDMMYYYY(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) {
+        // Fallback for simple YYYY-MM-DD strings
+        const parts = String(dateStr).slice(0, 10).split('-');
+        if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+}
+
 function toggleAdminTimeDrop(prefix) {
     const trigger  = document.getElementById(`${prefix}-time-trigger`);
     const dropdown = document.getElementById(`${prefix}-time-dropdown`);
@@ -230,8 +244,8 @@ async function confirmAppointment(id) {
     if (!ok) return;
     const res = await apiFetch(`/api/admin/appointments/${id}/confirm`, { method: 'POST' });
     if (res?.success) {
-        toast('Appointment confirmed.', 'success');
-        loadAppointments(); loadDashboard();
+        toast('Slot confirmed.', 'success');
+        loadDashboard();
     } else {
         toast('Failed: ' + (res?.error || 'Unknown error'), 'error');
     }
@@ -431,15 +445,22 @@ function toggleSidebar() {
 /* ── Global appointment cache (for edit drawer) ───────────── */
 let _allAppts         = [];
 let _editApptServices = [];
+let _apptDateFrom     = null; // YYYY-MM-DD
+let _apptDateTo       = null; // YYYY-MM-DD
+let _fpApptFrom       = null;
+let _fpApptTo         = null;
 
 /* ── Dashboard ────────────────────────────────────────────── */
 async function loadDashboard() {
     const stats = await apiFetch('/api/admin/stats');
     if (!stats) return;
 
-    document.getElementById('stat-bookings').textContent  = stats.totalBookings  ?? 0;
-    document.getElementById('stat-revenue').textContent   = '₹' + (stats.totalRevenue ?? 0);
-    document.getElementById('stat-customers').textContent = stats.totalCustomers ?? 0;
+    if (document.getElementById('stat-bookings')) {
+        document.getElementById('stat-bookings').textContent  = stats.activeBookings  ?? 0;
+    }
+    if (document.getElementById('stat-customers')) {
+        document.getElementById('stat-customers').textContent = stats.activeCustomers ?? 0;
+    }
 
     const appts = await apiFetch('/api/admin/appointments');
     if (!appts) return;
@@ -449,7 +470,16 @@ async function loadDashboard() {
     const tbody = document.querySelector('#recent-appointments-table tbody');
     if (!tbody) return;
 
-    tbody.innerHTML = appts.slice(0, 5).map(a => renderApptRow(a)).join('');
+    // Dashboard: show only Pending and Confirmed appointments (waiting for completion/payment)
+    // Sorted by appointment_id descending to show the most recent bookings first
+    const active = appts
+        .filter(a => a.status === 'Pending' || a.status === 'Confirmed')
+        .sort((a, b) => b.appointment_id - a.appointment_id);
+    if (!active.length) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#9a7840;padding:2rem;font-size:0.88rem;letter-spacing:1px;"><i class="bi bi-check-circle" style="margin-right:6px;color:#6fcf8a;"></i>No pending tasks</td></tr>`;
+    } else {
+        tbody.innerHTML = active.map(a => renderApptRow(a)).join('');
+    }
 }
 
 /* ── Shared appointment row renderer ─────────────────────── */
@@ -464,7 +494,7 @@ function renderApptRow(a) {
     <tr>
         <td>${a.customer_name}</td>
         <td>${a.customer_mobile || a.mobile_number || '—'}</td>
-        <td>${String(a.appointment_date).slice(0,10)}</td>
+        <td><span class="appt-date-pill">${_fmtDateDDMMYYYY(a.appointment_date)}</span></td>
         <td>${a.appointment_time?.slice(0, 5)}</td>
         <td>₹${Number(a.total_cost).toLocaleString('en-IN')}${promoDisc > 0 ? `<br><span style="font-size:0.72rem;color:#6fcf8a;"><i class="bi bi-ticket-perforated"></i> ${a.discount_code} −₹${promoDisc.toLocaleString('en-IN')}</span>` : ''}${manualDisc > 0 ? `<br><span style="font-size:0.72rem;color:#a8e6b8;"><i class="bi bi-person-check"></i> Manual ${a.manual_discount_type === 'percent' ? '(%)' : '(Fixed)'} −₹${manualDisc.toLocaleString('en-IN')}</span>` : ''}</td>
         <td style="color:${adv > 0 ? '#6fcf8a' : '#9a7840'}">₹${adv.toLocaleString('en-IN')}</td>
@@ -656,8 +686,12 @@ async function collectPayment(id, balance, total) {
     if (res?.success) {
         const totalDisc = _promoDisc + formValues.manual_discount_amount;
         const discNote = totalDisc > 0 ? ` | Total discount: ₹${totalDisc.toLocaleString('en-IN')}` : '';
-        toast(`₹${formValues.amount.toLocaleString('en-IN')} collected via ${formValues.method}.${discNote} ${res.new_status === 'Completed' ? 'Appointment Completed!' : ''}`, 'success');
-        loadDashboard(); loadAppointments();
+        toast(`₹${formValues.amount.toLocaleString('en-IN')} collected via ${formValues.method}.${discNote} ${res.new_status === 'Completed' ? 'Appointment Completed! Moving to Appointments.' : ''}`, 'success');
+        
+        // Switch to Appointments tab so admin sees the updated status
+        const apptNavLink = document.querySelector(`.nav-link[onclick*="'appointments'"]`);
+        switchTab('appointments', apptNavLink);
+        loadDashboard();
     } else {
         toast('Failed: ' + (res?.error || 'Unknown error'), 'error');
     }
@@ -1097,15 +1131,59 @@ async function submitTranslations() {
 
 /* ── Appointments ─────────────────────────────────────────── */
 async function loadAppointments() {
+    let statsUrl = '/api/admin/stats';
+    if (_apptDateFrom || _apptDateTo) {
+        statsUrl += `?from=${_apptDateFrom || ''}&to=${_apptDateTo || ''}`;
+    }
+    const stats = await apiFetch(statsUrl);
+    if (stats) {
+        if (document.getElementById('appt-stat-bookings'))  document.getElementById('appt-stat-bookings').textContent  = stats.globalBookings ?? 0;
+        if (document.getElementById('appt-stat-revenue'))   document.getElementById('appt-stat-revenue').textContent   = '₹' + (stats.totalRevenue ?? 0).toLocaleString('en-IN');
+        if (document.getElementById('appt-stat-customers')) document.getElementById('appt-stat-customers').textContent = stats.globalCustomers ?? 0;
+    }
+
     const appts = await apiFetch('/api/admin/appointments');
     if (!appts) return;
 
     _allAppts = appts;
-
     const tbody = document.querySelector('#all-appointments-table tbody');
     if (!tbody) return;
 
-    tbody.innerHTML = appts.map(a => renderApptRow(a)).join('');
+    // Filter out Pending appointments AND Confirmed appointments with a balance
+    const visible = appts.filter(a => {
+        if (a.status === 'Pending') return false;
+        
+        const adv        = parseFloat(a.advance_paid          || 0);
+        const promoDisc  = parseFloat(a.discount_amount       || 0);
+        const manualDisc = parseFloat(a.manual_discount_amount || 0);
+        const disc       = promoDisc + manualDisc;
+        const bal        = Math.max(0, parseFloat(a.total_cost || 0) - disc - adv);
+        
+        // If it's Confirmed but still has a balance, it's still being processed on dashboard
+        if (a.status === 'Confirmed' && bal > 0) return false;
+        
+        // Date Range Filter
+        if (_apptDateFrom || _apptDateTo) {
+            const rowDate = String(a.appointment_date).slice(0, 10);
+            if (_apptDateFrom && rowDate < _apptDateFrom) return false;
+            if (_apptDateTo   && rowDate > _apptDateTo)   return false;
+        }
+
+        return true;
+    }).sort((a, b) => b.appointment_id - a.appointment_id);
+    tbody.innerHTML = visible.map(a => renderApptRow(a)).join('');
+
+    // Toggle Clear button visibility
+    const clearBtn = document.getElementById('appt-filter-clear');
+    if (clearBtn) clearBtn.style.display = (_apptDateFrom || _apptDateTo) ? 'flex' : 'none';
+}
+
+function clearApptDateFilter() {
+    _apptDateFrom = null;
+    _apptDateTo   = null;
+    if (_fpApptFrom) _fpApptFrom.clear();
+    if (_fpApptTo)   _fpApptTo.clear();
+    loadAppointments();
 }
 
 async function downloadAdminInvoice(id) {
@@ -1416,7 +1494,11 @@ function closeEditApptDrawer() {
 let _newApptServices = [];
 let _newApptSearchTimer = null;
 
-async function openNewApptDrawer() {
+async function openNewApptDrawer(el) {
+    if (el) {
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        el.classList.add('active');
+    }
     // Reset form
     _newApptServices = [];
     document.getElementById('new-appt-cust-search').value = '';
@@ -1443,7 +1525,8 @@ async function openNewApptDrawer() {
         onChange: (_, dateStr) => { if (dateStr) _populateAdminTimeSlots('new-appt', dateStr); }
     });
 
-    openFormPage('new-appt-page', 'appointments');
+    const currentTab = localStorage.getItem('adminTab') || 'dashboard';
+    openFormPage('new-appt-page', currentTab);
     _loadSvcDropdown('new-appt');
     setTimeout(() => document.getElementById('new-appt-cust-search').focus(), 80);
 }
@@ -1574,9 +1657,12 @@ async function submitNewAppt() {
     btn.classList.remove('btn-loading');
 
     if (res?.success) {
-        toast(`Appointment #${res.appointmentId} created successfully!`, 'success');
+        toast(`Appointment #${res.appointmentId} created! Opening payment...`, 'success');
         closeNewApptDrawer();
-        loadAppointments();
+        // Wait for list to sync so collectPayment can find the new ID in _allAppts
+        await loadAppointments();
+        // Trigger the payment popup immediately
+        collectPayment(res.appointmentId, totalCost, totalCost);
     } else {
         toast('Failed: ' + (res?.error || 'Unknown error'), 'error');
     }
@@ -2364,4 +2450,73 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedTab = localStorage.getItem('adminTab') || 'dashboard';
     const savedNavLink = document.querySelector(`.nav-link[onclick*="'${savedTab}'"]`);
     switchTab(savedTab, savedNavLink);
+
+    // Init All Appointments Date Range Filters (Flatpickr)
+    const _commonPickerConfig = (targetVarName, instanceName) => ({
+        dateFormat: 'd-m-Y',
+        allowInput: true,
+        onReady: (selectedDates, dateStr, instance) => {
+            instance.input.removeAttribute('readonly');
+            instance.input.addEventListener('blur', (e) => {
+                const val = e.target.value;
+                if (!val) {
+                    window[targetVarName] = null;
+                    loadAppointments();
+                } else {
+                    const d = instance.parseDate(val, 'd-m-Y');
+                    if (d) {
+                        window[targetVarName] = instance.formatDate(d, 'Y-m-d');
+                        loadAppointments();
+                    }
+                }
+            });
+        },
+        onChange: (selectedDates, dateStr, instance) => {
+            window[targetVarName] = selectedDates.length > 0 ? instance.formatDate(selectedDates[0], 'Y-m-d') : null;
+            loadAppointments();
+        }
+    });
+
+    // Helper to allow updating global variables from within the config closure
+    // Since these are defined with 'let' and not 'window.var', I'll just write them out explicitly instead of using window[prop] to be safe with closure scoping.
+    
+    _fpApptFrom = flatpickr('#appt-date-from', {
+        dateFormat: 'd-m-Y',
+        allowInput: true,
+        onReady: (selectedDates, dateStr, instance) => {
+            instance.input.removeAttribute('readonly');
+            instance.input.addEventListener('blur', (e) => {
+                const val = e.target.value;
+                if (!val) { _apptDateFrom = null; loadAppointments(); } 
+                else {
+                    const d = instance.parseDate(val, 'd-m-Y');
+                    if (d) { _apptDateFrom = instance.formatDate(d, 'Y-m-d'); loadAppointments(); }
+                }
+            });
+        },
+        onChange: (selectedDates, dateStr, instance) => {
+            _apptDateFrom = selectedDates.length > 0 ? instance.formatDate(selectedDates[0], 'Y-m-d') : null;
+            loadAppointments();
+        }
+    });
+
+    _fpApptTo = flatpickr('#appt-date-to', {
+        dateFormat: 'd-m-Y',
+        allowInput: true,
+        onReady: (selectedDates, dateStr, instance) => {
+            instance.input.removeAttribute('readonly');
+            instance.input.addEventListener('blur', (e) => {
+                const val = e.target.value;
+                if (!val) { _apptDateTo = null; loadAppointments(); }
+                else {
+                    const d = instance.parseDate(val, 'd-m-Y');
+                    if (d) { _apptDateTo = instance.formatDate(d, 'Y-m-d'); loadAppointments(); }
+                }
+            });
+        },
+        onChange: (selectedDates, dateStr, instance) => {
+            _apptDateTo = selectedDates.length > 0 ? instance.formatDate(selectedDates[0], 'Y-m-d') : null;
+            loadAppointments();
+        }
+    });
 });

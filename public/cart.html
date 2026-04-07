@@ -446,36 +446,6 @@
             </div>
         </div>
     </footer>
-    <script>
-    (function() {
-        fetch('/api/settings').then(r => r.json()).then(data => {
-            const c = document.getElementById('footer-social-icons');
-            if (c) {
-                [
-                    { key: 'social_instagram', icon: 'bi-instagram', label: 'Instagram' },
-                    { key: 'social_facebook',  icon: 'bi-facebook',  label: 'Facebook'  },
-                    { key: 'social_youtube',   icon: 'bi-youtube',   label: 'YouTube'   },
-                    { key: 'social_twitter',   icon: 'bi-twitter-x', label: 'Twitter/X' },
-                    { key: 'social_whatsapp',  icon: 'bi-whatsapp',  label: 'WhatsApp'  },
-                    { key: 'social_tiktok',    icon: 'bi-tiktok',    label: 'TikTok'    },
-                ].forEach(({ key, icon, label }) => {
-                    const url = data[key];
-                    if (url && url.trim()) {
-                        const a = document.createElement('a');
-                        a.href = url.trim(); a.target = '_blank'; a.rel = 'noopener noreferrer';
-                        a.className = 'footer-social-link'; a.setAttribute('aria-label', label);
-                        a.innerHTML = `<i class="bi ${icon}"></i>`;
-                        c.appendChild(a);
-                    }
-                });
-            }
-            const mapBtn = document.getElementById('footer-map-btn');
-            if (mapBtn && data.maps_url && data.maps_url.trim()) {
-                mapBtn.href = data.maps_url.trim();
-                mapBtn.style.display = 'inline-flex';
-            }
-        }).catch(() => {});
-    })();
-    </script>
+    <script src="/js/main.js"></script>
 </body>
 </html>

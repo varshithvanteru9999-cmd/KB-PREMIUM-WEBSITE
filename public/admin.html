@@ -295,6 +295,12 @@
                         <span class="nav-label">Appointments</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tooltip="Billing" onclick="openNewApptDrawer(this)">
+                        <span class="nav-icon"><i class="bi bi-receipt"></i></span>
+                        <span class="nav-label">Billing</span>
+                    </a>
+                </li>
             </ul>
         </div>
 
@@ -389,13 +395,7 @@
                             <span class="stat-label">Total Bookings</span>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="bi bi-currency-rupee"></i></div>
-                        <div class="stat-info">
-                            <span class="stat-val" id="stat-revenue">₹0</span>
-                            <span class="stat-label">Total Revenue</span>
-                        </div>
-                    </div>
+
                     <div class="stat-card">
                         <div class="stat-icon"><i class="bi bi-people"></i></div>
                         <div class="stat-info">
@@ -430,12 +430,45 @@
 
             <!-- ── Appointments ── -->
             <section id="appointments-view" style="display:none;">
+                <div class="stats-grid" style="margin-bottom:1.5rem;">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-calendar-check"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-val" id="appt-stat-bookings">0</span>
+                            <span class="stat-label">Total Bookings</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-currency-rupee"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-val" id="appt-stat-revenue">0</span>
+                            <span class="stat-label">Total Revenue</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-people"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-val" id="appt-stat-customers">0</span>
+                            <span class="stat-label">Total Customers</span>
+                        </div>
+                    </div>
+                </div>
                 <div class="table-container">
                     <div class="table-header">
                         <h2>All Appointments</h2>
-                        <button class="btn-action primary-action" onclick="openNewApptDrawer()" style="padding:0.55rem 1.2rem;font-size:0.82rem;">
-                            <i class="bi bi-plus-lg" style="margin-right:6px;"></i>New Appointment
-                        </button>
+                        <div class="appt-filter-controls">
+                            <div class="appt-filter-input-wrap">
+                                <i class="bi bi-calendar3"></i>
+                                <input type="text" id="appt-date-from" placeholder="From Date">
+                            </div>
+                            <div class="appt-filter-input-wrap">
+                                <i class="bi bi-calendar3"></i>
+                                <input type="text" id="appt-date-to" placeholder="To Date">
+                            </div>
+                            <button id="appt-filter-clear" class="btn-clear" onclick="clearApptDateFilter()" style="display:none;">
+                                <i class="bi bi-x-lg"></i> Clear
+                            </button>
+                        </div>
                     </div>
                     <div class="table-scroll">
                         <table id="all-appointments-table">
@@ -944,7 +977,7 @@
             <div class="breadcrumb-nav">
                 <span class="bc-link" onclick="closeNewApptDrawer()">Appointments</span>
                 <i class="bi bi-chevron-right bc-sep"></i>
-                <span class="bc-current">New Appointment</span>
+                <span class="bc-current">Billing / New Order</span>
             </div>
         </div>
         <div class="form-page-body">
@@ -1045,7 +1078,7 @@
         <div class="form-page-actions">
             <button class="btn-ghost" onclick="closeNewApptDrawer()">Cancel</button>
             <button class="btn-action primary-action" id="new-appt-btn" onclick="submitNewAppt()">
-                <i class="bi bi-calendar-check" style="margin-right:6px;"></i>Create Appointment
+                <i class="bi bi-cash-stack" style="margin-right:6px;"></i>Pay Bill
             </button>
         </div>
     </section>

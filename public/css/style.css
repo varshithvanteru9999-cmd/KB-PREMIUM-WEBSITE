@@ -694,6 +694,10 @@ nav a:hover::after { width: 100%; }
     right: 0;
     background: linear-gradient(to left, var(--bg-light), transparent);
 }
+.gallery-strip::before, .gallery-strip::after {
+    pointer-events: none;
+    z-index: 2;
+}
 
 .gallery-track {
     display: flex;
@@ -702,7 +706,7 @@ nav a:hover::after { width: 100%; }
     animation: scrollGallery 40s linear infinite;
 }
 
-.gallery-track:hover {
+.gallery-strip:hover .gallery-track {
     animation-play-state: paused;
 }
 
