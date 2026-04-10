@@ -106,12 +106,10 @@ module.exports = function mountSchedulingRoutes(app, db, { authenticateToken, is
 
             const settings = await loadSettings();
 
-            // ── Slot must be on the valid booking grid ────────────────────────
-            const validSlots = generateSlots(settings, appointmentDate);
-            const timeKey    = appointmentTime.slice(0, 5);
-            if (!validSlots.includes(timeKey)) {
-                return res.status(400).json({ success: false, error: 'invalid_slot', message: 'Selected time is outside working hours or not a valid slot.' });
-            }
+            // ── Slot validation (relaxed for manual entry) ───────────────────
+            const timeKey = appointmentTime.slice(0, 5);
+            // We only require it to be a valid HH:MM string, which is checked by the regex above.
+            // Strict grid alignment is no longer enforced to support manual entry.
 
             // ── Load service details ──────────────────────────────────────────
             const svcIds  = services.map(s => parseInt(s.service_id));

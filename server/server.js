@@ -6,7 +6,7 @@ const cors = require('cors');
 const crypto = require('crypto');
 const multer = require('multer');
 const db = require('./db');
-const { sendInvoiceEmail, sendSlotConfirmationEmail } = require('./email');
+const { sendInvoiceEmail, sendSlotConfirmationEmail, sendDenialEmail, transporter } = require('./email');
 
 // Multer: store uploads in memory (we persist to PostgreSQL BYTEA)
 const upload = multer({
@@ -202,8 +202,8 @@ app.get('/api/customer/me', authenticateToken, async (req, res) => {
     try {
         const cust = await db.query('SELECT customer_id, name, email, mobile_number, created_at FROM customers WHERE customer_id = $1', [req.user.id]);
         if (!cust.rows.length) {
-            console.warn('[GET /api/customer/me] customer_not_found', { id: req.user.id });
-            return res.status(404).json({ error: 'Not found' });
+            console.warn('[GET /api/customer/me] customer_not_found (stale session)', { id: req.user.id });
+            return res.status(401).json({ error: 'Session invalid or account moved' });
         }
         console.log('[GET /api/customer/me] success', { id: cust.rows[0].customer_id, name: cust.rows[0].name });
         res.json(cust.rows[0]);
@@ -301,33 +301,38 @@ app.get('/api/customer/appointments', authenticateToken, async (req, res) => {
         );
 
         const appointments = result.rows.map(appt => {
-            // MySQL 8+ JSON_ARRAYAGG may return a JSON object OR a JSON string depending on driver settings.
-            // Explicitly parse it if it is a string to prevent frontend issues.
-            if (typeof appt.services === 'string') {
-                try { appt.services = JSON.parse(appt.services); } catch (e) { appt.services = []; }
-            }
-            if (!Array.isArray(appt.services)) appt.services = [];
+            try {
+                // Ensure services is always an array
+                if (typeof appt.services === 'string') {
+                    try { appt.services = JSON.parse(appt.services); } catch (e) { appt.services = []; }
+                }
+                if (!Array.isArray(appt.services)) appt.services = [];
 
-            const total       = parseFloat(appt.total_cost             || 0);
-            const disc        = parseFloat(appt.discount_amount        || 0);
-            const manualDisc  = parseFloat(appt.manual_discount_amount || 0);
-            const paid        = parseFloat(appt.advance_paid           || 0);
-            const netTotal         = Math.max(0, total - disc - manualDisc);
-            const required_advance = advType === 'percent'
-                ? parseFloat((netTotal * advValue / 100).toFixed(2))
-                : advValue;
-            const balance_advance = Math.max(0, required_advance - paid);
-            const balance_due     = Math.max(0, netTotal - paid);
-            return {
-                ...appt,
-                required_advance,
-                balance_advance,
-                balance_due,
-                // Show advance payment prompt: confirmed but advance not yet paid
-                show_payment_prompt:  appt.status === 'Confirmed' && balance_advance > 0,
-                // Show full balance payment: admin requested it, still has balance
-                show_balance_payment: appt.status === 'Confirmed' && appt.payment_requested && balance_due > 0,
-            };
+                const total       = parseFloat(appt.total_cost             || 0);
+                const disc        = parseFloat(appt.discount_amount        || 0);
+                const manualDisc  = parseFloat(appt.manual_discount_amount || 0);
+                const paid        = parseFloat(appt.advance_paid           || 0);
+                const netTotal         = Math.max(0, total - disc - manualDisc);
+                
+                const required_advance = advType === 'percent'
+                    ? parseFloat((netTotal * advValue / 100).toFixed(2))
+                    : advValue;
+                    
+                const balance_advance = Math.max(0, required_advance - paid);
+                const balance_due     = Math.max(0, netTotal - paid);
+                
+                return {
+                    ...appt,
+                    required_advance,
+                    balance_advance,
+                    balance_due,
+                    show_payment_prompt:  appt.status === 'Confirmed' && balance_advance > 0,
+                    show_balance_payment: appt.status === 'Confirmed' && appt.payment_requested && balance_due > 0,
+                };
+            } catch (mappingErr) {
+                console.error(`[GET /api/customer/appointments] Mapping error for Appt #${appt.appointment_id}:`, mappingErr.message);
+                return { ...appt, services: [], error: 'Failed to process details' };
+            }
         });
         console.log('[GET /api/customer/appointments] success', { count: appointments.length, customer_id: req.user.id });
         res.json(appointments);
@@ -340,7 +345,7 @@ app.get('/api/customer/appointments', authenticateToken, async (req, res) => {
 app.get('/api/categories', async (req, res) => {
     try {
         const { gender } = req.query;
-        const validGenders = ['men', 'women'];
+        const validGenders = ['men', 'women', 'tattoos'];
         let query = `SELECT category_id, name, gender, image_url, created_at,
                             CASE WHEN image_data IS NOT NULL THEN TRUE ELSE FALSE END AS has_image
                        FROM categories`;
@@ -349,7 +354,41 @@ app.get('/api/categories', async (req, res) => {
             query += ' WHERE gender = $1';
             params.push(gender);
         }
-        query += " ORDER BY CASE WHEN name = 'Haircut' THEN 0 ELSE 1 END, category_id";
+        query += ` ORDER BY 
+            CASE WHEN gender = 'women' THEN
+                CASE UPPER(name)
+                    WHEN 'THREADING' THEN 1
+                    WHEN 'WAXING' THEN 2
+                    WHEN 'BEAUTY SERVICES' THEN 3
+                    WHEN 'HAIR COLOURING' THEN 4
+                    WHEN 'HAIR COLOURINGS' THEN 4
+                    WHEN 'HAIR TREATMENT' THEN 5
+                    WHEN 'HAIR TREATMENTS' THEN 5
+                    WHEN 'HAIR SPA' THEN 6
+                    WHEN 'MANICURE & PEDICURE' THEN 7
+                    WHEN 'MANICURE&PEDICURE' THEN 7
+                    WHEN 'BRIDAL MAKEUP' THEN 8
+                    ELSE 20
+                END
+            ELSE
+                CASE UPPER(name)
+                    WHEN 'HAIRCUT' THEN 1
+                    WHEN 'BEARD' THEN 2
+                    WHEN 'KIDS' THEN 3
+                    WHEN 'BEAUTY' THEN 4
+                    WHEN 'MASSAGES' THEN 5
+                    WHEN 'HEAD OIL MASSAGE' THEN 6
+                    WHEN 'HAIR COLOURINGS' THEN 7
+                    WHEN 'HAIR COLOURING' THEN 7
+                    WHEN 'HAIR TREATMENT' THEN 8
+                    WHEN 'HAIR TREATMENTS' THEN 8
+                    WHEN 'PEDICURE' THEN 9
+                    WHEN 'MANICURE' THEN 10
+                    WHEN 'MAKEUP' THEN 11
+                    WHEN 'MAKE UP' THEN 11
+                    ELSE 20
+                END
+            END, category_id`;
         const result = await db.query(query, params);
         res.json(result.rows);
     } catch (err) {
@@ -369,7 +408,7 @@ app.get('/api/services', async (req, res) => {
         if (safeLang === 'en') {
             // English: just return base service columns
             query = `
-                SELECT s.*, c.name AS category_name
+                SELECT s.*, c.name AS category_name, c.gender
                 FROM services s
                 JOIN categories c ON s.category_id = c.category_id
                 WHERE s.is_enabled = true
@@ -384,7 +423,7 @@ app.get('/api/services', async (req, res) => {
             query = `
                 SELECT
                     s.*,
-                    c.name AS category_name,
+                    c.name AS category_name, c.gender,
                     COALESCE(t.description_what, s.description_what) AS description_what,
                     COALESCE(t.description_why,  s.description_why)  AS description_why,
                     COALESCE(t.description_how,  s.description_how)  AS description_how
@@ -401,7 +440,41 @@ app.get('/api/services', async (req, res) => {
             }
         }
 
-        query += " ORDER BY CASE WHEN s.name = 'Hair Cut' THEN 0 ELSE 1 END, s.service_id";
+        query += ` ORDER BY 
+            CASE WHEN c.gender = 'women' THEN
+                CASE UPPER(c.name)
+                    WHEN 'THREADING' THEN 1
+                    WHEN 'WAXING' THEN 2
+                    WHEN 'BEAUTY SERVICES' THEN 3
+                    WHEN 'HAIR COLOURING' THEN 4
+                    WHEN 'HAIR COLOURINGS' THEN 4
+                    WHEN 'HAIR TREATMENT' THEN 5
+                    WHEN 'HAIR TREATMENTS' THEN 5
+                    WHEN 'HAIR SPA' THEN 6
+                    WHEN 'MANICURE & PEDICURE' THEN 7
+                    WHEN 'MANICURE&PEDICURE' THEN 7
+                    WHEN 'BRIDAL MAKEUP' THEN 8
+                    ELSE 20
+                END
+            ELSE
+                CASE UPPER(c.name)
+                    WHEN 'HAIRCUT' THEN 1
+                    WHEN 'BEARD' THEN 2
+                    WHEN 'KIDS' THEN 3
+                    WHEN 'BEAUTY' THEN 4
+                    WHEN 'MASSAGES' THEN 5
+                    WHEN 'HEAD OIL MASSAGE' THEN 6
+                    WHEN 'HAIR COLOURINGS' THEN 7
+                    WHEN 'HAIR COLOURING' THEN 7
+                    WHEN 'HAIR TREATMENT' THEN 8
+                    WHEN 'HAIR TREATMENTS' THEN 8
+                    WHEN 'PEDICURE' THEN 9
+                    WHEN 'MANICURE' THEN 10
+                    WHEN 'MAKEUP' THEN 11
+                    WHEN 'MAKE UP' THEN 11
+                    ELSE 20
+                END
+            END, CASE WHEN s.name = 'Hair Cut' THEN 0 ELSE 1 END, s.service_id`;
         const result = await db.query(query, params);
         res.json(result.rows);
     } catch (err) {
@@ -667,7 +740,7 @@ app.post('/api/admin/categories', authenticateToken, isAdmin, async (req, res) =
     try {
         const { name, gender } = req.body;
         if (!name || !name.trim()) return res.status(400).json({ error: 'Name is required' });
-        const validGenders = ['men', 'women'];
+        const validGenders = ['men', 'women', 'tattoos'];
         const safeGender = validGenders.includes(gender) ? gender : 'men';
         const r = await db.query(
             `INSERT INTO categories (name, gender) VALUES ($1, $2)`,
@@ -1001,6 +1074,25 @@ app.post('/api/admin/appointments/:id/deny', authenticateToken, isAdmin, async (
              VALUES ($1, 'admin', 'Pending', 'Cancelled', $2)`,
             [id, 'Admin denied: ' + note]
         );
+
+        // Send Denial Email
+        try {
+            const apptRes = await db.query(
+                `SELECT a.appointment_date, a.appointment_time, c.name, c.email
+                   FROM appointments a JOIN customers c ON c.customer_id = a.customer_id
+                  WHERE a.appointment_id = $1`, [id]
+            );
+            if (apptRes.rows.length && apptRes.rows[0].email) {
+                const fa = apptRes.rows[0];
+                sendDenialEmail(fa.email, {
+                    customerName:    fa.name,
+                    appointmentDate: fa.appointment_date,
+                    appointmentTime: fa.appointment_time,
+                    reason:          note
+                }).catch(e => console.error('[Email] Denial failed:', e.message));
+            }
+        } catch (e) { console.error('[Email] Load appt for deny failed:', e.message); }
+
         res.json({ success: true });
     } catch (err) {
         console.error('[POST /deny]', err.message);
@@ -1422,6 +1514,33 @@ app.post('/api/admin/appointments/create', authenticateToken, isAdmin, async (re
         );
 
         await client.query('COMMIT');
+
+        // Send Confirmation Email for Admin-Created Booking
+        if (customerInfo.email) {
+            try {
+                // Fetch full details for email
+                const fullAppt = await client.query(`
+                    SELECT a.appointment_date, a.appointment_time, c.name, c.email,
+                           (SELECT JSON_ARRAYAGG(JSON_OBJECT('service_name', s.name, 'quantity', aps.quantity))
+                              FROM appointment_services aps JOIN services s ON s.service_id = aps.service_id
+                             WHERE aps.appointment_id = a.appointment_id) AS services
+                      FROM appointments a JOIN customers c ON c.customer_id = a.customer_id
+                     WHERE a.appointment_id = $1`, [appointmentId]);
+                
+                if (fullAppt.rows.length) {
+                    const fa = fullAppt.rows[0];
+                    const baseUrl = `${req.protocol}://${req.get('host')}`;
+                    sendSlotConfirmationEmail(fa.email, {
+                        customerName:    fa.name,
+                        appointmentDate: fa.appointment_date,
+                        appointmentTime: fa.appointment_time,
+                        services:        fa.services || [],
+                        baseUrl
+                    }).catch(e => console.error('[Email] Admin-create notify failed:', e.message));
+                }
+            } catch (e) { console.error('[Email] Admin-create load failed:', e.message); }
+        }
+
         res.json({ success: true, appointmentId, customerId });
     } catch (err) {
         await client.query('ROLLBACK').catch(() => {});
@@ -1645,14 +1764,8 @@ app.put('/api/admin/settings', authenticateToken, isAdmin, async (req, res) => {
 //          /api/admin/settings/scheduling, /api/admin/services/:id/scheduling
 const mountSchedulingRoutes = require('./routes/scheduling');
 mountSchedulingRoutes(app, db, { authenticateToken, isAdmin, loadSettings, hashPassword, normalizeMobile });
+// Email transporters now imported from ./email
 const { buildInvoicePdf } = require('./email');
-const nodemailer = require('nodemailer');
-const emailTransporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-});
 
 // ── In-memory OTP store (TTL 10 min) ─────────────────────────────────────────
 const otpStore = new Map();
@@ -1687,7 +1800,7 @@ app.post('/api/auth/send-otp', async (req, res) => {
         const key  = `${norm}:${email.trim().toLowerCase()}`;
         otpStore.set(key, { otp, exp: Date.now() + 10 * 60 * 1000, name });
 
-        await emailTransporter.sendMail({
+        await transporter.sendMail({
             from: `"KB Beauty Salons" <${process.env.SMTP_USER}>`,
             to: email.trim(),
             subject: 'Your OTP — KB Beauty Salons',

@@ -249,6 +249,10 @@
             gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1.2rem;
         }
 
+        .appt-meta {
+            min-width: 200px;
+        }
+
         .appt-meta .appt-num {
             font-size: 0.68rem; letter-spacing: 2px; text-transform: uppercase;
             color: var(--text-muted); margin-bottom: 0.3rem;
@@ -311,6 +315,13 @@
         .fin-value.total { color: #fcf6ba; font-size: 1rem; }
         .fin-value.due   { color: #f0a040; }
         .fin-value.paid  { color: var(--success); }
+
+        @media (max-width: 480px) {
+            .fin-row { flex-wrap: wrap; gap: 4px; }
+            .fin-label { width: 100%; font-size: 0.82rem; }
+            .fin-value { width: 100%; text-align: left; }
+            .appt-meta .appt-datetime { font-size: 0.95rem; }
+        }
 
         /* Info banners */
         .info-banner {
@@ -505,7 +516,7 @@
             console.error('[apiFetch] Network error:', url, e.message);
             return null;
         }
-        if (res.status === 401 || res.status === 403) { logout(); return null; }
+        if (res.status === 401 || res.status === 403 || res.status === 404) { logout(); return null; }
         try { return await res.json(); } catch (e) { return null; }
     }
 
@@ -1345,8 +1356,9 @@
 
         // If server returned error objects instead of expected data
         if (profile.error || !Array.isArray(appts)) {
-            console.error('[init] API error:', profile.error || 'appointments is not an array', appts);
-            showLoadError('Server error loading data. Please try again later.');
+            const errDetail = (appts && appts.error) ? appts.error : (profile && profile.error) ? profile.error : 'Unknown error';
+            console.error('[init] API error:', errDetail, appts);
+            showLoadError(`Server error loading data: ${errDetail}`);
             return;
         }
 

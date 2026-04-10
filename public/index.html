@@ -15,6 +15,9 @@
     
     <header id="main-header">
         <a href="/"><img src="/images/kb logo.png" alt="KB Beauty Logo" class="logo-img"></a>
+        <button class="mobile-menu-btn" style="display:none;" onclick="document.querySelector('nav').classList.toggle('mobile-open')">
+            <i class="bi bi-list"></i>
+        </button>
         <nav>
             <a href="#services">Services</a>
             <a href="#gallery">Gallery</a>
@@ -53,6 +56,9 @@
             </button>
             <button class="gender-tab"         id="tab-women" onclick="switchSection('women')">
                 <i class="bi bi-person-fill-up"></i> Women
+            </button>
+            <button class="gender-tab"         id="tab-tattoos" onclick="switchSection('tattoos')">
+                <i class="bi bi-droplet-fill"></i> Tattoos
             </button>
         </div>
 

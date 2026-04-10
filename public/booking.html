@@ -370,13 +370,39 @@
         .promo-msg.success { color: #6fcf8a; }
         .promo-msg.error { color: #e07060; }
         .discount-row { color: #6fcf8a !important; font-weight: 800; }
+        /* ── AM/PM Toggle ── */
+        .ampm-toggle {
+            display: flex;
+            background: rgba(13,10,2,0.6);
+            border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            height: 100%;
+        }
+        .ampm-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            padding: 0 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .ampm-btn.active {
+            background: rgba(212,175,55,0.15);
+            color: #fcf6ba;
+        }
     </style>
 </head>
 <body class="reveal active">
     <div class="gradient-bg"></div>
     <div class="gradient-bg-mid"></div>
-    <header id="main-header" class="scrolled">
+    <header id="main-header">
         <a href="/"><img src="/images/kb logo.png" alt="KB Beauty Logo" class="logo-img"></a>
+        <button class="mobile-menu-btn" style="display:none;" onclick="document.querySelector('nav').classList.toggle('mobile-open')">
+            <i class="bi bi-list"></i>
+        </button>
         <nav>
             <a href="/dashboard.html" id="nav-dashboard" style="display:none;">My Dashboard</a>
             <a href="/login.html" class="btn-login" id="nav-login">Login</a>
@@ -517,11 +543,22 @@
                         <i class="bi bi-calendar3 fp-icon"></i>
                     </div>
                     <div class="time-select-wrap" id="time-picker-wrap">
-                        <div class="time-trigger" id="time-trigger" onclick="toggleTimeDropdown()">
-                            <span id="time-trigger-label">Select Time</span>
-                            <i class="bi bi-clock"></i>
+                        <div style="display:flex; gap:0.5rem; align-items:stretch; position:relative;">
+                            <div style="position:relative; flex:1;">
+                                <input type="text" id="appt-time-input" 
+                                       class="input-luxury" 
+                                       placeholder="e.g. 10:30"
+                                       onclick="toggleTimeDropdown()"
+                                       oninput="onManualTimeInput(this.value)"
+                                       autocomplete="off">
+                                <i class="bi bi-clock fp-icon" style="right:1rem; pointer-events:none;"></i>
+                                <div class="time-dropdown" id="time-dropdown"></div>
+                            </div>
+                            <div class="ampm-toggle">
+                                <button type="button" class="ampm-btn active" id="btn-am" onclick="setAmpm('AM')">AM</button>
+                                <button type="button" class="ampm-btn" id="btn-pm" onclick="setAmpm('PM')">PM</button>
+                            </div>
                         </div>
-                        <div class="time-dropdown" id="time-dropdown"></div>
                     </div>
                     <input type="hidden" id="appt-time">
                 </div>
@@ -1030,45 +1067,49 @@
         S.date = dateStr;
         S.time = '';
         document.getElementById('appt-time').value = '';
-        const wrap = document.getElementById('time-picker-wrap');
-        const trigger = document.getElementById('time-trigger');
-        const label   = document.getElementById('time-trigger-label');
+        const input = document.getElementById('appt-time-input');
         const dropdown= document.getElementById('time-dropdown');
-        label.textContent = 'Loading times…';
-        trigger.classList.remove('has-value','open');
+        input.value = '';
+        input.placeholder = 'Loading times…';
         dropdown.classList.remove('open');
         dropdown.innerHTML = '';
-        wrap.style.display = 'block';
+        document.getElementById('time-picker-wrap').style.display = 'block';
         try {
             const url = serviceId ? `/api/availability?date=${dateStr}&service_id=${serviceId}` : `/api/availability?date=${dateStr}`;
             const d   = await (await fetch(url)).json();
             const slots = d.slots || [];
-            if (!slots.length) { label.textContent = 'No times available for this date'; return; }
-            label.textContent = 'Select Time';
+            if (!slots.length) { input.placeholder = 'No times available for this date'; return; }
+            input.placeholder = 'Select or Type Time';
             dropdown.innerHTML = slots.map(s =>
                 `<div class="time-option" data-value="${s}" onclick="pickTime('${s}',this)">${fmtTime(s)}</div>`
             ).join('');
-        } catch(_) { label.textContent = 'Could not load times'; }
+        } catch(_) { input.placeholder = 'Could not load times'; }
     }
 
     function toggleTimeDropdown() {
-        const trigger  = document.getElementById('time-trigger');
         const dropdown = document.getElementById('time-dropdown');
         if (!dropdown.children.length) return;
         const open = dropdown.classList.contains('open');
         dropdown.classList.toggle('open', !open);
-        trigger.classList.toggle('open', !open);
+    }
+
+    function onManualTimeInput(val) {
+        // Just sync it to S.time for now; server will handle validation
+        S.time = val;
+        document.getElementById('appt-time').value = val;
     }
 
     function pickTime(value, el) {
         S.time = value;
         document.getElementById('appt-time').value = value;
-        const trigger  = document.getElementById('time-trigger');
-        const label    = document.getElementById('time-trigger-label');
+        const formatted = fmtTime(value);
+        document.getElementById('appt-time-input').value = formatted;
+        
+        // Sync the toggle button with the selected format
+        if (formatted.includes('PM')) { setAmpm('PM'); }
+        else { setAmpm('AM'); }
+
         const dropdown = document.getElementById('time-dropdown');
-        label.textContent = fmtTime(value);
-        trigger.classList.add('has-value');
-        trigger.classList.remove('open');
         dropdown.classList.remove('open');
         dropdown.querySelectorAll('.time-option').forEach(o => o.classList.toggle('selected', o.dataset.value === value));
     }
@@ -1077,15 +1118,26 @@
         const wrap = document.getElementById('time-picker-wrap');
         if (wrap && !wrap.contains(e.target)) {
             document.getElementById('time-dropdown')?.classList.remove('open');
-            document.getElementById('time-trigger')?.classList.remove('open');
         }
     });
 
+    let manualAmpm = 'AM';
+    function setAmpm(val) {
+        manualAmpm = val;
+        document.getElementById('btn-am').classList.toggle('active', val === 'AM');
+        document.getElementById('btn-pm').classList.toggle('active', val === 'PM');
+    }
+
     function goToConfirm() {
         S.date = document.getElementById('appt-date').value;
-        S.time = document.getElementById('appt-time').value;
+        let rawInput = document.getElementById('appt-time-input').value.trim();
+        // If user manually typed a time but didn't include AM/PM, append the toggle value
+        if (rawInput && !/[AaPp][Mm]/.test(rawInput)) {
+            rawInput += ' ' + manualAmpm;
+        }
+        S.time = parseToHHMM(rawInput); // normalize to HH:MM for server
         if (!S.date) { kbAlert('warning', 'Please select a date.'); return; }
-        if (!S.time) { kbAlert('warning', 'Please select a time slot.'); return; }
+        if (!S.time) { kbAlert('warning', 'Please enter or select a time.'); return; }
 
         // Reset promo for fresh step
         S.promoCode   = '';
@@ -1318,8 +1370,35 @@
        HELPERS
     ══════════════════════════════════════════════════════════════ */
     function fmtTime(hhmm) {
-        const [h, m] = (hhmm || '').split(':').map(Number);
+        if (!hhmm) return '';
+        // If already formatted as 12-hour (contains AM/PM), return as-is
+        if (/[AaPp][Mm]/.test(hhmm)) return hhmm.trim();
+        // Otherwise parse HH:MM
+        const parts = (hhmm || '').split(':');
+        const h = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        if (isNaN(h) || isNaN(m)) return hhmm;
         return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;
+    }
+    function parseToHHMM(val) {
+        if (!val) return '';
+        val = val.trim();
+        // Already HH:MM
+        if (/^\d{1,2}:\d{2}$/.test(val)) {
+            const [h, m] = val.split(':').map(Number);
+            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+        }
+        // 12-hour with AM/PM e.g. "9:30 AM", "11:45PM"
+        const match = val.match(/^(\d{1,2}):(\d{2})\s*([AaPp][Mm])$/);
+        if (match) {
+            let h = parseInt(match[1], 10);
+            const m = parseInt(match[2], 10);
+            const ampm = match[3].toUpperCase();
+            if (ampm === 'PM' && h !== 12) h += 12;
+            if (ampm === 'AM' && h === 12) h = 0;
+            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+        }
+        return val; // fallback
     }
     function fmtDate(d) {
         if (!d) return '';

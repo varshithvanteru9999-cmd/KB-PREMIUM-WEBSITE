@@ -13,7 +13,7 @@
         /* ── Flatpickr dark gold theme ── */
         .fp-wrap { position: relative; }
         .fp-wrap .fp-icon { position: absolute; right: 0.85rem; top: 50%; transform: translateY(-50%); color: #d4af37; pointer-events: none; font-size: 0.9rem; }
-        .fp-wrap input { padding-right: 2.4rem !important; cursor: pointer; caret-color: transparent; }
+        .fp-wrap input { padding-right: 2.4rem !important; cursor: text; }
         .flatpickr-calendar { background: #1a1400 !important; border: 1px solid rgba(212,175,55,0.35) !important; border-radius: 1rem !important; box-shadow: 0 20px 60px rgba(0,0,0,0.8) !important; font-family: 'Outfit', sans-serif !important; color: #e8d5a0 !important; z-index: 999999 !important; }
         .flatpickr-calendar.arrowTop::before,.flatpickr-calendar.arrowTop::after { border-bottom-color: rgba(212,175,55,0.4) !important; }
         .flatpickr-months { background: rgba(22,16,3,0.95) !important; border-radius: 1rem 1rem 0 0 !important; padding: 0.4rem 0 !important; border-bottom: 1px solid rgba(212,175,55,0.18) !important; }
@@ -74,7 +74,7 @@
         .form-section-label { font-size:0.7rem; font-weight:800; letter-spacing:1.5px; color:#9a7840; text-transform:uppercase; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
         .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
         @media (max-width:620px) { .form-grid-2 { grid-template-columns:1fr; } }
-        .form-page-actions { display:flex; gap:0.75rem; align-items:center; padding-top:1.4rem; margin-top:0.3rem; border-top:1px solid rgba(212,175,55,0.1); max-width:880px; }
+        .form-page-actions { display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap; padding-top:1.4rem; margin-top:0.3rem; border-top:1px solid rgba(212,175,55,0.1); max-width:880px; }
         /* ── Service searchable dropdown ── */
         .svc-search-wrap { position: relative; }
         .svc-search-trigger {
@@ -457,15 +457,15 @@
                     <div class="table-header">
                         <h2>All Appointments</h2>
                         <div class="appt-filter-controls">
-                            <div class="appt-filter-input-wrap">
-                                <i class="bi bi-calendar3"></i>
-                                <input type="text" id="appt-date-from" placeholder="From Date">
+                            <div class="fp-wrap">
+                                <i class="bi bi-calendar3 fp-icon"></i>
+                                <input type="text" id="appt-date-from" class="field-input" placeholder="From Date" style="width:145px; font-size:0.82rem; padding:0.6rem 2.4rem 0.6rem 0.9rem;">
                             </div>
-                            <div class="appt-filter-input-wrap">
-                                <i class="bi bi-calendar3"></i>
-                                <input type="text" id="appt-date-to" placeholder="To Date">
+                            <div class="fp-wrap">
+                                <i class="bi bi-calendar3 fp-icon"></i>
+                                <input type="text" id="appt-date-to" class="field-input" placeholder="To Date" style="width:145px; font-size:0.82rem; padding:0.6rem 2.4rem 0.6rem 0.9rem;">
                             </div>
-                            <button id="appt-filter-clear" class="btn-clear" onclick="clearApptDateFilter()" style="display:none;">
+                            <button id="appt-filter-clear" class="btn-ghost" onclick="clearApptDateFilter()" style="display:none; padding:0.5rem 0.85rem; font-size:0.75rem; height:36px;">
                                 <i class="bi bi-x-lg"></i> Clear
                             </button>
                         </div>
@@ -496,7 +496,7 @@
                 <div class="table-container" style="margin-bottom:2rem;">
                     <div class="table-header">
                         <h2>Service Management</h2>
-                        <div style="display:flex;gap:0.6rem;">
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
                             <button class="btn-action" onclick="openAddCategoryDrawer()" title="Add new category">
                                 <i class="bi bi-folder-plus" style="margin-right:6px;"></i>Add Category
                             </button>

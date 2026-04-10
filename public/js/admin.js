@@ -495,7 +495,7 @@ function renderApptRow(a) {
         <td>${a.customer_name}</td>
         <td>${a.customer_mobile || a.mobile_number || '—'}</td>
         <td><span class="appt-date-pill">${_fmtDateDDMMYYYY(a.appointment_date)}</span></td>
-        <td>${a.appointment_time?.slice(0, 5)}</td>
+        <td>${_fmtTime12(a.appointment_time)}</td>
         <td>₹${Number(a.total_cost).toLocaleString('en-IN')}${promoDisc > 0 ? `<br><span style="font-size:0.72rem;color:#6fcf8a;"><i class="bi bi-ticket-perforated"></i> ${a.discount_code} −₹${promoDisc.toLocaleString('en-IN')}</span>` : ''}${manualDisc > 0 ? `<br><span style="font-size:0.72rem;color:#a8e6b8;"><i class="bi bi-person-check"></i> Manual ${a.manual_discount_type === 'percent' ? '(%)' : '(Fixed)'} −₹${manualDisc.toLocaleString('en-IN')}</span>` : ''}</td>
         <td style="color:${adv > 0 ? '#6fcf8a' : '#9a7840'}">₹${adv.toLocaleString('en-IN')}</td>
         <td style="color:${bal > 0 ? '#e07060' : '#6fcf8a'}">₹${bal.toLocaleString('en-IN')}</td>
@@ -1297,7 +1297,7 @@ function openViewApptDrawer(id) {
             <div class="view-section-label"><i class="bi bi-calendar3"></i> Schedule</div>
             <div class="view-info-grid">
                 <div class="view-info-row"><span class="view-info-key">Date</span><span class="view-info-val">${fmtDate}</span></div>
-                <div class="view-info-row"><span class="view-info-key">Time</span><span class="view-info-val">${(a.appointment_time || '').slice(0,5)}</span></div>
+                <div class="view-info-row"><span class="view-info-key">Time</span><span class="view-info-val">${_fmtTime12(a.appointment_time)}</span></div>
             </div>
         </div>
 
@@ -2486,11 +2486,17 @@ document.addEventListener('DOMContentLoaded', () => {
         onReady: (selectedDates, dateStr, instance) => {
             instance.input.removeAttribute('readonly');
             instance.input.addEventListener('blur', (e) => {
-                const val = e.target.value;
+                const val = e.target.value.trim();
                 if (!val) { _apptDateFrom = null; loadAppointments(); } 
                 else {
-                    const d = instance.parseDate(val, 'd-m-Y');
-                    if (d) { _apptDateFrom = instance.formatDate(d, 'Y-m-d'); loadAppointments(); }
+                    // Normalize separators for better manual typing support
+                    const normalized = val.replace(/[\/\.]/g, '-');
+                    const d = instance.parseDate(normalized, 'd-m-Y');
+                    if (d) { 
+                        _apptDateFrom = instance.formatDate(d, 'Y-m-d'); 
+                        instance.setDate(d, false); // Sync picker without triggering onChange
+                        loadAppointments(); 
+                    }
                 }
             });
         },
@@ -2506,11 +2512,16 @@ document.addEventListener('DOMContentLoaded', () => {
         onReady: (selectedDates, dateStr, instance) => {
             instance.input.removeAttribute('readonly');
             instance.input.addEventListener('blur', (e) => {
-                const val = e.target.value;
+                const val = e.target.value.trim();
                 if (!val) { _apptDateTo = null; loadAppointments(); }
                 else {
-                    const d = instance.parseDate(val, 'd-m-Y');
-                    if (d) { _apptDateTo = instance.formatDate(d, 'Y-m-d'); loadAppointments(); }
+                    const normalized = val.replace(/[\/\.]/g, '-');
+                    const d = instance.parseDate(normalized, 'd-m-Y');
+                    if (d) { 
+                        _apptDateTo = instance.formatDate(d, 'Y-m-d'); 
+                        instance.setDate(d, false);
+                        loadAppointments(); 
+                    }
                 }
             });
         },

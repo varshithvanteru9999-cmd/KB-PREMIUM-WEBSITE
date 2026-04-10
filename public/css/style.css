@@ -390,7 +390,7 @@ nav a:hover::after { width: 100%; }
 
 /* 3D Gold Hero Heading */
 .hero h1 {
-    font-size: 5rem;
+    font-size: clamp(2.5rem, 8vw, 5rem);
     font-weight: 900;
     margin-bottom: 1.5rem;
     line-height: 1;
@@ -406,7 +406,7 @@ nav a:hover::after { width: 100%; }
 }
 
 .hero p {
-    font-size: 1.2rem;
+    font-size: clamp(0.95rem, 3vw, 1.2rem);
     color: var(--text-main);
     margin-bottom: 3rem;
     font-weight: 400;
@@ -473,7 +473,7 @@ nav a:hover::after { width: 100%; }
 }
 
 .section-title h2 {
-    font-size: 3.5rem;
+    font-size: clamp(2rem, 6vw, 3.5rem);
     margin-bottom: 1rem;
 
     /* 3D Gold Gradient Text */
@@ -508,6 +508,7 @@ nav a:hover::after { width: 100%; }
     justify-content: center;
     gap: 0.6rem;
     margin-bottom: 3rem;
+    flex-wrap: wrap;
 }
 
 .gender-tab {
@@ -543,8 +544,8 @@ nav a:hover::after { width: 100%; }
 
 .categories-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+    gap: clamp(1rem, 3vw, 2rem);
 }
 
 .category-card {
@@ -1215,5 +1216,87 @@ nav a:hover::after { width: 100%; }
     }
     .footer-bottom-contact {
         justify-content: center;
+    }
+}
+
+/* ══════════════════ MOBILE FIRST OVERRIDES ══════════════════ */
+@media (max-width: 768px) {
+    /* Header & Navigation Mobile Menu */
+    header {
+        padding: 1rem 1.5rem;
+    }
+    header.scrolled {
+        padding: 0.8rem 1.5rem;
+    }
+
+    /* Convert horizontal nav to a mobile-friendly menu */
+    nav {
+        position: fixed;
+        top: 65px; /* below header */
+        left: 0;
+        width: 100%;
+        background: rgba(13, 10, 2, 0.98);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.5rem;
+        gap: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+        transition: clip-path 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 999;
+    }
+
+    nav.mobile-open {
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+
+    nav a {
+        margin-left: 0;
+        font-size: 1.1rem;
+        width: 100%;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(212,175,55,0.1);
+    }
+    
+    .btn-login {
+        width: 100%;
+        text-align: center;
+        padding: 0.8rem !important;
+        margin-top: 0.5rem;
+    }
+
+    .cart-nav-icon {
+        margin-left: 0;
+        margin-bottom: 1rem;
+    }
+
+    /* Mobile Menu Toggle Button (added to header via HTML) */
+    .mobile-menu-btn {
+        display: block !important;
+        background: none;
+        border: none;
+        color: var(--gold-standard);
+        font-size: 1.8rem;
+        cursor: pointer;
+    }
+
+    /* Modal Adjustments */
+    .modal-content {
+        padding: 1.5rem;
+        width: 95vw;
+        border-radius: 1.5rem;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .close-modal {
+        top: 1rem;
+        right: 1.5rem;
+    }
+
+    /* Categories Grid (Ensure single column for very small) */
+    .categories-container {
+        padding: 4rem 1.2rem;
     }
 }
