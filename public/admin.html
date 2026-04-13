@@ -40,6 +40,12 @@
         .admin-time-trigger.has-value { color: #e8d5a0; }
         .admin-time-trigger:hover,.admin-time-trigger.open { border-color: rgba(212,175,55,0.55); box-shadow: 0 0 0 3px rgba(212,175,55,0.08); }
         .admin-time-trigger i { color: #d4af37; font-size: 0.9rem; flex-shrink: 0; }
+        .admin-time-input {
+            background: transparent; border: none; outline: none;
+            color: inherit; font-family: inherit; font-size: 0.9rem;
+            width: 100%; cursor: text; padding: 0;
+        }
+        .admin-time-input::placeholder { color: rgba(154,120,64,0.4); }
         .admin-time-trigger.open #svc-cat-chevron { transform: rotate(180deg); }
         .admin-time-dropdown {
             position: absolute; top: calc(100% + 5px); left: 0; right: 0;
@@ -1016,16 +1022,16 @@
                     <div class="field-group" style="margin-bottom:0;">
                         <label class="field-label">Date <span style="color:#e07060;">*</span></label>
                         <div class="fp-wrap">
-                            <input type="text" id="new-appt-date" class="field-input" placeholder="Select date" readonly>
+                            <input type="text" id="new-appt-date" class="field-input" placeholder="Select date">
                             <i class="bi bi-calendar3 fp-icon"></i>
                         </div>
                     </div>
                     <div class="field-group" style="margin-bottom:0;">
                         <label class="field-label">Time <span style="color:#e07060;">*</span></label>
                         <div class="admin-time-wrap" id="new-appt-time-wrap">
-                            <div class="admin-time-trigger" id="new-appt-time-trigger" onclick="toggleAdminTimeDrop('new-appt')">
-                                <span id="new-appt-time-label">Pick a date first</span>
-                                <i class="bi bi-clock"></i>
+                            <div class="admin-time-trigger" id="new-appt-time-trigger">
+                                <input type="text" id="new-appt-time-input" class="admin-time-input" placeholder="Type HH:MM" autocomplete="off">
+                                <i class="bi bi-clock" onclick="toggleAdminTimeDrop('new-appt'); event.stopPropagation();"></i>
                             </div>
                             <div class="admin-time-dropdown" id="new-appt-time-dropdown"></div>
                         </div>
@@ -1114,16 +1120,16 @@
                     <div class="field-group" style="margin-bottom:0;">
                         <label class="field-label">Date</label>
                         <div class="fp-wrap">
-                            <input type="text" id="edit-appt-date" class="field-input" placeholder="Select date" readonly>
+                            <input type="text" id="edit-appt-date" class="field-input" placeholder="Select date">
                             <i class="bi bi-calendar3 fp-icon"></i>
                         </div>
                     </div>
                     <div class="field-group" style="margin-bottom:0;">
                         <label class="field-label">Time</label>
                         <div class="admin-time-wrap" id="edit-appt-time-wrap">
-                            <div class="admin-time-trigger" id="edit-appt-time-trigger" onclick="toggleAdminTimeDrop('edit-appt')">
-                                <span id="edit-appt-time-label">Select time</span>
-                                <i class="bi bi-clock"></i>
+                            <div class="admin-time-trigger" id="edit-appt-time-trigger">
+                                <input type="text" id="edit-appt-time-input" class="admin-time-input" placeholder="Select time" autocomplete="off">
+                                <i class="bi bi-clock" onclick="toggleAdminTimeDrop('edit-appt'); event.stopPropagation();"></i>
                             </div>
                             <div class="admin-time-dropdown" id="edit-appt-time-dropdown"></div>
                         </div>

@@ -17,6 +17,22 @@ function _fmtTime12(t) {
     return `${hr}:${String(m).padStart(2,'0')} ${ampm}`;
 }
 
+/** Robustly parse manual time entry (e.g. 9:33PM, 933, 21:00) into 24h HH:MM */
+function _parseManualTime(val) {
+    if (!val) return null;
+    let s = val.toUpperCase().replace(/\s+/g, '').replace(/\./g, ':');
+    // Match H:MM PM, HHMM PM, H PM, etc.
+    let m = s.match(/^(\d{1,2}):?(\d{2})?(AM|PM)?$/);
+    if (!m) return null;
+    let h = parseInt(m[1]);
+    let min = parseInt(m[2] || '0');
+    let p = m[3];
+    if (p === 'PM' && h < 12) h += 12;
+    if (p === 'AM' && h === 12) h = 0;
+    if (h < 0 || h > 23 || min < 0 || min > 59) return null;
+    return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+}
+
 function _fmtDateDDMMYYYY(dateStr) {
     if (!dateStr) return '—';
     const d = new Date(dateStr);
@@ -34,7 +50,7 @@ function _fmtDateDDMMYYYY(dateStr) {
 function toggleAdminTimeDrop(prefix) {
     const trigger  = document.getElementById(`${prefix}-time-trigger`);
     const dropdown = document.getElementById(`${prefix}-time-dropdown`);
-    if (!dropdown || !dropdown.children.length) return;
+    if (!dropdown) return; // Removed empty children check to allow opening during load
     const isOpen = dropdown.classList.contains('open');
     dropdown.classList.toggle('open', !isOpen);
     trigger.classList.toggle('open', !isOpen);
@@ -44,10 +60,10 @@ function pickAdminTime(prefix, value) {
     document.getElementById(`${prefix}-time-val`) && (document.getElementById(`${prefix}-time-val`).value = value);
     // edit-appt-drawer uses id "edit-appt-time" as the hidden field
     if (prefix === 'edit-appt') document.getElementById('edit-appt-time').value = value;
-    const label = document.getElementById(`${prefix}-time-label`);
+    const input = document.getElementById(`${prefix}-time-input`);
     const trigger = document.getElementById(`${prefix}-time-trigger`);
     const dropdown = document.getElementById(`${prefix}-time-dropdown`);
-    if (label) label.textContent = _fmtTime12(value);
+    if (input) input.value = _fmtTime12(value);
     if (trigger) { trigger.classList.add('has-value'); trigger.classList.remove('open'); }
     if (dropdown) {
         dropdown.classList.remove('open');
@@ -57,14 +73,17 @@ function pickAdminTime(prefix, value) {
 
 async function _populateAdminTimeSlots(prefix, date) {
     const trigger  = document.getElementById(`${prefix}-time-trigger`);
-    const label    = document.getElementById(`${prefix}-time-label`);
+    const input    = document.getElementById(`${prefix}-time-input`);
     const dropdown = document.getElementById(`${prefix}-time-dropdown`);
     if (!dropdown) return;
 
-    label.textContent = 'Loading…';
+    if (input) {
+        input.value = '';
+        input.placeholder = 'Loading…';
+    }
     trigger.classList.remove('has-value', 'open');
     dropdown.classList.remove('open');
-    dropdown.innerHTML = '';
+    dropdown.innerHTML = '<div style="padding:0.8rem 1.1rem;color:rgba(140,100,50,0.5);font-size:0.82rem;">Loading slots...</div>';
 
     // Clear the hidden value
     const hiddenId = prefix === 'edit-appt' ? 'edit-appt-time' : `${prefix}-time-val`;
@@ -74,12 +93,14 @@ async function _populateAdminTimeSlots(prefix, date) {
     try {
         const data = await apiFetch(`/api/availability?date=${date}&admin=1`);
         const slots = Array.isArray(data) ? data : (data?.slots || []);
+        const input = document.getElementById(`${prefix}-time-input`);
+        if (input) input.placeholder = 'Select time';
         if (!slots.length) {
-            label.textContent = 'No slots available';
+            if (input) input.placeholder = 'No slots available';
             dropdown.innerHTML = '<div style="padding:0.8rem 1.1rem;color:rgba(140,100,50,0.5);font-size:0.82rem;">No available slots for this date</div>';
             return;
         }
-        label.textContent = 'Select time';
+        if (input) input.placeholder = 'Select time';
         dropdown.innerHTML = slots.map(s => {
             const val   = typeof s === 'string' ? s : s.time;
             const avail = typeof s === 'object' ? s.available !== false : true;
@@ -87,7 +108,7 @@ async function _populateAdminTimeSlots(prefix, date) {
                          onclick="pickAdminTime('${prefix}','${val}')">${_fmtTime12(val)}</div>`;
         }).join('');
     } catch (err) {
-        label.textContent = 'Could not load slots';
+        if (input) input.placeholder = 'Error loading slots';
         console.error('[_populateAdminTimeSlots]', err);
     }
 }
@@ -1367,10 +1388,11 @@ async function openEditApptDrawer(id) {
     // Populate time slots and pre-select existing time
     await _populateAdminTimeSlots('edit-appt', dateStr);
     if (timeStr) {
-        document.getElementById('edit-appt-time').value = timeStr;
-        const label = document.getElementById('edit-appt-time-label');
+        const hidden = document.getElementById('edit-appt-time');
+        const input = document.getElementById('edit-appt-time-input');
         const trigger = document.getElementById('edit-appt-time-trigger');
-        if (label) label.textContent = _fmtTime12(timeStr);
+        if (hidden) hidden.value = timeStr;
+        if (input) input.value = _fmtTime12(timeStr);
         if (trigger) trigger.classList.add('has-value');
         // Mark selected option
         document.querySelectorAll('#edit-appt-time-dropdown .admin-time-option').forEach(o =>
@@ -1388,6 +1410,24 @@ async function openEditApptDrawer(id) {
     _renderApptServicesList();
 
     _loadSvcDropdown('edit-appt');
+
+    // Add manual time entry listener
+    const timeInput = document.getElementById('edit-appt-time-input');
+    if (timeInput && !timeInput.dataset.listenerAdded) {
+        timeInput.addEventListener('blur', (e) => {
+            const parsed = _parseManualTime(e.target.value);
+            if (parsed) {
+                document.getElementById('edit-appt-time').value = parsed;
+                timeInput.value = _fmtTime12(parsed);
+                timeInput.parentElement.classList.add('has-value');
+            } else if (e.target.value.trim() !== '') {
+                // If invalid, reset to what was saved in the selection
+                const saved = document.getElementById('edit-appt-time').value;
+                timeInput.value = saved ? _fmtTime12(saved) : '';
+            }
+        });
+        timeInput.dataset.listenerAdded = "true";
+    }
 
     openFormPage('edit-appt-page', 'appointments');
 }
@@ -1510,7 +1550,11 @@ async function openNewApptDrawer(el) {
     document.getElementById('new-appt-status').value = 'Confirmed';
     document.getElementById('new-appt-note').value   = '';
     document.getElementById('new-appt-time-val').value = '';
-    document.getElementById('new-appt-time-label').textContent = 'Pick a date first';
+    const newTimeInput = document.getElementById('new-appt-time-input');
+    if (newTimeInput) {
+        newTimeInput.value = '';
+        newTimeInput.placeholder = 'Pick a date first';
+    }
     document.getElementById('new-appt-time-trigger').classList.remove('has-value');
     document.getElementById('new-appt-time-dropdown').innerHTML = '';
     _renderNewApptServices();
@@ -1520,6 +1564,7 @@ async function openNewApptDrawer(el) {
     _fpNewAppt = flatpickr('#new-appt-date', {
         minDate: 'today',
         dateFormat: 'Y-m-d',
+        allowInput: true,
         disableMobile: true,
         locale: { firstDayOfWeek: 1 },
         onChange: (_, dateStr) => { if (dateStr) _populateAdminTimeSlots('new-appt', dateStr); }
@@ -1528,6 +1573,24 @@ async function openNewApptDrawer(el) {
     const currentTab = localStorage.getItem('adminTab') || 'dashboard';
     openFormPage('new-appt-page', currentTab);
     _loadSvcDropdown('new-appt');
+
+    // Add manual time entry listener
+    const nti = document.getElementById('new-appt-time-input');
+    if (nti && !nti.dataset.listenerAdded) {
+        nti.addEventListener('blur', (e) => {
+            const parsed = _parseManualTime(e.target.value);
+            if (parsed) {
+                document.getElementById('new-appt-time-val').value = parsed;
+                nti.value = _fmtTime12(parsed);
+                nti.parentElement.classList.add('has-value');
+            } else if (e.target.value.trim() !== '') {
+                const saved = document.getElementById('new-appt-time-val').value;
+                nti.value = saved ? _fmtTime12(saved) : '';
+            }
+        });
+        nti.dataset.listenerAdded = "true";
+    }
+
     setTimeout(() => document.getElementById('new-appt-cust-search').focus(), 80);
 }
 

@@ -321,13 +321,15 @@ app.get('/api/customer/appointments', authenticateToken, async (req, res) => {
                 const balance_advance = Math.max(0, required_advance - paid);
                 const balance_due     = Math.max(0, netTotal - paid);
                 
+                const hasGateway = !!(process.env.PAYU_KEY && process.env.PAYU_SALT);
+                
                 return {
                     ...appt,
                     required_advance,
                     balance_advance,
                     balance_due,
-                    show_payment_prompt:  appt.status === 'Confirmed' && balance_advance > 0,
-                    show_balance_payment: appt.status === 'Confirmed' && appt.payment_requested && balance_due > 0,
+                    show_payment_prompt:  hasGateway && appt.status === 'Confirmed' && balance_advance > 0,
+                    show_balance_payment: hasGateway && appt.status === 'Confirmed' && appt.payment_requested && balance_due > 0,
                 };
             } catch (mappingErr) {
                 console.error(`[GET /api/customer/appointments] Mapping error for Appt #${appt.appointment_id}:`, mappingErr.message);
@@ -1657,6 +1659,10 @@ app.post('/api/payments/initiate', async (req, res) => {
         const salt = process.env.PAYU_SALT;
         const url  = process.env.PAYU_URL;
 
+        if (!key || !salt || !url) {
+            return res.status(400).json({ error: 'Online payment is currently disabled. Please pay at the salon.' });
+        }
+
         // PayU hash: sha512(key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||salt)
         const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email || ''}|||||||||||${salt}`;
         const hash = crypto.createHash('sha512').update(hashString).digest('hex');
@@ -1688,6 +1694,7 @@ app.get('/api/settings', async (req, res) => {
     try {
         const s = await loadSettings();
         res.json({
+            gateway_available: !!(process.env.PAYU_KEY && process.env.PAYU_SALT),
             advance_type:      s.advance_type   || 'fixed',
             advance_value:     parseFloat(s.advance_value  || 1),
             working_start:     s.working_start  || '09:00',

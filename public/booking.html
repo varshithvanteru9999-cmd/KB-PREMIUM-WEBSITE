@@ -13,7 +13,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 6rem 1.5rem 3rem;
+            padding: 6rem 1.5rem 12rem; /* Increased padding for dropdown space */
+            position: relative;
+            z-index: 10; /* Ensure this is above the footer's z-index (1) */
         }
         .booking-card {
             width: 100%;
@@ -26,6 +28,8 @@
             border-radius: 1.5rem;
             padding: 2rem 2.2rem 2.2rem;
             box-shadow: 0 30px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(252,246,186,0.07);
+            margin-bottom: 2rem; 
+            overflow: visible !important; /* Ensure absolute dropdowns aren't clipped */
         }
 
         /* ── Step indicator ── */
@@ -177,11 +181,12 @@
         .time-trigger:hover, .time-trigger.open { border-color: rgba(212,175,55,0.55); box-shadow: 0 0 0 3px rgba(212,175,55,0.08); }
         .time-trigger i { color: #d4af37; font-size: 0.95rem; }
         .time-dropdown {
-            position: absolute; top: calc(100% + 6px); left: 0; right: 0;
-            background: #1a1400; border: 1px solid rgba(212,175,55,0.35);
-            border-radius: 1rem; box-shadow: 0 20px 60px rgba(0,0,0,0.7);
-            max-height: 220px; overflow-y: auto; z-index: 9999;
-            display: none; padding: 0.4rem 0;
+            position: absolute; top: calc(100% + 2px); left: 0; right: 0;
+            background: #1a1400; border: 1px solid rgba(212,175,55,0.45);
+            border-radius: 0.8rem; box-shadow: 0 15px 50px rgba(0,0,0,0.9);
+            max-height: 380px; overflow-y: auto; z-index: 10000;
+            display: none; padding: 0.3rem 0;
+            backdrop-filter: blur(10px);
         }
         .time-dropdown.open { display: block; }
         .time-dropdown::-webkit-scrollbar { width: 4px; }
@@ -196,8 +201,11 @@
 
         /* ── Flatpickr theme ── */
         .fp-wrap { position: relative; }
-        .fp-wrap .fp-icon { position: absolute; right: 0.9rem; top: 50%; transform: translateY(-50%); color: #d4af37; pointer-events: none; font-size: 0.95rem; }
-        .fp-wrap input { padding-right: 2.4rem !important; cursor: pointer; }
+        .fp-wrap .fp-icon, .time-input-wrap .fp-icon { 
+            position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); 
+            color: #d4af37; pointer-events: none; font-size: 0.95rem; z-index: 5;
+        }
+        .fp-wrap input, .appt-time-field { padding-right: 2.8rem !important; cursor: pointer; }
         .flatpickr-calendar { background: #1a1400 !important; border: 1px solid rgba(212,175,55,0.35) !important; border-radius: 1rem !important; box-shadow: 0 20px 60px rgba(0,0,0,0.7) !important; font-family: 'Outfit', sans-serif !important; color: #e8d5a0 !important; z-index: 999999 !important; }
         .flatpickr-calendar.arrowTop::before,.flatpickr-calendar.arrowTop::after { border-bottom-color: rgba(212,175,55,0.4) !important; }
         .flatpickr-months { background: rgba(22,16,3,0.95) !important; border-radius: 1rem 1rem 0 0 !important; padding: 0.4rem 0 !important; border-bottom: 1px solid rgba(212,175,55,0.18) !important; }
@@ -543,18 +551,18 @@
                         <i class="bi bi-calendar3 fp-icon"></i>
                     </div>
                     <div class="time-select-wrap" id="time-picker-wrap">
-                        <div style="display:flex; gap:0.5rem; align-items:stretch; position:relative;">
-                            <div style="position:relative; flex:1;">
+                        <div style="display:flex; gap:0.55rem; align-items:center;">
+                            <div class="time-input-wrap" style="position:relative; flex:1;">
                                 <input type="text" id="appt-time-input" 
-                                       class="input-luxury" 
-                                       placeholder="e.g. 10:30"
+                                       class="input-luxury appt-time-field" 
+                                       placeholder="Select or Type Time"
                                        onclick="toggleTimeDropdown()"
                                        oninput="onManualTimeInput(this.value)"
                                        autocomplete="off">
-                                <i class="bi bi-clock fp-icon" style="right:1rem; pointer-events:none;"></i>
+                                <i class="bi bi-clock fp-icon"></i>
                                 <div class="time-dropdown" id="time-dropdown"></div>
                             </div>
-                            <div class="ampm-toggle">
+                            <div class="ampm-toggle" style="flex-shrink:0;">
                                 <button type="button" class="ampm-btn active" id="btn-am" onclick="setAmpm('AM')">AM</button>
                                 <button type="button" class="ampm-btn" id="btn-pm" onclick="setAmpm('PM')">PM</button>
                             </div>
@@ -1253,9 +1261,13 @@
         const note = document.getElementById('advance-note');
         if (settings.advance_value > 0) {
             note.style.display = 'flex';
-            const noteText = settings.advance_type === 'percent'
+            let noteText = settings.advance_type === 'percent'
                 ? `An advance of ${settings.advance_value}% (₹${advance}) is required to confirm your slot.`
                 : `An advance of ₹${advance} is required to confirm your slot. Pay after admin approves.`;
+            
+            if (!settings.gateway_available) {
+                noteText += ' (Pay at salon)';
+            }
             note.querySelector('span').innerText = noteText;
         } else {
             note.style.display = 'none';

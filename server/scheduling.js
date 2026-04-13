@@ -76,7 +76,7 @@ function generateSlots(settings, dateStr) {
     let cur       = sh * 60 + sm;
     const endMins = eh * 60 + em;
 
-    while (cur < endMins) {
+    while (cur <= endMins) {
         slots.push(minsToTime(cur));
         cur += interval;
     }
